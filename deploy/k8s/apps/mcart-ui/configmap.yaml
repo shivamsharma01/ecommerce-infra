@@ -10,4 +10,4 @@ data:
   NODE_ENV: "production"
   PORT: "4000"
   # Browser / SSR may read API base URL from env at build or runtime — set to your public API or Ingress:
-  API_BASE_URL: "https://api.example.com"
+  API_BASE_URL: "https://mcart.store"

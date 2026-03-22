@@ -6,10 +6,11 @@ HELM ?= helm
 KUBECTL ?= kubectl
 ROOT := $(abspath $(CURDIR)/../..)
 K8S := $(abspath $(CURDIR))/k8s/apps
+ING := $(abspath $(CURDIR))/k8s/ingress
 # Set to 0 to skip Elasticsearch ExternalSecrets (search, product-indexer) if GSM keys are not ready yet.
 APPLY_ES_SECRETS ?= 1
 
-.PHONY: helm-repo data-install data-install-redis data-install-es flyway-install apps-apply
+.PHONY: helm-repo data-install data-install-redis data-install-es flyway-install apps-apply ingress-apply
 
 helm-repo:
 	$(HELM) repo add bitnami https://charts.bitnami.com/bitnami 2>/dev/null || true
@@ -64,3 +65,8 @@ apps-apply:
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/mcart-ui/configmap.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/mcart-ui/deployment.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/mcart-ui/service.yaml
+
+# GKE Ingress + managed cert (after apps-apply; DNS → Ingress IP; uncomment cert annotation in YAML when ready).
+ingress-apply:
+	$(KUBECTL) apply -f $(ING)/managed-certificate.yaml
+	$(KUBECTL) apply -f $(ING)/mcart-store-ingress.yaml

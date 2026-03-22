@@ -1,0 +1,182 @@
+# mcart.store / www → path routing (UI at / last). Public traffic: DNS → Terraform static IP → API Gateway → this Ingress (set ingress_https_backend_base_url to this LB’s HTTPS origin).
+# Prerequisites: make apps-apply; managed-certificate.yaml; uncomment managed-certificates when Active.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mcart-store
+  namespace: mcart
+  labels:
+    app.kubernetes.io/name: mcart-ingress
+  annotations:
+    # After: kubectl describe managedcertificate mcart-store-cert -n mcart → Active
+    # networking.gke.io/managed-certificates: mcart-store-cert
+spec:
+  ingressClassName: gce
+  rules:
+    - host: mcart.store
+      http:
+        paths:
+          # Optional OpenAPI (product service)
+          - path: /v3/api-docs
+            pathType: Prefix
+            backend:
+              service:
+                name: product
+                port:
+                  number: 80
+          - path: /swagger-ui
+            pathType: Prefix
+            backend:
+              service:
+                name: product
+                port:
+                  number: 80
+          # Product & search (see ProductController / SearchController)
+          - path: /api/products
+            pathType: Prefix
+            backend:
+              service:
+                name: product
+                port:
+                  number: 80
+          - path: /api/search
+            pathType: Prefix
+            backend:
+              service:
+                name: search
+                port:
+                  number: 80
+          # Product-indexer admin (ReindexController)
+          - path: /product-indexer
+            pathType: Prefix
+            backend:
+              service:
+                name: product-indexer
+                port:
+                  number: 80
+          # User service (UserController /user/...)
+          - path: /user
+            pathType: Prefix
+            backend:
+              service:
+                name: user
+                port:
+                  number: 8082
+          # Auth REST under /auth/...
+          - path: /auth
+            pathType: Prefix
+            backend:
+              service:
+                name: auth
+                port:
+                  number: 8081
+          # OAuth2 / OIDC for Authorization Server (must hit auth pod — same as JWT issuer base)
+          - path: /.well-known
+            pathType: Prefix
+            backend:
+              service:
+                name: auth
+                port:
+                  number: 8081
+          - path: /oauth2
+            pathType: Prefix
+            backend:
+              service:
+                name: auth
+                port:
+                  number: 8081
+          - path: /login
+            pathType: Prefix
+            backend:
+              service:
+                name: auth
+                port:
+                  number: 8081
+          # SPA + static assets (catch-all last)
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mcart-ui
+                port:
+                  number: 80
+    - host: www.mcart.store
+      http:
+        paths:
+          - path: /v3/api-docs
+            pathType: Prefix
+            backend:
+              service:
+                name: product
+                port:
+                  number: 80
+          - path: /swagger-ui
+            pathType: Prefix
+            backend:
+              service:
+                name: product
+                port:
+                  number: 80
+          - path: /api/products
+            pathType: Prefix
+            backend:
+              service:
+                name: product
+                port:
+                  number: 80
+          - path: /api/search
+            pathType: Prefix
+            backend:
+              service:
+                name: search
+                port:
+                  number: 80
+          - path: /product-indexer
+            pathType: Prefix
+            backend:
+              service:
+                name: product-indexer
+                port:
+                  number: 80
+          - path: /user
+            pathType: Prefix
+            backend:
+              service:
+                name: user
+                port:
+                  number: 8082
+          - path: /auth
+            pathType: Prefix
+            backend:
+              service:
+                name: auth
+                port:
+                  number: 8081
+          - path: /.well-known
+            pathType: Prefix
+            backend:
+              service:
+                name: auth
+                port:
+                  number: 8081
+          - path: /oauth2
+            pathType: Prefix
+            backend:
+              service:
+                name: auth
+                port:
+                  number: 8081
+          - path: /login
+            pathType: Prefix
+            backend:
+              service:
+                name: auth
+                port:
+                  number: 8081
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mcart-ui
+                port:
+                  number: 80
