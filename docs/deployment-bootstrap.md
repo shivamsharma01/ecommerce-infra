@@ -8,7 +8,7 @@
 
 | Layer | Tool | Purpose |
 |--------|------|---------|
-| Cluster, VPC, IAM, Pub/Sub, optional API Gateway | Terraform (`ecomm-infra/terraform`) | Infra only — not app lifecycle |
+| Cluster, VPC, IAM, Pub/Sub, API Gateway + public HTTPS LB | Terraform (`ecomm-infra/terraform`) | Infra only — not app lifecycle |
 | PostgreSQL, Redis, Elasticsearch | Helm (Bitnami charts) | Stateful workloads on GKE |
 | Schema migrations | Helm chart `deploy/helm/mcart-bootstrap` | `flyway/flyway` **Jobs** + SQL versioned under `files/auth/` and `files/user/` (canonical; not in service JARs) |
 | Firestore | GCP managed | No Helm; apps use Workload Identity |
@@ -75,21 +75,9 @@ From repo root, with `kubectl` and `helm` pointed at the new cluster:
 
 **Firestore / product / product-indexer:** no Flyway in this chart; they rely on GCP APIs once Workload Identity is bound.
 
-## Ongoing deploys on merge to `main` (any service)
+## Ongoing deploys on merge to `main`
 
-**Pattern A — Push-based (simplest):** In each service repo, GitHub Actions on `push` to `main`:
-
-1. Build and push image `:sha` (or `:main`).
-2. `kubectl set image deployment/NAME NAME=REG/NAME:sha -n mcart` using a **GCP/GitHub OIDC** service account with `container.developer`, **or**
-3. `repository_dispatch` to a workflow in **`ecomm-infra`** that runs `kubectl set image` / `helm upgrade` for all or one service.
-
-**Pattern B — GitOps (best at scale):** Service CI only updates a **central config repo** (image tag or Helm values). **Argo CD / Flux** reconciles the cluster. Initial bootstrap still uses the same Helm steps above once; Argo then owns Deployments continuously.
-
-**Pattern C — Monorepo:** One workflow with `paths:` filters: only rebuild services whose folders changed, then patch the single cluster.
-
-Use **`ecomm-infra/.github/workflows/dispatch-deploy-example.yml`** as the reference: it validates `client_payload.service` against an allowlist and passes `service` / `image` through **env vars** before `kubectl set image` (avoids shell injection from `repository_dispatch`).
-
-Service repo calls `gh api repos/ORG/ecomm-infra/dispatches ...` with `event_type: mcart-deploy-image` and payload `{service,image}`.
+Per **service repo**: build/push image, then **`kubectl set image`** (OIDC to GCP) or trigger **`ecomm-infra`** via **`repository_dispatch`** — see [`.github/workflows/dispatch-deploy-example.yml`](../.github/workflows/dispatch-deploy-example.yml) (allowlisted `service` + validated `image`). Example build workflow: **`user/.github/workflows/build-push-deploy.yml`**. Broader CI notes: [demo-cost-and-cicd.md](./demo-cost-and-cicd.md).
 
 ## Flyway vs app startup
 

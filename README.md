@@ -6,8 +6,11 @@ Terraform (GKE + networking + optional API Gateway/DNS), Helm (data stores + Fly
 
 | Doc | Purpose |
 |-----|---------|
-| [SETUP.md](./SETUP.md) | Placeholders, secrets, push checklist |
-| [docs/gcp-platform-setup.md](./docs/gcp-platform-setup.md) | What Terraform manages |
-| [docs/deployment-bootstrap.md](./docs/deployment-bootstrap.md) | Helm + `kubectl` bootstrap order |
+| [SETUP.md](./SETUP.md) | Placeholders, secrets, first push |
+| [docs/terraform-first-apply.md](./docs/terraform-first-apply.md) | First Terraform apply |
+| [docs/deployment-bootstrap.md](./docs/deployment-bootstrap.md) | Helm, Flyway, `make apps-apply` |
+| [docs/ingress-and-domain.md](./docs/ingress-and-domain.md) | DNS, Ingress, Gateway backend, JWT URLs |
+| [docs/gcp-platform-setup.md](./docs/gcp-platform-setup.md) | What Terraform creates |
+| [docs/demo-cost-and-cicd.md](./docs/demo-cost-and-cicd.md) | Cost tuning, preemptible + data, CI |
 | [docs/kubernetes-secrets-production.md](./docs/kubernetes-secrets-production.md) | GSM + External Secrets |
-| [docs/production-configuration-reference.md](./docs/production-configuration-reference.md) | Env vars, ConfigMap ↔ Spring, prod checklist |
+| [docs/production-configuration-reference.md](./docs/production-configuration-reference.md) | Env / ConfigMaps |

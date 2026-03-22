@@ -2,6 +2,8 @@
 
 Use this before your first `terraform apply`, Helm install, or **git push** to GitHub. It lists what belongs in the repo vs what must stay local/secret.
 
+**First Terraform step (minimal):** [docs/terraform-first-apply.md](./docs/terraform-first-apply.md) — start with **`terraform/terraform.tfvars`** (`project_id` + `region` only).
+
 ---
 
 ## 1. What you **must not** commit (runtime / secrets only)
@@ -10,7 +12,7 @@ Create these on your machine or in your CI/CD platform; they are **gitignored** 
 
 | Item | Where it lives |
 |------|----------------|
-| **`terraform.tfvars`** | `ecomm-infra/terraform/` (gitignored). Copy from `terraform.tfvars.example`. |
+| **`terraform.tfvars`** | `ecomm-infra/terraform/` (gitignored). Create locally with at least `project_id` and `region` (see [docs/terraform-first-apply.md](./docs/terraform-first-apply.md)). |
 | **Helm values with passwords** | `ecomm-infra/deploy/helm/values-postgresql.yaml`, `values-redis.yaml`, `values-elasticsearch.yaml` (gitignored). Copy from `*.example.yaml`. |
 | **Terraform state** | Remote backend (recommended) or local `*.tfstate` (gitignored). |
 | **GCP Secret Manager values** | Created with `gcloud` or Console — not files in this repo. |
@@ -54,16 +56,11 @@ The `*.example.yaml` files use placeholders; your real files are gitignored:
 | `deploy/helm/values-redis.example.yaml` | `values-redis.yaml` — `CHANGEME_REDIS_PASSWORD`. |
 | `deploy/helm/values-elasticsearch.example.yaml` | `values-elasticsearch.yaml` — `CHANGEME_ELASTIC_PASSWORD` (and tune resources as needed). |
 
-### 2.4 Terraform — `terraform/terraform.tfvars.example`
+### 2.4 Terraform — `terraform/terraform.tfvars`
 
-Copy to **`terraform.tfvars`** (gitignored) and set at minimum:
+Create **`terraform.tfvars`** (gitignored) with at least **`project_id`** and **`region`**. API Gateway and the public HTTPS load balancer are always created; set **`ingress_https_backend_base_url`** after the GKE Ingress exists, then bump **`api_gateway_config_id`** and re-apply.
 
-- `project_id`, `region`
-- Optional but common: `workload_service_accounts` (GCP SA emails for WI), `ingress_https_backend_base_url`, `domain_name` / DNS flags, `api_gateway_config_id` when OpenAPI/backend changes
-
-Defaults like `ingress_https_backend_base_url = "https://0.0.0.0"` are **bring-up placeholders** — update after you know the real Ingress URL.
-
-Optional hardening: `allow_unrestricted_kubernetes_api = false` **only** if you also set `master_authorized_networks` or `enable_private_endpoint = true` (see `terraform/checks.tf`).
+Optional: `workload_service_accounts`, `create_cloud_dns_public_zone`, `domain_name` / `domain_aliases`, hardening (`master_authorized_networks`, `allow_unrestricted_kubernetes_api = false` with `checks.tf`).
 
 ### 2.5 Database schema (tracked)
 
@@ -75,7 +72,7 @@ Optional hardening: `allow_unrestricted_kubernetes_api = false` **only** if you 
 ## 3. Step-by-step: before first deploy
 
 1. **Install tools:** `terraform` (≥ 1.5), `kubectl`, `helm`, `gcloud` (optional but typical).
-2. **Terraform:** `cd ecomm-infra/terraform && terraform init` → create `terraform.tfvars` from example → `terraform plan` → `terraform apply`.
+2. **Terraform:** `cd ecomm-infra/terraform && terraform init` → create `terraform.tfvars` → `terraform plan` → `terraform apply`.
 3. **Cluster credentials:** `gcloud container clusters get-credentials ...` (or your OIDC flow in CI).
 4. **Helm data layer:** copy three `values-*.example.yaml` → `values-*.yaml`, edit secrets → from `ecomm-infra/deploy` run `make data-install`, `data-install-redis`, `data-install-es`.
 5. **Flyway:** `make flyway-install` with DB passwords matching PostgreSQL initdb (prefer `*_PASS_FILE` — see `deploy/Makefile`).
@@ -118,9 +115,3 @@ YOUR_PROJECT_ID / YOUR_NAMESPACE → docs examples only (gcloud/kubectl snippets
 ```
 
 ---
-
-## 7. Files removed as redundant (reference)
-
-- `deploy/scripts/sync-flyway-sql.sh` — SQL is only under `helm/mcart-bootstrap/files/` now.
-- `deploy/k8s/apps/README.md` — folded into `deploy/k8s/README.md`.
-- `deploy/helm/mcart-bootstrap/files/README.md` — replaced by this document.
