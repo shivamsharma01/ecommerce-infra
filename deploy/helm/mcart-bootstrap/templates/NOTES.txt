@@ -1,0 +1,6 @@
+1. Ensure PostgreSQL is running and initdb created databases "{{ .Values.auth.database }}" and "{{ .Values.user.database }}" with matching users.
+2. Install with passwords set, e.g.:
+     helm upgrade --install mcart-bootstrap . -n {{ .Values.namespace }} \
+       --set auth.password=... --set user.password=...
+   or use existingSecret in values.
+3. Watch jobs: kubectl get jobs -n {{ .Values.namespace }} -w

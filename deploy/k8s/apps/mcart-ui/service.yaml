@@ -1,0 +1,18 @@
+# ClusterIP Service for mcart-ui (Ingress / Gateway routes to this service).
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcart-ui
+  labels:
+    app.kubernetes.io/name: mcart-ui
+    app.kubernetes.io/component: frontend
+    app.kubernetes.io/part-of: mcart
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: mcart-ui
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP

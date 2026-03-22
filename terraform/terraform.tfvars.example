@@ -1,0 +1,48 @@
+# Copy to terraform.tfvars (gitignored) and adjust.
+
+project_id = "your-gcp-project-id"
+region     = "asia-south1"
+
+# Optional: lock kubectl/API access when using a public control plane endpoint.
+# master_authorized_networks = [
+#   { cidr_block = "203.0.113.10/32", display_name = "home" },
+# ]
+#
+# Stricter prod: fail apply if the API is public with no authorized networks (default allows either).
+# allow_unrestricted_kubernetes_api = false
+
+# Fully private API server (reachable only from VPC / Cloud VPN / etc.):
+# enable_private_endpoint = true
+
+# Zonal cluster (cheaper for dev):
+# regional_cluster = false
+# zone             = "asia-south1-a"
+
+# --- Pub/Sub + Firestore IAM (Workload Identity GCP service account emails) ---
+# workload_service_accounts = {
+#   auth            = "mcart-auth@your-gcp-project-id.iam.gserviceaccount.com"
+#   user            = "mcart-user@your-gcp-project-id.iam.gserviceaccount.com"
+#   product         = "mcart-product@your-gcp-project-id.iam.gserviceaccount.com"
+#   product_indexer = "mcart-product-indexer@your-gcp-project-id.iam.gserviceaccount.com"
+# }
+#
+# Legacy / extra project bindings (same as gcloud projects add-iam-policy-binding):
+# extra_project_iam_members = {
+#   "roles/pubsub.publisher" = ["serviceAccount:firestore-java-app@your-gcp-project-id.iam.gserviceaccount.com"]
+# }
+
+# --- API Gateway → GKE Ingress ---
+# Point at your Ingress HTTPS URL once it exists (hostname preferred over raw IP for TLS).
+# ingress_https_backend_base_url = "https://YOUR_INGRESS_IP_OR_HOST"
+# api_gateway_backend_disable_auth = false
+#
+# Custom domain on a fixed IP: external HTTPS LB → API Gateway (serverless NEG).
+# enable_api_gateway_https_load_balancer = true
+# domain_name    = "mcart.store"
+# domain_aliases = ["www.mcart.store"]
+
+# Cloud DNS (optional): create zone + A records; delegate NS at registrar (e.g. Hostinger).
+# create_cloud_dns_public_zone = true
+
+# Bump when OpenAPI/backend changes (new config revision).
+# api_gateway_config_id = "v2"

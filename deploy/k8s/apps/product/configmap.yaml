@@ -1,0 +1,17 @@
+# Use Workload Identity for Firestore in GKE (omit JSON key files). Tune security flags per environment.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: product-config
+  labels:
+    app.kubernetes.io/name: product
+    app: product
+data:
+  SERVER_PORT: "8080"
+  SPRING_CLOUD_GCP_PROJECT_ID: "CHANGEME_GCP_PROJECT_ID"
+  SPRING_CLOUD_GCP_FIRESTORE_ENABLED: "true"
+  SPRING_CLOUD_GCP_FIRESTORE_HOST: ""
+  SPRING_CLOUD_GCP_PUBSUB_ENABLED: "true"
+  APP_SECURITY_ENABLED: "true"
+  APP_SECURITY_REQUIRED_SCOPE: "product.admin"
+  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "https://auth.example.com"

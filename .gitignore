@@ -1,0 +1,19 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# Helm — generated from *.example.yaml; holds real passwords (never commit)
+deploy/helm/values-postgresql.yaml
+deploy/helm/values-redis.yaml
+deploy/helm/values-elasticsearch.yaml

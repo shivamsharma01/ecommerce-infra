@@ -1,0 +1,23 @@
+# ClusterIP: port 80 → container port 8080 (named port http on Deployment).
+apiVersion: v1
+kind: Service
+metadata:
+  name: product
+  labels:
+    app.kubernetes.io/name: product
+    app.kubernetes.io/instance: product
+    app.kubernetes.io/version: "0.0.1"
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: mcart
+    app: product
+    version: "0.0.1"
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: product
+    app: product
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP

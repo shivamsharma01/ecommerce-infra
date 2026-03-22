@@ -1,0 +1,26 @@
+swagger: '2.0'
+info:
+  title: mcart API Gateway
+  version: '1.0.0'
+schemes:
+  - https
+produces:
+  - application/json
+consumes:
+  - application/json
+paths:
+  /{path=**}:
+%{ for op in gateway_operations ~}
+    ${op.method}:
+      operationId: ${op.operation_id}
+      responses:
+        '200':
+          description: OK
+      x-google-backend:
+        address: ${backend_base_url}
+        protocol: h2
+        path_translation: APPEND_PATH_TO_ADDRESS
+%{ if disable_auth ~}
+        disable_auth: true
+%{ endif ~}
+%{ endfor ~}

@@ -1,0 +1,16 @@
+# Bitnami Redis — auth service dependency
+#   helm upgrade --install mcart-redis bitnami/redis -n mcart -f values-redis.yaml
+
+architecture: standalone
+auth:
+  enabled: true
+  password: CHANGEME_REDIS_PASSWORD
+
+master:
+  persistence:
+    enabled: true
+    size: 8Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi

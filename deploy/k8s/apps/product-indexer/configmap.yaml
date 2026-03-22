@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: product-indexer-config
+  labels:
+    app.kubernetes.io/name: product-indexer
+data:
+  SERVER_PORT: "8085"
+  SPRING_APPLICATION_NAME: "product-indexer"
+  SPRING_CLOUD_GCP_PROJECT_ID: "CHANGEME_GCP_PROJECT_ID"
+  SPRING_CLOUD_GCP_FIRESTORE_ENABLED: "true"
+  SPRING_ELASTICSEARCH_URIS: "http://elasticsearch.elasticsearch.svc.cluster.local:9200"
+  SPRING_DATA_ELASTICSEARCH_REPOSITORIES_ENABLED: "false"
+  SPRING_DATA_ELASTICSEARCH_AUTO_INDEX_CREATION: "true"
+  PRODUCT_INDEXER_PUBSUB_ENABLED: "true"
+  PRODUCT_INDEXER_PUBSUB_SUBSCRIPTION: "product-events-sub"
+  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "https://auth.example.com"
+  MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED: "true"

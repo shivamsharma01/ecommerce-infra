@@ -1,0 +1,45 @@
+# Example: receive image bumps from microservice repos via repository_dispatch.
+# Copy/adapt into this repo; configure WIF, GKE name/region, and secrets.
+# client_payload.service and .image must not be trusted until validated (shell injection).
+name: Deploy image to GKE (dispatch example)
+
+on:
+  repository_dispatch:
+    types: [mcart-deploy-image]
+
+jobs:
+  rollout:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOY_SA }}
+
+      - name: Get GKE credentials
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: ${{ secrets.GKE_CLUSTER_NAME }}
+          location: ${{ secrets.GKE_REGION }}
+
+      - name: Rollout one deployment
+        env:
+          NS: mcart
+          DEPLOYMENT: ${{ github.event.client_payload.service }}
+          IMAGE: ${{ github.event.client_payload.image }}
+        run: |
+          set -euo pipefail
+          case "$DEPLOYMENT" in
+            auth|user|product|search|product-indexer|mcart-ui) ;;
+            *) echo "Invalid service: $DEPLOYMENT"; exit 1 ;;
+          esac
+          if [[ ! "$IMAGE" =~ ^[[:alnum:]._:@/-]+$ ]]; then
+            echo "Image ref contains disallowed characters"
+            exit 1
+          fi
+          kubectl set image "deployment/$DEPLOYMENT" "${DEPLOYMENT}=${IMAGE}" -n "$NS"
+          kubectl rollout status "deployment/$DEPLOYMENT" -n "$NS" --timeout=120s

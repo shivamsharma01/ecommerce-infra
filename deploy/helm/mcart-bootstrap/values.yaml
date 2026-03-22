@@ -1,0 +1,30 @@
+# Namespace where Jobs run (and where ConfigMaps are created).
+namespace: mcart
+
+# Bitnami PostgreSQL service (helm release name defaults to mcart-pg → mcart-pg-postgresql).
+postgresql:
+  host: mcart-pg-postgresql
+  port: 5432
+
+# Flyway Docker image
+flyway:
+  image: flyway/flyway
+  tag: "10.21.0-alpine"
+
+# Application DB users (must match initdb script in values-postgresql.yaml)
+auth:
+  database: auth
+  username: auth_user
+  password: "" # set via --set-file or --set (never commit real passwords)
+
+user:
+  database: user
+  username: user_user
+  password: ""
+
+# Optional: pull app passwords from an existing Secret instead of values
+existingSecret:
+  enabled: false
+  name: mcart-db-app-credentials
+  authPasswordKey: auth-password
+  userPasswordKey: user-password

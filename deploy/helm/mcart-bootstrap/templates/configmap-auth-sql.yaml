@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "mcart-bootstrap.fullname" . }}-auth-flyway-sql
+  namespace: {{ .Values.namespace }}
+data:
+{{- range $path, $_ := .Files.Glob "files/auth/*.sql" }}
+  {{ base $path }}: |
+{{ $.Files.Get $path | nindent 4 }}
+{{- end }}
