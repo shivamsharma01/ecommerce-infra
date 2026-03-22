@@ -1,10 +1,3 @@
-check "api_gateway_lb_requires_gateway" {
-  assert {
-    condition     = !var.enable_api_gateway_https_load_balancer || var.enable_api_gateway
-    error_message = "enable_api_gateway_https_load_balancer requires enable_api_gateway = true."
-  }
-}
-
 check "kubernetes_api_network_restriction" {
   assert {
     condition = (

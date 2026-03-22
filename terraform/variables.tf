@@ -131,19 +131,31 @@ variable "node_min_count" {
 variable "node_max_count" {
   description = "Maximum nodes per zone in the default pool."
   type        = number
-  default     = 5
+  default     = 2
 }
 
 variable "node_disk_size_gb" {
   description = "Boot disk size (GB) per node."
   type        = number
-  default     = 100
+  default     = 50
+}
+
+variable "node_disk_type" {
+  description = "Boot disk type (pd-standard is cheaper than pd-balanced for short demos)."
+  type        = string
+  default     = "pd-standard"
+}
+
+variable "node_preemptible" {
+  description = "Use preemptible (Spot) VMs for the default node pool — large savings; nodes can be reclaimed anytime (fine for demos)."
+  type        = bool
+  default     = true
 }
 
 variable "regional_cluster" {
   description = "If true, create a regional cluster (3 zones); if false, zonal using var.zone."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "deletion_protection" {
@@ -202,14 +214,8 @@ variable "domain_aliases" {
   default     = ["www.mcart.store"]
 }
 
-variable "reserve_mcart_static_ip" {
-  description = "Create a global static IP (used by the optional HTTPS load balancer in front of API Gateway)."
-  type        = bool
-  default     = true
-}
-
 variable "static_ip_name" {
-  description = "Name of the global static IP resource."
+  description = "GCP resource name for the global IPv4 attached to the public HTTPS load balancer (DNS points here)."
   type        = string
   default     = "mcart-public-ip"
 }
@@ -224,12 +230,6 @@ variable "cloud_dns_zone_name" {
   description = "Cloud DNS managed zone name (DNS name is var.domain_name when zone is created)."
   type        = string
   default     = "mcart-public-zone"
-}
-
-variable "enable_api_gateway" {
-  description = "Create Cloud API Gateway API, OpenAPI config, and gateway."
-  type        = bool
-  default     = true
 }
 
 variable "api_gateway_api_id" {
@@ -249,19 +249,16 @@ variable "api_gateway_config_id" {
 }
 
 variable "ingress_https_backend_base_url" {
-  description = "HTTPS origin for GKE Ingress (no trailing slash), e.g. https://203.0.113.50. After first deploy, set to Ingress IP or hostname."
+  description = "HTTPS origin of the GKE Ingress (no trailing slash). After `kubectl get ingress`, set to that IP/hostname; bump api_gateway_config_id and re-apply."
   type        = string
   default     = "https://0.0.0.0"
 }
 
 variable "api_gateway_backend_disable_auth" {
-  description = "Set x-google-backend disable_auth (needed for raw IP backends or self-signed Ingress TLS during bring-up)."
+  description = <<-EOT
+    OpenAPI x-google-backend.disable_auth. When true, API Gateway does not attach Google-signed identity to backend calls (required for typical GKE backends).
+    Client headers (e.g. Authorization: Bearer) are still forwarded; Spring Security validates JWTs on the cluster as usual.
+  EOT
   type        = bool
   default     = true
-}
-
-variable "enable_api_gateway_https_load_balancer" {
-  description = "External HTTPS load balancer + serverless NEG → API Gateway, bound to the reserved static IP and managed cert for var.domain_name."
-  type        = bool
-  default     = false
 }

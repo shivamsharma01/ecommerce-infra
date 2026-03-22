@@ -80,10 +80,10 @@ resource "google_container_node_pool" "primary" {
   }
 
   node_config {
-    preemptible     = false
+    preemptible     = var.node_preemptible
     machine_type    = var.node_machine_type
     disk_size_gb    = var.node_disk_size_gb
-    disk_type       = "pd-balanced"
+    disk_type       = var.node_disk_type
     service_account = google_service_account.gke_nodes.email
     oauth_scopes = [
       "https://www.googleapis.com/auth/cloud-platform",

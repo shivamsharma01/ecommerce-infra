@@ -41,8 +41,8 @@ output "kubectl_context_hint" {
 }
 
 output "mcart_static_ip_address" {
-  description = "Reserved global IPv4 for the optional HTTPS LB (Hostinger A/AAAA or Cloud DNS)."
-  value       = try(google_compute_global_address.mcart_public[0].address, null)
+  description = "Global IPv4 for DNS: apex and www A records → this address (public HTTPS LB → API Gateway → GKE)."
+  value       = google_compute_global_address.mcart_public.address
 }
 
 output "cloud_dns_zone_name_servers" {
@@ -51,11 +51,11 @@ output "cloud_dns_zone_name_servers" {
 }
 
 output "api_gateway_default_hostname" {
-  description = "Built-in hostname for the gateway (use for tests or CNAME if you do not use the static IP LB)."
-  value       = try(google_api_gateway_gateway.mcart[0].default_hostname, null)
+  description = "Google-managed gateway hostname (smoke tests without custom domain)."
+  value       = google_api_gateway_gateway.mcart.default_hostname
 }
 
 output "api_gateway_https_url" {
-  description = "Public URL when the HTTPS load balancer is enabled (https://var.domain_name)."
-  value       = local.apigw_https_lb ? "https://${var.domain_name}" : null
+  description = "Browser origin after DNS points at mcart_static_ip_address (https://var.domain_name)."
+  value       = "https://${var.domain_name}"
 }

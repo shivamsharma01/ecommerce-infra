@@ -1,10 +1,11 @@
 locals {
   wsa = var.workload_service_accounts
 
-  auth_sa            = trimspace(try(local.wsa.auth, ""))
-  user_sa            = trimspace(try(local.wsa.user, ""))
-  product_sa         = trimspace(try(local.wsa.product, ""))
-  product_indexer_sa = trimspace(try(local.wsa.product_indexer, ""))
+  # optional() attributes are null when unset; coalesce(null, "") errors ("" is skipped by coalesce).
+  auth_sa            = local.wsa.auth == null ? "" : trimspace(local.wsa.auth)
+  user_sa            = local.wsa.user == null ? "" : trimspace(local.wsa.user)
+  product_sa         = local.wsa.product == null ? "" : trimspace(local.wsa.product)
+  product_indexer_sa = local.wsa.product_indexer == null ? "" : trimspace(local.wsa.product_indexer)
 
   extra_iam_bindings = flatten([
     for role, members in var.extra_project_iam_members : [
