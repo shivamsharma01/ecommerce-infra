@@ -47,6 +47,8 @@ terraform plan -out=tfplan && terraform apply tfplan
 
 **Creates:** VPC, subnet, NAT, GKE, Pub/Sub, global static IP, API Gateway + OpenAPI backend, HTTPS forwarding rule, optional Cloud DNS.
 
+**API Gateway region:** Managed gateways are **not** available in every GKE region (e.g. **not** `asia-south2`). This stack uses **`api_gateway_region`** (default **`asia-northeast1`**) for `google_api_gateway_gateway` and the serverless NEG; GKE stays in `var.region` / `var.zone`. Override `api_gateway_region` in `terraform.tfvars` only with a [supported region](https://cloud.google.com/api-gateway/docs/deployment-model).
+
 **First apply** uses a hostname placeholder for `ingress_https_backend_base_url` (default `https://ingress-backend.pending.invalid`) because API Gateway **rejects IP-only backends** like `https://0.0.0.0`. After workloads + Ingress exist, set it to the real GKE Ingress HTTPS origin, bump `api_gateway_config_id`, and apply again (see §5).
 
 ```bash

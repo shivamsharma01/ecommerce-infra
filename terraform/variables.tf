@@ -248,6 +248,14 @@ variable "api_gateway_config_id" {
   default     = "v1"
 }
 
+# API Gateway is only available in a subset of regions (not asia-south2 / Mumbai).
+# https://cloud.google.com/api-gateway/docs/deployment-model
+variable "api_gateway_region" {
+  description = "Region for google_api_gateway_gateway and its serverless NEG (must match; must be an API Gateway–supported region)."
+  type        = string
+  default     = "asia-northeast1"
+}
+
 variable "ingress_https_backend_base_url" {
   description = <<-EOT
     HTTPS origin of the GKE Ingress (no trailing slash), must be a hostname — API Gateway rejects IP literals (e.g. https://0.0.0.0).

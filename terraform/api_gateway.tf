@@ -44,7 +44,7 @@ resource "google_api_gateway_api_config" "mcart" {
 resource "google_api_gateway_gateway" "mcart" {
   provider = google-beta
 
-  region     = var.region
+  region     = var.api_gateway_region
   gateway_id = var.api_gateway_id
   api_config = google_api_gateway_api_config.mcart.id
 
@@ -56,7 +56,7 @@ resource "google_compute_region_network_endpoint_group" "mcart_apigw" {
 
   name                  = "mcart-apigw-neg"
   network_endpoint_type = "SERVERLESS"
-  region                = var.region
+  region                = var.api_gateway_region
 
   serverless_deployment {
     platform = "apigateway.googleapis.com"
