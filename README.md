@@ -81,14 +81,25 @@ gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
 
 A **narrower** set (still large) would include at least: `roles/compute.admin`, `roles/container.admin`, `roles/iam.serviceAccountAdmin`, `roles/resourcemanager.projectIamAdmin`, `roles/apigateway.admin`, `roles/pubsub.admin`, plus **Service Management** access for API Gateway (`roles/servicemanagement.admin` or related). In practice **Editor** avoids trial-and-error on individual permissions.
 
-**“IAM API has not been used / is disabled”** (sometimes the error shows a **project number**, not `ecommerce-491019`—that number is the same project): run **`./scripts/enable-apis.sh`** again for **`ecommerce-491019`**, wait 2–5 minutes, then verify:
+**“IAM API has not been used / is disabled”** on project number **A**, while **`enable-apis.sh`** / **`apis-verify`** succeed on **`ecommerce-491019`** (project number **B**): those numbers are **different projects**. Terraform uses **Application Default Credentials (ADC)**, not the same path as `gcloud` CLI unless you align them.
 
-```bash
-make apis-verify PROJECT_ID=ecommerce-491019
-# or: ./scripts/verify-apis.sh ecommerce-491019
-```
+1. Run:
 
-**Wrong project:** ensure `project_id` in **`terraform.tfvars`**, **`gcloud config set project`**, and the account you used for **`enable-apis.sh`** all refer to the **same** project.
+   ```bash
+   make auth-check PROJECT_ID=ecommerce-491019
+   ```
+
+2. If **ADC `quota_project_id`** is wrong or missing, set it to your Terraform project:
+
+   ```bash
+   gcloud auth application-default set-quota-project ecommerce-491019
+   ```
+
+   Then **`terraform apply`** again.
+
+3. If **`GOOGLE_APPLICATION_CREDENTIALS`** is set, Terraform uses **that key’s** service account. It must have **Editor** (or equivalent) on **`ecommerce-491019`** — enabling APIs with your user does **not** grant that SA any rights.
+
+4. If the error’s project number **matches** `ecommerce-491019`’s number but IAM still says disabled, run **`./scripts/enable-apis.sh`** again, wait a few minutes, **`make apis-verify`**.
 
 ---
 

@@ -2,7 +2,7 @@
 # If `terraform` is not installed, use Docker (same image as CI can use):
 #   make validate-docker
 
-.PHONY: validate validate-docker fmt apis-enable apis-verify
+.PHONY: validate validate-docker fmt apis-enable apis-verify auth-check
 
 # One-time per project: enable GCP APIs (requires Owner or Service Usage Admin on gcloud).
 # Example: make apis-enable PROJECT_ID=ecommerce-491019
@@ -13,6 +13,11 @@ apis-enable:
 apis-verify:
 	@test -n "$(PROJECT_ID)" || (echo "Set PROJECT_ID=your-gcp-project"; exit 1)
 	bash scripts/verify-apis.sh "$(PROJECT_ID)"
+
+# Diagnose Terraform 403 / wrong project number in IAM errors (ADC vs gcloud).
+auth-check:
+	@test -n "$(PROJECT_ID)" || (echo "Set PROJECT_ID=your-gcp-project"; exit 1)
+	bash scripts/check-terraform-gcp-auth.sh "$(PROJECT_ID)"
 
 validate:
 	terraform init -backend=false -input=false
