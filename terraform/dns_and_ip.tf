@@ -2,6 +2,8 @@
 # GKE Ingress uses a separate ephemeral Google LB IP; set ingress_https_backend_base_url to that HTTPS origin.
 resource "google_compute_global_address" "mcart_public" {
   name = var.static_ip_name
+
+  depends_on = [google_project_service.required]
 }
 
 resource "google_dns_managed_zone" "public" {

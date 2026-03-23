@@ -1,5 +1,7 @@
 locals {
+  # serviceusage.googleapis.com — required for Terraform to enable other APIs via this resource.
   required_apis = [
+    "serviceusage.googleapis.com",
     "container.googleapis.com",
     "compute.googleapis.com",
     "iam.googleapis.com",
