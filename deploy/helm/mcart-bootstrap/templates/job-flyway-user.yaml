@@ -26,7 +26,7 @@ spec:
             - migrate
           env:
             - name: FLYWAY_URL
-              value: jdbc:postgresql://{{ .Values.postgresql.host }}:{{ .Values.postgresql.port }}/{{ .Values.user.database }}
+              value: jdbc:postgresql://{{ .Values.postgresql.host }}:{{ .Values.postgresql.port }}/{{ .Values.user.database }}?sslmode=disable
             - name: FLYWAY_USER
               value: {{ .Values.user.username | quote }}
             - name: FLYWAY_LOCATIONS

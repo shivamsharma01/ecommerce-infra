@@ -60,7 +60,7 @@ resource "google_compute_region_network_endpoint_group" "mcart_apigw" {
 
   serverless_deployment {
     platform = "apigateway.googleapis.com"
-    resource = google_api_gateway_gateway.mcart.id
+    resource = google_api_gateway_gateway.mcart.gateway_id
   }
 
   depends_on = [google_api_gateway_gateway.mcart]

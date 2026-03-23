@@ -5,7 +5,7 @@ metadata:
   name: auth
   labels:
     app: auth
-    version: "aacdaa6"
+    version: "5a77d00"
 spec:
   replicas: 2
   selector:
@@ -20,11 +20,11 @@ spec:
     metadata:
       labels:
         app: auth
-        version: "aacdaa6"
+        version: "5a77d00"
     spec:
       containers:
         - name: auth
-          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/auth:aacdaa6
+          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/auth:5a77d00e77ccda75972037a0be72ab9b101a4d3c
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

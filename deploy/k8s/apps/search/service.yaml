@@ -4,7 +4,6 @@ metadata:
   name: search
   labels:
     app: search
-    version: "<VERSION>"
 spec:
   type: ClusterIP
   selector:

@@ -1,46 +1,90 @@
 # Run from: ecomm-infra/deploy
 # Monorepo root = ../.. (parent of ecomm-infra)
+#
+# Helm reads ~/.kube/config (same as kubectl after get-credentials). You do not need the kubectl
+# binary for make data-install / flyway-install (Helm checks the API). apps-apply needs kubectl:
+#   gcloud components install kubectl
+# If the API server is a local IP (e.g. 192.168.49.x), switch context to GKE:
+#   gcloud container clusters get-credentials mcart-gke --location asia-south2-a --project ecommerce-491019
 
 NS ?= mcart
 HELM ?= helm
 KUBECTL ?= kubectl
+GKE_PROJECT ?= ecommerce-491019
+GKE_CLUSTER ?= mcart-gke
+GKE_LOCATION ?= asia-south2-a
+# So `make flyway-install AUTH_DB_PASS=...` is visible in the recipe (and passwords with `$` are not mangled by Make).
+export AUTH_DB_PASS AUTH_DB_PASS_FILE USER_DB_PASS USER_DB_PASS_FILE
 ROOT := $(abspath $(CURDIR)/../..)
 K8S := $(abspath $(CURDIR))/k8s/apps
 ING := $(abspath $(CURDIR))/k8s/ingress
 
-.PHONY: helm-repo data-install data-install-redis data-install-es flyway-install apps-apply ingress-apply
+.PHONY: helm-repo k8s-ready kubectl-required data-install data-install-redis data-install-es flyway-install apps-apply ingress-apply
+
+# Helm reaches the API without the kubectl binary; kubectl cluster-info fails if kubectl is missing.
+k8s-ready:
+	@if $(HELM) list -n kube-system >/dev/null 2>&1; then exit 0; fi; \
+	if command -v $(KUBECTL) >/dev/null 2>&1 && $(KUBECTL) cluster-info >/dev/null 2>&1; then exit 0; fi; \
+	echo "Cannot reach the Kubernetes API (Helm could not list kube-system; kubectl check also failed or kubectl is missing)."; \
+	if ! command -v $(KUBECTL) >/dev/null 2>&1; then \
+	  echo "Install kubectl for diagnostics and for make apps-apply / ingress-apply:"; \
+	  echo "  gcloud components install kubectl"; \
+	fi; \
+	if command -v $(KUBECTL) >/dev/null 2>&1; then \
+	  ctx=$$($(KUBECTL) config current-context 2>/dev/null || echo unknown); \
+	  server=$$($(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' 2>/dev/null || echo ""); \
+	  echo "kubectl context: $$ctx  API server: $$server"; \
+	  case "$$server" in \
+	    *192.168.49*|*127.0.0.1*|*localhost*|*.docker.internal*|*docker-desktop*) \
+	      echo "This looks like a local cluster, not GKE.";; \
+	  esac; \
+	fi; \
+	echo "Ensure kubeconfig points at GKE:"; \
+	echo "  gcloud container clusters get-credentials $(GKE_CLUSTER) --location $(GKE_LOCATION) --project $(GKE_PROJECT)"; \
+	echo "Private clusters need network path to the control plane (authorized networks / VPN)."; \
+	exit 1
+
+kubectl-required:
+	@if command -v $(KUBECTL) >/dev/null 2>&1; then exit 0; fi; \
+	echo "kubectl not found. Install it, then retry:"; \
+	echo "  gcloud components install kubectl"; \
+	exit 1
 
 helm-repo:
 	$(HELM) repo add bitnami https://charts.bitnami.com/bitnami 2>/dev/null || true
 	$(HELM) repo update
 
-data-install: helm-repo
+data-install: helm-repo k8s-ready
 	test -f helm/values-postgresql.yaml || (echo "cp helm/values-postgresql.example.yaml helm/values-postgresql.yaml && edit"; exit 1)
 	$(HELM) upgrade --install mcart-pg bitnami/postgresql -n $(NS) --create-namespace -f helm/values-postgresql.yaml
 
-data-install-redis: helm-repo
+data-install-redis: helm-repo k8s-ready
 	test -f helm/values-redis.yaml || (echo "cp helm/values-redis.example.yaml helm/values-redis.yaml && edit"; exit 1)
 	$(HELM) upgrade --install mcart-redis bitnami/redis -n $(NS) -f helm/values-redis.yaml
 
-data-install-es: helm-repo
+data-install-es: helm-repo k8s-ready
 	test -f helm/values-elasticsearch.yaml || (echo "cp helm/values-elasticsearch.example.yaml helm/values-elasticsearch.yaml && edit"; exit 1)
 	$(HELM) upgrade --install mcart-es bitnami/elasticsearch -n $(NS) -f helm/values-elasticsearch.yaml
 
 # Prefer AUTH_DB_PASS_FILE / USER_DB_PASS_FILE (e.g. mkstemp files) over env vars to avoid shell history.
-flyway-install:
+# Passwords must match auth_user / user_user in helm/values-postgresql.yaml → primary.initdb.scripts.
+# Use shell vars below (not $(AUTH_DB_PASS)): Make eats `$` inside passwords if expanded here.
+flyway-install: k8s-ready
 	@set -e; \
-	AUTH_ARG=; USER_ARG=; \
-	if [ -n "$(AUTH_DB_PASS_FILE)" ]; then AUTH_ARG="--set-file auth.password=$(AUTH_DB_PASS_FILE)"; \
-	elif [ -n "$(AUTH_DB_PASS)" ]; then AUTH_ARG="--set auth.password=$(AUTH_DB_PASS)"; \
-	else echo "Set AUTH_DB_PASS or AUTH_DB_PASS_FILE (must match initdb in values-postgresql.yaml)"; exit 1; fi; \
-	if [ -n "$(USER_DB_PASS_FILE)" ]; then USER_ARG="--set-file user.password=$(USER_DB_PASS_FILE)"; \
-	elif [ -n "$(USER_DB_PASS)" ]; then USER_ARG="--set user.password=$(USER_DB_PASS)"; \
-	else echo "Set USER_DB_PASS or USER_DB_PASS_FILE"; exit 1; fi; \
+	if { [ -z "$${AUTH_DB_PASS_FILE-}" ] && [ -z "$${AUTH_DB_PASS-}" ]; } || { [ -z "$${USER_DB_PASS_FILE-}" ] && [ -z "$${USER_DB_PASS-}" ]; }; then \
+	  echo "Set both: AUTH_DB_PASS or AUTH_DB_PASS_FILE, and USER_DB_PASS or USER_DB_PASS_FILE."; \
+	  echo "They must match the CREATE USER ... PASSWORD values in helm/values-postgresql.yaml (initdb)."; \
+	  exit 1; \
+	fi; \
+	if [ -n "$${AUTH_DB_PASS_FILE-}" ]; then AUTH_ARG="--set-file auth.password=$${AUTH_DB_PASS_FILE}"; \
+	else AUTH_ARG="--set auth.password=$${AUTH_DB_PASS}"; fi; \
+	if [ -n "$${USER_DB_PASS_FILE-}" ]; then USER_ARG="--set-file user.password=$${USER_DB_PASS_FILE}"; \
+	else USER_ARG="--set user.password=$${USER_DB_PASS}"; fi; \
 	$(HELM) upgrade --install mcart-bootstrap helm/mcart-bootstrap -n $(NS) $$AUTH_ARG $$USER_ARG
 
 # Application manifests (canonical copy lives under ecomm-infra/deploy/k8s/apps/<service>/).
 # Per-service secret.yaml is gitignored — copy secret.example.yaml → secret.yaml, edit, then apps-apply applies it if present.
-apps-apply:
+apps-apply: k8s-ready kubectl-required
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/auth/configmap.yaml
 	@if [ -f $(K8S)/auth/secret.yaml ]; then $(KUBECTL) apply -n $(NS) -f $(K8S)/auth/secret.yaml; else echo "auth: no secret.yaml (copy secret.example.yaml)"; fi
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/auth/deployment.yaml
@@ -66,6 +110,6 @@ apps-apply:
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/mcart-ui/service.yaml
 
 # GKE Ingress + managed cert (after apps-apply; DNS → Ingress IP; uncomment cert annotation in YAML when ready).
-ingress-apply:
+ingress-apply: k8s-ready kubectl-required
 	$(KUBECTL) apply -f $(ING)/managed-certificate.yaml
 	$(KUBECTL) apply -f $(ING)/mcart-store-ingress.yaml

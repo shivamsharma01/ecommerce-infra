@@ -4,3 +4,5 @@
        --set auth.password=... --set user.password=...
    or use existingSecret in values.
 3. Watch jobs: kubectl get jobs -n {{ .Values.namespace }} -w
+4. If a Flyway job fails (BackoffLimitExceeded): kubectl logs -n {{ .Values.namespace }} job/{{ include "mcart-bootstrap.fullname" . }}-flyway-auth --tail=200
+   (or …-flyway-user). Fix password vs initdb, then: helm uninstall mcart-bootstrap -n {{ .Values.namespace }} && re-install.
