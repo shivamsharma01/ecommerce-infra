@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: auth
-          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/auth:manual
+          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/auth:aacdaa6
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
