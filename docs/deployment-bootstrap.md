@@ -63,13 +63,13 @@ From repo root, with `kubectl` and `helm` pointed at the new cluster:
 
    Or `AUTH_DB_PASS` / `USER_DB_PASS` as before. Jobs use an **initContainer** (`nc` to `5432`) so Flyway does not start until TCP to Postgres succeeds.
 
-5. **Wire ConfigMaps** to cluster DNS names for Postgres/Redis/ES (edit `ecomm-infra/deploy/k8s/apps/<service>/configmap.yaml` or use overlays), create **External Secrets** / GSM secrets, then:
+5. **Wire ConfigMaps** to cluster DNS names for Postgres/Redis/ES (edit `ecomm-infra/deploy/k8s/apps/<service>/configmap.yaml` or use overlays). Copy each **`secret.example.yaml`** → **`secret.yaml`**, fill values (aligned with Helm passwords), then:
 
    ```bash
    make apps-apply NS=mcart
    ```
 
-   Optional: `APPLY_ES_SECRETS=0 make apps-apply` skips Elasticsearch ExternalSecrets for `search` and `product-indexer` until GSM secrets exist.
+   If `secret.yaml` is missing for a service, `make apps-apply` still applies Deployments; pods may fail until you add the Secret.
 
 6. **Images:** ensure Deployment manifests reference real Artifact Registry tags (or run `kubectl set image` after CI has pushed images).
 

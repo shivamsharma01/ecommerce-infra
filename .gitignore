@@ -18,3 +18,6 @@ terraform.rc
 deploy/helm/values-postgresql.yaml
 deploy/helm/values-redis.yaml
 deploy/helm/values-elasticsearch.yaml
+
+# K8s — local secrets (never commit); tracked templates are secret.example.yaml
+deploy/k8s/apps/**/secret.yaml

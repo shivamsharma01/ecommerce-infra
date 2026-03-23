@@ -7,8 +7,6 @@ KUBECTL ?= kubectl
 ROOT := $(abspath $(CURDIR)/../..)
 K8S := $(abspath $(CURDIR))/k8s/apps
 ING := $(abspath $(CURDIR))/k8s/ingress
-# Set to 0 to skip Elasticsearch ExternalSecrets (search, product-indexer) if GSM keys are not ready yet.
-APPLY_ES_SECRETS ?= 1
 
 .PHONY: helm-repo data-install data-install-redis data-install-es flyway-install apps-apply ingress-apply
 
@@ -41,25 +39,26 @@ flyway-install:
 	$(HELM) upgrade --install mcart-bootstrap helm/mcart-bootstrap -n $(NS) $$AUTH_ARG $$USER_ARG
 
 # Application manifests (canonical copy lives under ecomm-infra/deploy/k8s/apps/<service>/).
+# Per-service secret.yaml is gitignored — copy secret.example.yaml → secret.yaml, edit, then apps-apply applies it if present.
 apps-apply:
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/auth/configmap.yaml
-	$(KUBECTL) apply -n $(NS) -f $(K8S)/auth/external-secret.yaml
+	@if [ -f $(K8S)/auth/secret.yaml ]; then $(KUBECTL) apply -n $(NS) -f $(K8S)/auth/secret.yaml; else echo "auth: no secret.yaml (copy secret.example.yaml)"; fi
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/auth/deployment.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/auth/service.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/user/configmap.yaml
-	$(KUBECTL) apply -n $(NS) -f $(K8S)/user/external-secret.yaml
+	@if [ -f $(K8S)/user/secret.yaml ]; then $(KUBECTL) apply -n $(NS) -f $(K8S)/user/secret.yaml; else echo "user: no secret.yaml (copy secret.example.yaml)"; fi
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/user/deployment.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/user/service.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/product/configmap.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/product/deployment.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/product/service.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/search/configmap.yaml
-	@if [ "$(APPLY_ES_SECRETS)" = "1" ]; then $(KUBECTL) apply -n $(NS) -f $(K8S)/search/external-secret.yaml; else echo "Skipping search ExternalSecret (APPLY_ES_SECRETS!=1)"; fi
+	@if [ -f $(K8S)/search/secret.yaml ]; then $(KUBECTL) apply -n $(NS) -f $(K8S)/search/secret.yaml; else echo "search: no secret.yaml (optional; copy secret.example.yaml if ES uses auth)"; fi
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/search/deployment.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/search/service.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/product-indexer/serviceaccount.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/product-indexer/configmap.yaml
-	@if [ "$(APPLY_ES_SECRETS)" = "1" ]; then $(KUBECTL) apply -n $(NS) -f $(K8S)/product-indexer/external-secret.yaml; else echo "Skipping product-indexer ExternalSecret (APPLY_ES_SECRETS!=1)"; fi
+	@if [ -f $(K8S)/product-indexer/secret.yaml ]; then $(KUBECTL) apply -n $(NS) -f $(K8S)/product-indexer/secret.yaml; else echo "product-indexer: no secret.yaml (optional; copy secret.example.yaml if ES uses auth)"; fi
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/product-indexer/deployment.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/product-indexer/service.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/mcart-ui/configmap.yaml

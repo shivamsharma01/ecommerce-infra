@@ -53,9 +53,6 @@ spec:
           envFrom:
             - configMapRef:
                 name: mcart-ui-config
-            - secretRef:
-                name: mcart-ui-secrets
-                optional: true
           resources:
             requests:
               cpu: 100m

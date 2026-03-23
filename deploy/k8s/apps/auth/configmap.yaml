@@ -15,7 +15,7 @@ data:
   AUTH_VERIFICATION_BASE_URL: "https://mcart.store"
   OAUTH2_REDIRECT_URI: "https://mcart.store/login/oauth2/code/client-app"
   OAUTH2_CLIENT_ID: "client-app"
-  GCP_PROJECT_ID: "CHANGEME_GCP_PROJECT_ID"
+  GCP_PROJECT_ID: "ecommerce-491019"
   AUTH_PUBSUB_USER_SIGNUP_TOPIC: "user-signup-events"
   SPRING_MAIL_HOST: "smtp.gmail.com"
   SPRING_MAIL_PORT: "587"

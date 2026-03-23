@@ -2,7 +2,7 @@
 
 Single place for **environment variables**, **Kubernetes ConfigMaps/Secrets**, how they connect to **`application.yaml` / `application.yml`**, and **placeholders you must replace** before production.
 
-Related: [SETUP.md](../SETUP.md) (git push checklist), [kubernetes-secrets-production.md](./kubernetes-secrets-production.md) (GSM + External Secrets).
+Related: [SETUP.md](../SETUP.md) (git push checklist), [kubernetes-secrets-production.md](./kubernetes-secrets-production.md) (local `secret.yaml` from examples).
 
 ---
 
@@ -25,7 +25,7 @@ Each **key** in the ConfigMap or Secret becomes an **environment variable** in t
 
 Example: ConfigMap entry `SERVER_PORT: "8080"` → process env `SERVER_PORT=8080`.
 
-External Secrets Operator fills the Secret from GCP Secret Manager; key names (e.g. `DB_PASSWORD`) are whatever you define in `external-secret.yaml` → they still become env vars with those names.
+Secret **keys** (e.g. `DB_PASSWORD`) become env vars with those names whether you create the Secret from **`secret.yaml`** or `kubectl create secret`.
 
 ### 1.2 Environment variables → Spring properties
 
@@ -52,7 +52,7 @@ Files under `src/main/resources/application.yaml` are **defaults** and **explici
 So in prod you usually:
 
 1. Put **non-secret** settings in **ConfigMap** (URLs, feature flags, public issuer URL).
-2. Put **secrets** in **Kubernetes Secret** (from GSM via ExternalSecret, or manual `kubectl create secret`).
+2. Put **secrets** in **Kubernetes Secret** (from `secret.example.yaml` → `secret.yaml`, or `kubectl create secret`).
 3. Keep **`application.yaml`** as structure + safe defaults for local dev.
 
 ---
@@ -65,7 +65,7 @@ So in prod you usually:
 | Auth public URL | Auth + all JWT consumers | `AUTH_ISSUER_URI` (auth) and `SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI` (others) must equal the **`iss`** claim on access tokens (same string). |
 | GCP project id | ConfigMaps | Replace `CHANGEME_GCP_PROJECT_ID`. |
 | In-cluster DNS | ConfigMaps | JDBC URLs, Redis, Elasticsearch hosts must match **your** Helm release names and **namespaces** (samples use `postgresql.*.svc`, `redis-service.auth.svc`, `elasticsearch.elasticsearch.svc` — adjust if different). |
-| GSM secrets + ESO | Cluster | Create secrets in Secret Manager; install ESO + ClusterSecretStore; apply `external-secret.yaml`. See [kubernetes-secrets-production.md](./kubernetes-secrets-production.md). |
+| App secrets | Cluster | Copy each `secret.example.yaml` → `secret.yaml` (or `kubectl create secret`); see [kubernetes-secrets-production.md](./kubernetes-secrets-production.md). |
 | Bootstrap admin | Flyway SQL | After first deploy, change bootstrap password / hash if used. |
 
 ---
@@ -76,7 +76,7 @@ Keys listed are the **environment variable names** your pods receive (ConfigMap/
 
 ### 3.1 `auth`
 
-**Sources:** `deploy/k8s/apps/auth/configmap.yaml`, `auth-secrets` (ExternalSecret), `auth/src/main/resources/application.yaml`.
+**Sources:** `deploy/k8s/apps/auth/configmap.yaml`, `auth-secrets` (Kubernetes Secret from `secret.example.yaml` / manual), `auth/src/main/resources/application.yaml`.
 
 | Env var (ConfigMap / Secret) | Purpose | YAML / Spring binding |
 |------------------------------|---------|------------------------|
@@ -139,7 +139,7 @@ Keys listed are the **environment variable names** your pods receive (ConfigMap/
 | `APP_SECURITY_REQUIRED_SCOPE` | e.g. `product.admin` | `app.security.required-scope` |
 | `SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI` | JWT validation | `spring.security.oauth2.resourceserver.jwt.issuer-uri` |
 
-Optional **Secret** keys (if you add an ExternalSecret later): anything your code expects (e.g. API keys) — `product-secrets` is optional in Git manifests.
+Optional **Secret** keys: anything your code expects (e.g. API keys) — `product-secrets` is optional unless you create it.
 
 **Prod placeholders:** `CHANGEME_GCP_PROJECT_ID`, issuer URL, Firestore enablement.
 
@@ -159,7 +159,7 @@ Optional **Secret** keys (if you add an ExternalSecret later): anything your cod
 | `SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI` | JWT validation | `spring.security.oauth2.resourceserver.jwt.issuer-uri` |
 | `MANAGEMENT_*` | Actuator | Standard Spring management binding |
 
-Elasticsearch credentials (if ES has auth): usually via **Secret** and `SPRING_ELASTICSEARCH_USERNAME` / `PASSWORD` or your app’s property names — align with `search` service code and optional `external-secret.yaml`.
+Elasticsearch credentials (if ES has auth): via **Secret** and `SPRING_ELASTICSEARCH_USERNAME` / `PASSWORD` (see `search/secret.example.yaml`).
 
 **Prod placeholders:** ES URL (service DNS), issuer URL.
 
@@ -212,7 +212,7 @@ Git: deploy/k8s/apps/<svc>/configmap.yaml
         ▼
 Kubernetes ConfigMap  ──envFrom──►  Pod env vars  ──►  Spring Boot binds to properties
         │                                      │
-Secret (ESO / manual)  ──envFrom──►  (same)     └──►  application.yaml defaults + ${VAR} overrides
+Secret (file / kubectl) ──envFrom──►  (same)     └──►  application.yaml defaults + ${VAR} overrides
 ```
 
 ---
@@ -222,6 +222,6 @@ Secret (ESO / manual)  ──envFrom──►  (same)     └──►  applicat
 - [ ] All `CHANGEME_*` and `*.example.com` / `api.example.com` in ConfigMaps  
 - [ ] `AUTH_ISSUER_URI` == `SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI` (same URL as JWT `iss`)  
 - [ ] JDBC/Redis/Elasticsearch hostnames match cluster services  
-- [ ] GSM secrets created; ExternalSecrets syncing; Secret keys match tables above  
+- [ ] Kubernetes Secrets created (`secret.yaml` or `kubectl create secret`); keys match tables above  
 - [ ] Images: `<ARTIFACT_REGISTRY_URL>` / `<VERSION>` in every `deployment.yaml`  
 - [ ] Product: confirm `SPRING_CLOUD_GCP_PUBSUB_ENABLED` matches whether you use the outbox (sample is `true`)  

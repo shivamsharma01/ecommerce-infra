@@ -15,7 +15,7 @@ Create these on your machine or in your CI/CD platform; they are **gitignored** 
 | **`terraform.tfvars`** | `ecomm-infra/terraform/` (gitignored). Create locally with at least `project_id` and `region` (see [docs/terraform-first-apply.md](./docs/terraform-first-apply.md)). |
 | **Helm values with passwords** | `ecomm-infra/deploy/helm/values-postgresql.yaml`, `values-redis.yaml`, `values-elasticsearch.yaml` (gitignored). Copy from `*.example.yaml`. |
 | **Terraform state** | Remote backend (recommended) or local `*.tfstate` (gitignored). |
-| **GCP Secret Manager values** | Created with `gcloud` or Console — not files in this repo. |
+| **`deploy/k8s/apps/**/secret.yaml`** | Gitignored. Copy from each `secret.example.yaml`, edit, `kubectl apply` or let `make apps-apply` pick it up. |
 | **GitHub Actions secrets** (if you use the dispatch workflow) | Repository secrets: `GCP_WIF_PROVIDER`, `GCP_DEPLOY_SA`, `GKE_CLUSTER_NAME`, `GKE_REGION` (names must match `.github/workflows/dispatch-deploy-example.yml`). |
 | **`KUBE_CONFIG` / kubeconfig** | Only in CI secrets or your laptop — never commit. |
 | **Flyway / DB passwords at install time** | Pass to `make flyway-install` via env vars or `*_PASS_FILE` (see `deploy/Makefile`). |
@@ -38,13 +38,11 @@ Replace illustrative values so the repo matches **your** project, domain, and re
 | **`search/configmap.yaml`** | Same Elasticsearch URI note as product-indexer. |
 | **`mcart-ui/configmap.yaml`** | `API_BASE_URL` → your public API / gateway URL. |
 
-### 2.2 External Secrets + cluster store — examples
+### 2.2 Kubernetes **Secrets** (local files, not Git)
 
-| File | Replace |
-|------|---------|
-| **`k8s/examples/cluster-secret-store-gcp.yaml`** | `CHANGEME_GCP_PROJECT_ID`, `CHANGEME_REGION`, `CHANGEME_GKE_CLUSTER_NAME`. Apply **once** per cluster after ESO + Workload Identity are set up. Do **not** apply with placeholders. |
-
-`external-secret.yaml` under each app references GSM **secret IDs** (not values). Create those secrets in GCP (see `docs/kubernetes-secrets-production.md`).
+| Tracked template | You create (gitignored) |
+|------------------|-------------------------|
+| **`deploy/k8s/apps/<svc>/secret.example.yaml`** | **`secret.yaml`** in the same folder — see [docs/kubernetes-secrets-production.md](./docs/kubernetes-secrets-production.md). |
 
 ### 2.3 Helm **examples** (tracked) — copy then fill **local** copies
 
@@ -76,17 +74,17 @@ Optional: `workload_service_accounts`, `create_cloud_dns_public_zone`, `domain_n
 3. **Cluster credentials:** `gcloud container clusters get-credentials ...` (or your OIDC flow in CI).
 4. **Helm data layer:** copy three `values-*.example.yaml` → `values-*.yaml`, edit secrets → from `ecomm-infra/deploy` run `make data-install`, `data-install-redis`, `data-install-es`.
 5. **Flyway:** `make flyway-install` with DB passwords matching PostgreSQL initdb (prefer `*_PASS_FILE` — see `deploy/Makefile`).
-6. **ConfigMaps / Deployments:** replace placeholders in `deploy/k8s/apps/**` (section 2.1), then `make apps-apply` (or `APPLY_ES_SECRETS=0` if ES GSM keys are missing).
-7. **Secrets:** install External Secrets Operator, apply edited `cluster-secret-store-gcp.yaml`, create GSM secrets, apply `external-secret.yaml` manifests (order in `docs/kubernetes-secrets-production.md`).
+6. **ConfigMaps / Deployments:** replace placeholders in `deploy/k8s/apps/**` (section 2.1), then `make apps-apply`.
+7. **Secrets:** copy each `secret.example.yaml` → `secret.yaml`, fill values (aligned with Helm DB/Redis/ES passwords), then `make apps-apply` again or `kubectl apply -f` those files (see `docs/kubernetes-secrets-production.md`).
 
 ---
 
 ## 4. Step-by-step: before **pushing this repo to GitHub**
 
 1. **Search for leftovers:** `CHANGEME`, `example.com`, `<ARTIFACT_REGISTRY_URL>`, `<VERSION>` — decide whether you commit **real** project IDs and URLs or keep templates (many teams commit real **non-secret** IDs and domains).
-2. **Confirm gitignore:** no `terraform.tfvars`, no `*.tfstate`, no `values-postgresql.yaml` / `values-redis.yaml` / `values-elasticsearch.yaml` with passwords.
+2. **Confirm gitignore:** no `terraform.tfvars`, no `*.tfstate`, no `values-postgresql.yaml` / `values-redis.yaml` / `values-elasticsearch.yaml` with passwords, no `deploy/k8s/apps/**/secret.yaml`.
 3. **Commit `terraform/.terraform.lock.hcl`** after `terraform init` (provider versions for reproducible applies).
-4. **No kubeconfig, GSM secret values, or Helm password files** in the index (`git status`).
+4. **No kubeconfig, raw `secret.yaml` files, or Helm password files** in the index (`git status`).
 5. **Optional:** enable GitHub Actions only after **repository secrets** for the dispatch example are configured; rename/adapt `dispatch-deploy-example.yml` if needed.
 
 ---
@@ -97,7 +95,7 @@ Optional: `workload_service_accounts`, `create_cloud_dns_public_zone`, `domain_n
 |--------------|---------------------|
 | Real **Ingress / LB URL** for API Gateway backend | After first GKE Ingress (or LB) exists → set `ingress_https_backend_base_url` in `terraform.tfvars` and bump `api_gateway_config_id`, then re-apply Terraform. |
 | **DNS A/AAAA** at registrar | After `terraform output` shows static IP or you use Cloud DNS delegation. |
-| **GSM secret payloads** | When cluster and ESO are up; values never belong in Git. |
+| **K8s app secrets** | Create `secret.yaml` from examples or `kubectl create secret`; values never belong in Git. |
 | **Image tags** in cluster | After CI builds images; use `kubectl set image` or replace `<VERSION>` in YAML. |
 | **TLS / managed cert provisioning** | After DNS points at Google LB (can take time). |
 
@@ -107,7 +105,7 @@ Optional: `workload_service_accounts`, `create_cloud_dns_public_zone`, `domain_n
 
 ```text
 MY_PASSWORD             → helm examples (replace before apply); local `values-*.yaml` gitignored  
-CHANGEME_GCP_PROJECT_ID → ConfigMaps, `cluster-secret-store-gcp.yaml`
+CHANGEME_GCP_PROJECT_ID → ConfigMaps
 <ARTIFACT_REGISTRY_URL> → all app deployment.yaml
 <VERSION>               → all app deployment.yaml
 *.example.com           → auth/user ConfigMaps (public URLs)
