@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: auth
-          image: <ARTIFACT_REGISTRY_URL>/auth:<VERSION>
+          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/auth:manual
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
