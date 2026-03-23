@@ -18,7 +18,9 @@ resource "google_api_gateway_api" "mcart" {
 resource "google_api_gateway_api_config" "mcart" {
   provider = google-beta
 
-  api           = google_api_gateway_api.mcart.id
+  # Use api_id, not .id — .id is the full resource name and duplicates the path (404 on create).
+  # https://github.com/hashicorp/terraform-provider-google/issues/16533
+  api           = google_api_gateway_api.mcart.api_id
   api_config_id = var.api_gateway_config_id
 
   openapi_documents {
