@@ -8,14 +8,24 @@ produces:
   - application/json
 consumes:
   - application/json
+# Do not use {path=**}: "path" collides with internal protobuf mapping →
+# "undefined field 'path' on message 'google.protobuf.Empty'".
 paths:
-  /{path=**}:
+  /{proxy=**}:
 %{ for op in gateway_operations ~}
     ${op.method}:
       operationId: ${op.operation_id}
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          type: string
+          description: Matched suffix path (double wildcard).
       responses:
         '200':
           description: OK
+          schema:
+            type: string
       x-google-backend:
         address: ${backend_base_url}
         protocol: h2
