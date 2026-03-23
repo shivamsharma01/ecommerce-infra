@@ -61,6 +61,35 @@ cd terraform
 terraform state list | grep 'google_project_service.required' | xargs -r terraform state rm
 ```
 
+### Who may run `terraform apply`? (fixes 403 “permission denied” / “IAM API disabled”)
+
+Terraform is acting as **whatever credentials Application Default Credentials use** (`gcloud auth application-default login`, or `GOOGLE_APPLICATION_CREDENTIALS` pointing at a key). That principal must be allowed to create VPCs, GKE, service accounts, Pub/Sub, API Gateway, load balancers, and project IAM bindings.
+
+**Easiest for a solo project:** use your Google user and grant yourself **Editor** or **Owner** on **`ecommerce-491019`** (IAM → Grant access → Principal = your email → Role = *Editor*).
+
+**If you use a dedicated service account for Terraform**, bind it on the project (replace `SA_EMAIL`):
+
+```bash
+PROJECT_ID=ecommerce-491019
+SA_EMAIL=terraform-runner@${PROJECT_ID}.iam.gserviceaccount.com
+
+# Broad but simple (tighten later):
+gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
+  --member="serviceAccount:${SA_EMAIL}" \
+  --role="roles/editor"
+```
+
+A **narrower** set (still large) would include at least: `roles/compute.admin`, `roles/container.admin`, `roles/iam.serviceAccountAdmin`, `roles/resourcemanager.projectIamAdmin`, `roles/apigateway.admin`, `roles/pubsub.admin`, plus **Service Management** access for API Gateway (`roles/servicemanagement.admin` or related). In practice **Editor** avoids trial-and-error on individual permissions.
+
+**“IAM API has not been used / is disabled”** (sometimes the error shows a **project number**, not `ecommerce-491019`—that number is the same project): run **`./scripts/enable-apis.sh`** again for **`ecommerce-491019`**, wait 2–5 minutes, then verify:
+
+```bash
+make apis-verify PROJECT_ID=ecommerce-491019
+# or: ./scripts/verify-apis.sh ecommerce-491019
+```
+
+**Wrong project:** ensure `project_id` in **`terraform.tfvars`**, **`gcloud config set project`**, and the account you used for **`enable-apis.sh`** all refer to the **same** project.
+
 ---
 
 ## 2. Helm data layer + Flyway

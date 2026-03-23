@@ -21,9 +21,10 @@ if [[ -z "${PROJECT_ID}" || "${PROJECT_ID}" == "(unset)" ]]; then
   exit 1
 fi
 
-# Keep in sync with former terraform/apis.tf list.
+# Keep in sync with README "Terraform IAM" section.
 SERVICES=(
   serviceusage.googleapis.com
+  cloudresourcemanager.googleapis.com
   container.googleapis.com
   compute.googleapis.com
   iam.googleapis.com
