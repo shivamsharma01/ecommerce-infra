@@ -203,15 +203,15 @@ variable "extra_project_iam_members" {
 }
 
 variable "domain_name" {
-  description = "Primary public hostname (no scheme), e.g. mcart.store. Used for managed cert and optional Cloud DNS records."
+  description = "Primary public hostname (no scheme), e.g. mcart.space. Used for managed cert and optional Cloud DNS records."
   type        = string
-  default     = "mcart.store"
+  default     = "mcart.space"
 }
 
 variable "domain_aliases" {
-  description = "Extra hostnames for the managed SSL certificate (e.g. www.mcart.store)."
+  description = "Extra hostnames for the managed SSL certificate (e.g. www.mcart.space)."
   type        = list(string)
-  default     = ["www.mcart.store"]
+  default     = ["www.mcart.space"]
 }
 
 variable "static_ip_name" {

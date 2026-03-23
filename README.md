@@ -2,7 +2,7 @@
 
 Terraform (GKE, VPC, API Gateway, public HTTPS LB), Helm (PostgreSQL, Redis, Elasticsearch, Flyway bootstrap), and Kubernetes manifests for **mcart**.
 
-**This checkout is wired for:** GCP project **`ecommerce-491019`**, region **`asia-south2`**, zonal cluster **`mcart-gke`** in **`asia-south2-a`**, domain **`mcart.store`**, Artifact Registry **`asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/`**.
+**This checkout is wired for:** GCP project **`ecommerce-491019`**, region **`asia-south2`**, zonal cluster **`mcart-gke`** in **`asia-south2-a`**, domain **`mcart.space`**, Artifact Registry **`asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/`**.
 
 **End-to-end without GitHub:** use **Cloud Source Repositories** (or another supported host) for Git, **Cloud Build** triggers for **service images** and for **this repo’s** `cloudbuild.yaml` to apply YAML to GKE. See **§10** for a plain-language checklist.
 
@@ -51,7 +51,7 @@ terraform plan -out=tfplan && terraform apply tfplan
 
 ```bash
 gcloud container clusters get-credentials mcart-gke --location asia-south2-a --project ecommerce-491019
-terraform output -raw mcart_static_ip_address   # DNS A/AAAA for mcart.store → this IP
+terraform output -raw mcart_static_ip_address   # DNS A/AAAA for mcart.space → this IP
 ```
 
 **If you already applied an older version** that created `google_project_service.*` in state, remove them from state after upgrading (they are no longer in code):
@@ -157,9 +157,9 @@ make ingress-apply NS=mcart
 
 When **`kubectl describe managedcertificate mcart-store-cert -n mcart`** shows **Active**, uncomment `networking.gke.io/managed-certificates: mcart-store-cert` in `deploy/k8s/ingress/mcart-store-ingress.yaml` and re-apply.
 
-**Traffic path:** `Browser → mcart.store (DNS → static IP) → HTTPS LB → API Gateway → GKE Ingress → Services`.
+**Traffic path:** `Browser → mcart.space (DNS → static IP) → HTTPS LB → API Gateway → GKE Ingress → Services`.
 
-**JWT / OIDC:** ConfigMaps use issuer **`https://mcart.store`** (`AUTH_ISSUER_URI`, `SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI`, `API_BASE_URL` on UI).
+**JWT / OIDC:** ConfigMaps use issuer **`https://mcart.space`** (`AUTH_ISSUER_URI`, `SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI`, `API_BASE_URL` on UI).
 
 **Ingress paths (summary):** `/.well-known`, `/oauth2`, `/login`, `/auth` → auth; `/user` → user; `/api/products`, `/v3/api-docs`, `/swagger-ui` → product; `/api/search` → search; `/product-indexer` → product-indexer; `/` → mcart-ui.
 
@@ -250,7 +250,7 @@ Do these **in order** the first time. Later you only repeat the parts that chang
    This creates **GKE**, **VPC**, **static IP**, **API Gateway** front end, etc.
 
 4. **Point DNS at Google**  
-   Take the static IP from **`terraform output`** and create an **A record** for **`mcart.store`** (and **`www`** if you use it) at your domain registrar so traffic hits Google’s load balancer.
+   Take the static IP from **`terraform output`** and create an **A record** for **`mcart.space`** (and **`www`** if you use it) at your domain registrar so traffic hits Google’s load balancer.
 
 5. **Helm: databases**  
    On your PC, **`kubectl`** must talk to the new cluster (**`gcloud container clusters get-credentials …`**). Under **`ecomm-infra/deploy`**, copy the three **`values-*.example.yaml`** files to **`values-*.yaml`**, set strong passwords, then run **`make data-install`**, **`data-install-redis`**, **`data-install-es`**.

@@ -1,4 +1,4 @@
-# mcart.store / www → path routing (UI at / last). Public traffic: DNS → Terraform static IP → API Gateway → this Ingress (set ingress_https_backend_base_url to this LB’s HTTPS origin).
+# mcart.space / www → path routing (UI at / last). Public traffic: DNS → Terraform static IP → API Gateway → this Ingress (set ingress_https_backend_base_url to this LB’s HTTPS origin).
 # Prerequisites: make apps-apply; managed-certificate.yaml; uncomment managed-certificates when Active.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -13,7 +13,7 @@ metadata:
 spec:
   ingressClassName: gce
   rules:
-    - host: mcart.store
+    - host: mcart.space
       http:
         paths:
           # Optional OpenAPI (product service)
@@ -100,7 +100,7 @@ spec:
                 name: mcart-ui
                 port:
                   number: 80
-    - host: www.mcart.store
+    - host: www.mcart.space
       http:
         paths:
           - path: /v3/api-docs

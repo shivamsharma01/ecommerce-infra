@@ -8,5 +8,5 @@ metadata:
   namespace: mcart
 spec:
   domains:
-    - mcart.store
-    - www.mcart.store
+    - mcart.space
+    - www.mcart.space
