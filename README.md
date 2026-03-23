@@ -47,7 +47,7 @@ terraform plan -out=tfplan && terraform apply tfplan
 
 **Creates:** VPC, subnet, NAT, GKE, Pub/Sub, global static IP, API Gateway + OpenAPI backend, HTTPS forwarding rule, optional Cloud DNS.
 
-**First apply** uses placeholder `ingress_https_backend_base_url` (default `https://0.0.0.0`). After workloads + Ingress exist, set it to the GKE Ingress HTTPS origin, bump `api_gateway_config_id`, and apply again (see §5).
+**First apply** uses a hostname placeholder for `ingress_https_backend_base_url` (default `https://ingress-backend.pending.invalid`) because API Gateway **rejects IP-only backends** like `https://0.0.0.0`. After workloads + Ingress exist, set it to the real GKE Ingress HTTPS origin, bump `api_gateway_config_id`, and apply again (see §5).
 
 ```bash
 gcloud container clusters get-credentials mcart-gke --location asia-south2-a --project ecommerce-491019
@@ -175,7 +175,7 @@ kubectl get ingress mcart-store -n mcart -o jsonpath='{.status.loadBalancer.ingr
 Set in **`terraform.tfvars`**:
 
 ```hcl
-ingress_https_backend_base_url = "https://<ingress-ip-or-host>"
+ingress_https_backend_base_url = "https://<ingress-hostname>"
 api_gateway_config_id          = "v2"   # bump from previous
 ```
 

@@ -249,9 +249,13 @@ variable "api_gateway_config_id" {
 }
 
 variable "ingress_https_backend_base_url" {
-  description = "HTTPS origin of the GKE Ingress (no trailing slash). After `kubectl get ingress`, set to that IP/hostname; bump api_gateway_config_id and re-apply."
+  description = <<-EOT
+    HTTPS origin of the GKE Ingress (no trailing slash), must be a hostname — API Gateway rejects IP literals (e.g. https://0.0.0.0).
+    Default is a non-routable placeholder so the first apply can create the API config; replace with the real Ingress URL from
+    `kubectl get ingress -n mcart`, bump api_gateway_config_id, and apply again before relying on traffic.
+  EOT
   type        = string
-  default     = "https://0.0.0.0"
+  default     = "https://ingress-backend.pending.invalid"
 }
 
 variable "api_gateway_backend_disable_auth" {

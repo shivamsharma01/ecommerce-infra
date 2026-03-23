@@ -13,8 +13,8 @@ node_max_count    = 3
 node_disk_size_gb = 120
 node_preemptible  = true
 
-# After: kubectl get ingress mcart-store -n mcart — set HTTPS origin, bump api_gateway_config_id, re-apply.
-# ingress_https_backend_base_url = "https://YOUR_INGRESS_IP_OR_HOST"
+# After: kubectl get ingress mcart-store -n mcart — set HTTPS origin (hostname OK; raw IP forbidden by API Gateway), bump api_gateway_config_id, re-apply.
+# ingress_https_backend_base_url = "https://YOUR_INGRESS_HOSTNAME"
 # api_gateway_config_id          = "v2"
 
 # Optional Workload Identity bindings (uncomment and set real SA emails):
