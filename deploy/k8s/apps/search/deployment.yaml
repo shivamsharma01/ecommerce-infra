@@ -1,11 +1,11 @@
-# Substitute: <ARTIFACT_REGISTRY_URL>, <VERSION>
+# Image tag updated by search repo Cloud Build (short SHA).
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: search
   labels:
     app: search
-    version: "<VERSION>"
+    version: "9227976"
 spec:
   replicas: 2
   revisionHistoryLimit: 5
@@ -22,7 +22,7 @@ spec:
     metadata:
       labels:
         app: search
-        version: "<VERSION>"
+        version: "9227976"
     spec:
       terminationGracePeriodSeconds: 30
       securityContext:

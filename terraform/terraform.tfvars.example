@@ -1,0 +1,27 @@
+# Copy to terraform.tfvars (gitignored) and edit.
+
+project_id = "ecommerce-491019"
+region     = "asia-south2"
+
+regional_cluster  = false
+zone              = "asia-south2-a"
+node_machine_type = "e2-highmem-4"
+node_min_count    = 2
+node_max_count    = 3
+node_disk_size_gb = 120
+node_preemptible  = true
+
+# After: kubectl get ingress mcart-store -n mcart — set HTTPS origin, bump api_gateway_config_id, re-apply.
+# ingress_https_backend_base_url = "https://YOUR_INGRESS_IP_OR_HOST"
+# api_gateway_config_id          = "v2"
+
+# Optional Workload Identity bindings (uncomment and set real SA emails):
+# workload_service_accounts = {
+#   auth            = "mcart-auth@ecommerce-491019.iam.gserviceaccount.com"
+#   user            = "mcart-user@ecommerce-491019.iam.gserviceaccount.com"
+#   product         = "mcart-product@ecommerce-491019.iam.gserviceaccount.com"
+#   product_indexer = "mcart-product-indexer@ecommerce-491019.iam.gserviceaccount.com"
+# }
+
+# Optional Cloud DNS in GCP (delegate NS at registrar):
+# create_cloud_dns_public_zone = true

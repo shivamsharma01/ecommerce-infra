@@ -1,4 +1,4 @@
-# Substitute: <ARTIFACT_REGISTRY_URL>, <VERSION>
+# Image tag updated by product-indexer repo Cloud Build (short SHA).
 apiVersion: apps/v1
 kind: Deployment
 metadata:

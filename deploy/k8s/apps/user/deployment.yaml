@@ -1,4 +1,4 @@
-# Substitute before apply: <ARTIFACT_REGISTRY_URL>, <VERSION>
+# Image line is updated by service Cloud Build (short SHA).
 # Health: GET /health/liveness , GET /health/readiness
 apiVersion: apps/v1
 kind: Deployment
@@ -6,7 +6,7 @@ metadata:
   name: user
   labels:
     app: user
-    version: "<VERSION>"
+    version: "bd3afcd"
 spec:
   replicas: 2
   selector:
@@ -21,7 +21,7 @@ spec:
     metadata:
       labels:
         app: user
-        version: "<VERSION>"
+        version: "bd3afcd"
     spec:
       containers:
         - name: user

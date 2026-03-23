@@ -1,0 +1,50 @@
+# Deploy Kubernetes manifests to GKE (apps + ingress). Wire this file to your Cloud Build trigger
+# on the ecomm-infra repository (Cloud Source Repositories, Bitbucket, etc.—not GitHub required).
+#
+# IAM: grant the Cloud Build service account (default: PROJECT_NUMBER@cloudbuild.gserviceaccount.com)
+#       the role roles/container.developer on the project (Kubernetes Engine Developer).
+#
+# Substitutions (override in the trigger if your cluster differs):
+#   _CLUSTER_NAME      — GKE cluster name (default mcart-gke)
+#   _GKE_LOCATION      — zone (e.g. asia-south2-a) OR region (e.g. asia-south2)
+#   _GKE_LOCATION_KIND — "zone" or "region"
+#   _K8S_NAMESPACE     — target namespace (default mcart)
+
+substitutions:
+  _CLUSTER_NAME: mcart-gke
+  _GKE_LOCATION: asia-south2-a
+  _GKE_LOCATION_KIND: zone
+  _K8S_NAMESPACE: mcart
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+timeout: 1200s
+
+steps:
+  - id: gke-apply
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: bash
+    args:
+      - -ceu
+      - |
+        export DEBIAN_FRONTEND=noninteractive
+        apt-get update -qq
+        apt-get install -y -qq make
+
+        case "${_GKE_LOCATION_KIND}" in
+          region)
+            gcloud container clusters get-credentials "${_CLUSTER_NAME}" \
+              --region="${_GKE_LOCATION}" \
+              --project="${PROJECT_ID}"
+            ;;
+          *)
+            gcloud container clusters get-credentials "${_CLUSTER_NAME}" \
+              --zone="${_GKE_LOCATION}" \
+              --project="${PROJECT_ID}"
+            ;;
+        esac
+
+        cd deploy
+        make apps-apply NS="${_K8S_NAMESPACE}"
+        make ingress-apply NS="${_K8S_NAMESPACE}"

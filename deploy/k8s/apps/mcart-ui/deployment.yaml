@@ -1,4 +1,4 @@
-# Substitute: <ARTIFACT_REGISTRY_URL>, <VERSION> (or use kubectl set image / Cloud Build).
+# Image tag updated by mcart-ui repo Cloud Build (short SHA).
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/name: mcart-ui
     app.kubernetes.io/component: frontend
     app.kubernetes.io/part-of: mcart
-    app.kubernetes.io/version: "<VERSION>"
+    app.kubernetes.io/version: "5307397"
 spec:
   replicas: 2
   revisionHistoryLimit: 5
@@ -25,7 +25,7 @@ spec:
       labels:
         app.kubernetes.io/name: mcart-ui
         app.kubernetes.io/component: frontend
-        app.kubernetes.io/version: "<VERSION>"
+        app.kubernetes.io/version: "5307397"
     spec:
       securityContext:
         runAsNonRoot: true

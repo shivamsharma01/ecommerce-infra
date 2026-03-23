@@ -1,4 +1,4 @@
-# Substitute image before apply or use kubectl set image / CI (matches cloudbuild defaults).
+# Image tag updated by product repo Cloud Build (short SHA).
 apiVersion: apps/v1
 kind: Deployment
 metadata:
