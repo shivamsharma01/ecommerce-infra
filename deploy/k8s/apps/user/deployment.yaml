@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
         - name: user
-          image: <ARTIFACT_REGISTRY_URL>/user:<VERSION>
+          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/user:manual
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
