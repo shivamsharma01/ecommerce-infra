@@ -4,7 +4,7 @@
 architecture: standalone
 auth:
   enabled: true
-  password: CHANGEME_REDIS_PASSWORD
+  password: MY_PASSWORD
 
 master:
   persistence:

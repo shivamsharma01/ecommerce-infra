@@ -40,7 +40,7 @@ From repo root, with `kubectl` and `helm` pointed at the new cluster:
    cp helm/values-postgresql.example.yaml helm/values-postgresql.yaml
    cp helm/values-redis.example.yaml helm/values-redis.yaml
    cp helm/values-elasticsearch.example.yaml helm/values-elasticsearch.yaml
-   # Edit CHANGEME_* — DB user passwords in initdb must match flyway-install below
+   # Edit MY_PASSWORD (or your real `values-*.yaml`) — DB user passwords in initdb must match flyway-install below
    make data-install
    make data-install-redis
    make data-install-es

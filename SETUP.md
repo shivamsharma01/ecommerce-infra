@@ -52,9 +52,9 @@ The `*.example.yaml` files use placeholders; your real files are gitignored:
 
 | Example (commit) | Local file (do not commit) |
 |------------------|----------------------------|
-| `deploy/helm/values-postgresql.example.yaml` | `values-postgresql.yaml` — replace all `CHANGEME_*` passwords; initdb SQL must match DB users used by apps and Flyway. |
-| `deploy/helm/values-redis.example.yaml` | `values-redis.yaml` — `CHANGEME_REDIS_PASSWORD`. |
-| `deploy/helm/values-elasticsearch.example.yaml` | `values-elasticsearch.yaml` — `CHANGEME_ELASTIC_PASSWORD` (and tune resources as needed). |
+| `deploy/helm/values-postgresql.example.yaml` | `values-postgresql.yaml` — replace every `MY_PASSWORD` with real secrets; initdb SQL must match apps + Flyway. |
+| `deploy/helm/values-redis.example.yaml` | `values-redis.yaml` — `MY_PASSWORD`. |
+| `deploy/helm/values-elasticsearch.example.yaml` | `values-elasticsearch.yaml` — `MY_PASSWORD` (and tune resources as needed). |
 
 ### 2.4 Terraform — `terraform/terraform.tfvars`
 
@@ -106,7 +106,8 @@ Optional: `workload_service_accounts`, `create_cloud_dns_public_zone`, `domain_n
 ## 6. Quick placeholder index (search the repo)
 
 ```text
-CHANGEME_*              → helm examples, cluster-secret-store, some ConfigMaps
+MY_PASSWORD             → helm examples (replace before apply); local `values-*.yaml` gitignored  
+CHANGEME_GCP_PROJECT_ID → ConfigMaps, `cluster-secret-store-gcp.yaml`
 <ARTIFACT_REGISTRY_URL> → all app deployment.yaml
 <VERSION>               → all app deployment.yaml
 *.example.com           → auth/user ConfigMaps (public URLs)

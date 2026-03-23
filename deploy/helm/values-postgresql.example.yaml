@@ -2,10 +2,11 @@
 #   helm repo add bitnami https://charts.bitnami.com/bitnami
 #   helm upgrade --install mcart-pg bitnami/postgresql -n mcart --create-namespace -f values-postgresql.yaml
 #
-# Replace ALL CHANGEME_* before apply. Use the same auth/user passwords in mcart-bootstrap (--set auth.password / user.password).
+# Replace MY_PASSWORD with strong distinct values before apply (examples use one placeholder).
+# Use the same auth/user DB passwords in mcart-bootstrap (--set auth.password / user.password).
 
 auth:
-  postgresPassword: CHANGEME_POSTGRES_SUPERUSER
+  postgresPassword: MY_PASSWORD
   database: postgres
   username: postgres
 
@@ -20,8 +21,8 @@ primary:
   initdb:
     scripts:
       00-mcart-databases.sql: |
-        CREATE USER auth_user WITH PASSWORD 'CHANGEME_AUTH_DB_PASSWORD';
-        CREATE USER user_user WITH PASSWORD 'CHANGEME_USER_DB_PASSWORD';
+        CREATE USER auth_user WITH PASSWORD 'MY_PASSWORD';
+        CREATE USER user_user WITH PASSWORD 'MY_PASSWORD';
         CREATE DATABASE auth OWNER auth_user;
         CREATE DATABASE "user" OWNER user_user;
         GRANT ALL PRIVILEGES ON DATABASE auth TO auth_user;

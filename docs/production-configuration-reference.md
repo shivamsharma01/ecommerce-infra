@@ -99,7 +99,7 @@ Keys listed are the **environment variable names** your pods receive (ConfigMap/
 | `AUTH_COOKIE_SECURE` | Cookie `Secure` flag | `auth.cookie.secure` (optional; add to ConfigMap if needed) |
 | `EMAIL_VERIFICATION_*`, `LOGIN_*` | Rate limits / lockout | Optional overrides for `auth.*` |
 
-**Prod placeholders to fix in Git:** `CHANGEME_GCP_PROJECT_ID`, all `*.example.com` URLs, Redis/Postgres hostnames if your cluster differs.
+**Prod placeholders to fix in Git:** `CHANGEME_GCP_PROJECT_ID`, any leftover `*.example.com` URLs, Redis/Postgres hostnames if your cluster differs. Helm password files (`values-*.yaml`) are local — examples use **`MY_PASSWORD`** as the placeholder name.
 
 ---
 
