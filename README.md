@@ -20,11 +20,25 @@ Terraform (GKE, VPC, API Gateway, public HTTPS LB), Helm (PostgreSQL, Redis, Ela
 
 ## 1. Terraform
 
+**Why a script before `terraform apply`?** Enabling APIs with Terraform (`google_project_service`) needs **Service Usage Admin** (or Owner) on the **same credentials Terraform uses**. Many setups use a **service account** that can create GKE/Compute but **cannot** list or enable APIs—you then get **403 Permission denied to list services**. This repo enables APIs **once** with **`gcloud`** (your user or an admin SA), then Terraform only creates infrastructure.
+
+**Step A — one time per project** (as Owner / Editor / `roles/serviceusage.serviceUsageAdmin`):
+
 ```bash
 gcloud auth login
-gcloud auth application-default login
 gcloud config set project ecommerce-491019
 
+cd terraform
+./scripts/enable-apis.sh ecommerce-491019
+# or: make apis-enable PROJECT_ID=ecommerce-491019
+```
+
+Wait **1–2 minutes** after it finishes.
+
+**Step B — Terraform** (can use a narrower service account if you prefer):
+
+```bash
+gcloud auth application-default login   # or point ADC at your terraform SA key
 cd terraform
 cp terraform.tfvars.example terraform.tfvars   # edit if needed
 terraform init
@@ -40,20 +54,12 @@ gcloud container clusters get-credentials mcart-gke --location asia-south2-a --p
 terraform output -raw mcart_static_ip_address   # DNS A/AAAA for mcart.store → this IP
 ```
 
-**If `terraform apply` fails with Compute API disabled or “Permission denied to list services”:**
+**If you already applied an older version** that created `google_project_service.*` in state, remove them from state after upgrading (they are no longer in code):
 
-1. Run these **once** as a user with **Owner** (or **Editor**) on the project, then wait a few minutes and apply again:
-
-   ```bash
-   gcloud config set project ecommerce-491019
-   gcloud services enable serviceusage.googleapis.com compute.googleapis.com --project=ecommerce-491019
-   ```
-
-   Or use the links in the error for **Service Usage** and **Compute Engine** in APIs & Services.
-
-2. If Terraform uses a **service account**, that account needs permission to enable and list APIs, e.g. **`Service Usage Admin`** (`roles/serviceusage.serviceUsageAdmin`) on the project, plus the roles required for the resources you create (often **Kubernetes Engine Admin**, **Compute Admin**, **IAM** as needed). Without that, `google_project_service` will return **403 AUTH_PERMISSION_DENIED**.
-
-3. Terraform now waits for **`google_project_service`** before creating Compute resources (managed cert, global IP, load balancer), so **Compute** and **Service Usage** must be usable before those resources succeed.
+```bash
+cd terraform
+terraform state list | grep 'google_project_service.required' | xargs -r terraform state rm
+```
 
 ---
 

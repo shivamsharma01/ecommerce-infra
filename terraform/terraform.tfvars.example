@@ -1,4 +1,6 @@
 # Copy to terraform.tfvars (gitignored) and edit.
+#
+# Before first apply: ./scripts/enable-apis.sh <project_id>  (see README §1)
 
 project_id = "ecommerce-491019"
 region     = "asia-south2"

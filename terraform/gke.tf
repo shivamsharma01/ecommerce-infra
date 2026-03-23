@@ -58,7 +58,6 @@ resource "google_container_cluster" "primary" {
 
   depends_on = [
     google_project_iam_member.gke_node_roles,
-    google_project_service.required,
   ]
 }
 
@@ -103,6 +102,5 @@ resource "google_container_node_pool" "primary" {
 
   depends_on = [
     google_project_iam_member.gke_node_roles,
-    google_project_service.required,
   ]
 }

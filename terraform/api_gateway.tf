@@ -13,8 +13,6 @@ resource "google_api_gateway_api" "mcart" {
   provider = google-beta
 
   api_id = var.api_gateway_api_id
-
-  depends_on = [google_project_service.required]
 }
 
 resource "google_api_gateway_api_config" "mcart" {
@@ -77,8 +75,6 @@ resource "google_compute_backend_service" "mcart_apigw" {
   backend {
     group = google_compute_region_network_endpoint_group.mcart_apigw.id
   }
-
-  depends_on = [google_project_service.required]
 }
 
 resource "google_compute_managed_ssl_certificate" "mcart" {
@@ -87,8 +83,6 @@ resource "google_compute_managed_ssl_certificate" "mcart" {
   managed {
     domains = distinct(compact(concat([var.domain_name], var.domain_aliases)))
   }
-
-  depends_on = [google_project_service.required]
 }
 
 resource "google_compute_url_map" "mcart_apigw" {
@@ -108,6 +102,4 @@ resource "google_compute_global_forwarding_rule" "mcart_apigw_https" {
   port_range            = "443"
   load_balancing_scheme = "EXTERNAL_MANAGED"
   ip_address            = google_compute_global_address.mcart_public.id
-
-  depends_on = [google_project_service.required]
 }

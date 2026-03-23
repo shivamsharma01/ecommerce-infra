@@ -1,7 +1,5 @@
 resource "google_pubsub_topic" "product_events" {
   name = "product-events"
-
-  depends_on = [google_project_service.required]
 }
 
 resource "google_pubsub_subscription" "product_events_sub" {
@@ -15,8 +13,6 @@ resource "google_pubsub_subscription" "product_events_sub" {
 
 resource "google_pubsub_topic" "user_signup_events" {
   name = "user-signup-events"
-
-  depends_on = [google_project_service.required]
 }
 
 resource "google_pubsub_subscription" "user_signup_events_sub" {

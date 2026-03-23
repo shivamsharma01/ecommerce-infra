@@ -1,8 +1,6 @@
 resource "google_service_account" "gke_nodes" {
   account_id   = var.node_service_account_id
   display_name = "GKE node pool SA (${var.environment})"
-
-  depends_on = [google_project_service.required]
 }
 
 locals {
