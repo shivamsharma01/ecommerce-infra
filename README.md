@@ -63,7 +63,9 @@ terraform state list | grep 'google_project_service.required' | xargs -r terrafo
 
 ### Who may run `terraform apply`? (fixes 403 “permission denied” / “IAM API disabled”)
 
-Terraform is acting as **whatever credentials Application Default Credentials use** (`gcloud auth application-default login`, or `GOOGLE_APPLICATION_CREDENTIALS` pointing at a key). That principal must be allowed to create VPCs, GKE, service accounts, Pub/Sub, API Gateway, load balancers, and project IAM bindings.
+Terraform is acting as **whatever the Google provider uses**. If **`GOOGLE_APPLICATION_CREDENTIALS`** is set in your shell, Terraform uses **only** that JSON key’s service account — **not** `gcloud auth application-default` and **not** the account that ran `enable-apis.sh`. Unset it (`unset GOOGLE_APPLICATION_CREDENTIALS`) if you want user ADC instead.
+
+That principal must be allowed to create VPCs, GKE, service accounts, Pub/Sub, API Gateway, load balancers, and project IAM bindings.
 
 **Easiest for a solo project:** use your Google user and grant yourself **Editor** or **Owner** on **`ecommerce-491019`** (IAM → Grant access → Principal = your email → Role = *Editor*).
 
