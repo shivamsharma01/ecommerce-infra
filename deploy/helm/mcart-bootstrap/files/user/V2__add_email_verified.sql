@@ -1,3 +1,3 @@
-ALTER TABLE "user" ADD COLUMN email_verified BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE user_profile ADD COLUMN email_verified BOOLEAN NOT NULL DEFAULT false;
 
-CREATE INDEX idx_user_email_verified ON "user" (email_verified);
+CREATE INDEX idx_user_profile_email_verified ON user_profile (email_verified);

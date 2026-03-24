@@ -125,7 +125,7 @@ rm -f /tmp/auth.db.pass /tmp/user.db.pass
 
 Canonical SQL: `deploy/helm/mcart-bootstrap/files/{auth,user}/`. **Auth** and **user** apps do not run Flyway on startup.
 
-**Local Flyway only:** `deploy/scripts/run-flyway-local.sh` with `FLYWAY_URL` / `FLYWAY_USER` / `FLYWAY_PASSWORD` set.
+**Local Flyway only:** `deploy/scripts/run-flyway-local.sh` with `FLYWAY_URL` / `FLYWAY_USER` / `FLYWAY_PASSWORD` set. Because Flyway runs in Docker, use **`host.docker.internal`** (not `localhost`) in `FLYWAY_URL` when Postgres is on the host or another container with published ports (the script adds the Linux host-gateway mapping). Create the `auth` / `user` databases and owners before migrating; see comments at the top of that script.
 
 ---
 
