@@ -41,7 +41,7 @@ output "kubectl_context_hint" {
 }
 
 output "mcart_static_ip_address" {
-  description = "Global IPv4 for DNS: apex and www A records → this address (public HTTPS LB → API Gateway → GKE)."
+  description = "Global IPv4 for DNS: apex and www A records → this address (public HTTPS LB on GKE Ingress)."
   value       = google_compute_global_address.mcart_public.address
 }
 
@@ -50,12 +50,17 @@ output "cloud_dns_zone_name_servers" {
   value       = try(google_dns_managed_zone.public[0].name_servers, null)
 }
 
-output "api_gateway_default_hostname" {
-  description = "Google-managed gateway hostname (smoke tests without custom domain)."
-  value       = google_api_gateway_gateway.mcart.default_hostname
+output "catalog_images_bucket_name" {
+  description = "GCS bucket used by demo catalog product images."
+  value       = google_storage_bucket.catalog_images.name
 }
 
-output "api_gateway_https_url" {
-  description = "Browser origin after DNS points at mcart_static_ip_address (https://var.domain_name)."
+output "catalog_images_public_base_url" {
+  description = "Public base URL prefix for objects when catalog_images_bucket_public is true."
+  value       = "https://storage.googleapis.com/${google_storage_bucket.catalog_images.name}"
+}
+
+output "public_https_url" {
+  description = "Browser origin once DNS points at mcart_static_ip_address (https://var.domain_name)."
   value       = "https://${var.domain_name}"
 }

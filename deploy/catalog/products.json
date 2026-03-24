@@ -1,0 +1,927 @@
+[
+  {
+    "sku": "W-KS-001",
+    "name": "Women Kurta Suit Set",
+    "description": "Cotton kurta set for everyday wear.",
+    "price": 1999,
+    "stockQuantity": 25,
+    "categories": [
+      "Women",
+      "Indian & Western Wear",
+      "Kurtas & Suits"
+    ],
+    "brand": "MCart Basics",
+    "rating": 4.3,
+    "attributes": {
+      "color": "Blue",
+      "size": "M"
+    },
+    "imagePaths": [
+      "women/indian-western/kurtas-suits.jpg"
+    ]
+  },
+  {
+    "sku": "W-KT-001",
+    "name": "Women Kurti Tunic",
+    "description": "Straight fit kurti tunic.",
+    "price": 1299,
+    "stockQuantity": 28,
+    "categories": [
+      "Women",
+      "Indian & Western Wear",
+      "Kurtis & Tunics"
+    ],
+    "brand": "MCart Basics",
+    "rating": 4.2,
+    "attributes": {
+      "fabric": "Rayon"
+    },
+    "imagePaths": [
+      "women/indian-western/kurtis-tunics.jpg"
+    ]
+  },
+  {
+    "sku": "W-LSC-001",
+    "name": "Women Leggings Churidar Pack",
+    "description": "Stretchable leggings and churidar combo.",
+    "price": 899,
+    "stockQuantity": 40,
+    "categories": [
+      "Women",
+      "Indian & Western Wear",
+      "Leggings, Salwars & Churidars"
+    ],
+    "brand": "MCart Basics",
+    "rating": 4.1,
+    "attributes": {
+      "pack": "2"
+    },
+    "imagePaths": [
+      "women/indian-western/leggings-salwars-churidars.jpg"
+    ]
+  },
+  {
+    "sku": "W-SP-001",
+    "name": "Women Palazzo Skirt",
+    "description": "Flared palazzo with elastic waist.",
+    "price": 1499,
+    "stockQuantity": 22,
+    "categories": [
+      "Women",
+      "Indian & Western Wear",
+      "Skirts & Palazzos"
+    ],
+    "brand": "MCart Basics",
+    "rating": 4.0,
+    "attributes": {
+      "fit": "Relaxed"
+    },
+    "imagePaths": [
+      "women/indian-western/skirts-palazzos.jpg"
+    ]
+  },
+  {
+    "sku": "W-SB-001",
+    "name": "Women Saree with Blouse",
+    "description": "Festive saree with matching blouse piece.",
+    "price": 2799,
+    "stockQuantity": 18,
+    "categories": [
+      "Women",
+      "Indian & Western Wear",
+      "Sarees & Blouses"
+    ],
+    "brand": "MCart Ethnic",
+    "rating": 4.4,
+    "attributes": {
+      "occasion": "Festive"
+    },
+    "imagePaths": [
+      "women/indian-western/sarees-blouses.jpg"
+    ]
+  },
+  {
+    "sku": "W-DM-001",
+    "name": "Women Dress Material Set",
+    "description": "Unstitched dress material for custom tailoring.",
+    "price": 1599,
+    "stockQuantity": 20,
+    "categories": [
+      "Women",
+      "Indian & Western Wear",
+      "Dress Material"
+    ],
+    "brand": "MCart Ethnic",
+    "rating": 4.1,
+    "attributes": {
+      "length": "2.5m"
+    },
+    "imagePaths": [
+      "women/indian-western/dress-material.jpg"
+    ]
+  },
+  {
+    "sku": "W-LC-001",
+    "name": "Women Lehenga Choli Set",
+    "description": "Wedding-ready lehenga choli set.",
+    "price": 5499,
+    "stockQuantity": 10,
+    "categories": [
+      "Women",
+      "Indian & Western Wear",
+      "Lehenga Choli"
+    ],
+    "brand": "MCart Ethnic",
+    "rating": 4.6,
+    "attributes": {
+      "occasion": "Wedding"
+    },
+    "imagePaths": [
+      "women/indian-western/lehenga-choli.jpg"
+    ]
+  },
+  {
+    "sku": "W-DS-001",
+    "name": "Women Dupatta Shawl",
+    "description": "Printed dupatta and shawl combo.",
+    "price": 999,
+    "stockQuantity": 32,
+    "categories": [
+      "Women",
+      "Indian & Western Wear",
+      "Dupattas & Shawls"
+    ],
+    "brand": "MCart Ethnic",
+    "rating": 4.0,
+    "attributes": {
+      "pattern": "Printed"
+    },
+    "imagePaths": [
+      "women/indian-western/dupattas-shawls.jpg"
+    ]
+  },
+  {
+    "sku": "W-DJ-001",
+    "name": "Women Dress Jumpsuit",
+    "description": "Western jumpsuit for casual outings.",
+    "price": 2299,
+    "stockQuantity": 24,
+    "categories": [
+      "Women",
+      "Western Wear",
+      "Dresses & Jumpsuits"
+    ],
+    "brand": "MCart Trend",
+    "rating": 4.2,
+    "attributes": {
+      "sleeve": "Sleeveless"
+    },
+    "imagePaths": [
+      "women/western/dresses-jumpsuits.jpg"
+    ]
+  },
+  {
+    "sku": "W-TTS-001",
+    "name": "Women Top T-Shirt Shirt",
+    "description": "Mixed western top set.",
+    "price": 1199,
+    "stockQuantity": 35,
+    "categories": [
+      "Women",
+      "Western Wear",
+      "Tops, T-Shirts & Shirts"
+    ],
+    "brand": "MCart Trend",
+    "rating": 4.1,
+    "attributes": {
+      "neck": "Round"
+    },
+    "imagePaths": [
+      "women/western/tops-tshirts-shirts.jpg"
+    ]
+  },
+  {
+    "sku": "W-JJ-001",
+    "name": "Women Jeans Jeggings",
+    "description": "Skinny fit jeans and jeggings.",
+    "price": 1899,
+    "stockQuantity": 30,
+    "categories": [
+      "Women",
+      "Western Wear",
+      "Jeans & Jeggings"
+    ],
+    "brand": "MCart Denim",
+    "rating": 4.3,
+    "attributes": {
+      "fit": "Skinny"
+    },
+    "imagePaths": [
+      "women/western/jeans-jeggings.jpg"
+    ]
+  },
+  {
+    "sku": "W-TC-001",
+    "name": "Women Trousers Capris",
+    "description": "Smart trousers and capris combo.",
+    "price": 1699,
+    "stockQuantity": 26,
+    "categories": [
+      "Women",
+      "Western Wear",
+      "Trousers & Capris"
+    ],
+    "brand": "MCart Trend",
+    "rating": 4.0,
+    "attributes": {
+      "style": "Office"
+    },
+    "imagePaths": [
+      "women/western/trousers-capris.jpg"
+    ]
+  },
+  {
+    "sku": "W-SS-001",
+    "name": "Women Shorts Skirts",
+    "description": "Summer-ready shorts and skirts.",
+    "price": 1299,
+    "stockQuantity": 29,
+    "categories": [
+      "Women",
+      "Western Wear",
+      "Shorts & Skirts"
+    ],
+    "brand": "MCart Trend",
+    "rating": 4.1,
+    "attributes": {
+      "season": "Summer"
+    },
+    "imagePaths": [
+      "women/western/shorts-skirts.jpg"
+    ]
+  },
+  {
+    "sku": "W-SHR-001",
+    "name": "Women Shrug",
+    "description": "Lightweight shrug for layering.",
+    "price": 999,
+    "stockQuantity": 27,
+    "categories": [
+      "Women",
+      "Western Wear",
+      "Shrugs"
+    ],
+    "brand": "MCart Trend",
+    "rating": 3.9,
+    "attributes": {
+      "fabric": "Viscose"
+    },
+    "imagePaths": [
+      "women/western/shrugs.jpg"
+    ]
+  },
+  {
+    "sku": "W-SSW-001",
+    "name": "Women Sweater Sweatshirt",
+    "description": "Warm sweater sweatshirt combo.",
+    "price": 1999,
+    "stockQuantity": 21,
+    "categories": [
+      "Women",
+      "Western Wear",
+      "Sweaters & Sweatshirts"
+    ],
+    "brand": "MCart Warm",
+    "rating": 4.3,
+    "attributes": {
+      "season": "Winter"
+    },
+    "imagePaths": [
+      "women/western/sweaters-sweatshirts.jpg"
+    ]
+  },
+  {
+    "sku": "W-JW-001",
+    "name": "Women Jacket Waistcoat",
+    "description": "Layered jacket waistcoat pair.",
+    "price": 2499,
+    "stockQuantity": 17,
+    "categories": [
+      "Women",
+      "Western Wear",
+      "Jackets & Waistcoats"
+    ],
+    "brand": "MCart Warm",
+    "rating": 4.2,
+    "attributes": {
+      "closure": "Zip"
+    },
+    "imagePaths": [
+      "women/western/jackets-waistcoats.jpg"
+    ]
+  },
+  {
+    "sku": "W-CB-001",
+    "name": "Women Coat Blazer",
+    "description": "Formal coat blazer for office.",
+    "price": 3299,
+    "stockQuantity": 14,
+    "categories": [
+      "Women",
+      "Western Wear",
+      "Coats & Blazers"
+    ],
+    "brand": "MCart Formal",
+    "rating": 4.4,
+    "attributes": {
+      "occasion": "Formal"
+    },
+    "imagePaths": [
+      "women/western/coats-blazers.jpg"
+    ]
+  },
+  {
+    "sku": "W-WAT-001",
+    "name": "Women Analog Watch",
+    "description": "Classic analog watch for women.",
+    "price": 2199,
+    "stockQuantity": 19,
+    "categories": [
+      "Women",
+      "Accessories",
+      "Women Watches",
+      "Analog"
+    ],
+    "brand": "MCart Time",
+    "rating": 4.3,
+    "attributes": {
+      "strap": "Leather"
+    },
+    "imagePaths": [
+      "women/accessories/watch-analog.jpg"
+    ]
+  },
+  {
+    "sku": "W-WCD-001",
+    "name": "Women Chronograph Watch",
+    "description": "Chronograph watch with metal strap.",
+    "price": 3499,
+    "stockQuantity": 11,
+    "categories": [
+      "Women",
+      "Accessories",
+      "Women Watches",
+      "Chronograph"
+    ],
+    "brand": "MCart Time",
+    "rating": 4.5,
+    "attributes": {
+      "strap": "Metal"
+    },
+    "imagePaths": [
+      "women/accessories/watch-chronograph.jpg"
+    ]
+  },
+  {
+    "sku": "W-WDG-001",
+    "name": "Women Digital Watch",
+    "description": "Sporty digital watch.",
+    "price": 1899,
+    "stockQuantity": 16,
+    "categories": [
+      "Women",
+      "Accessories",
+      "Women Watches",
+      "Digital"
+    ],
+    "brand": "MCart Time",
+    "rating": 4.0,
+    "attributes": {
+      "waterResistant": true
+    },
+    "imagePaths": [
+      "women/accessories/watch-digital.jpg"
+    ]
+  },
+  {
+    "sku": "W-WAD-001",
+    "name": "Women Hybrid Analog Digital Watch",
+    "description": "Hybrid analog-digital watch.",
+    "price": 2799,
+    "stockQuantity": 12,
+    "categories": [
+      "Women",
+      "Accessories",
+      "Women Watches",
+      "Analog & Digital"
+    ],
+    "brand": "MCart Time",
+    "rating": 4.2,
+    "attributes": {
+      "hybrid": true
+    },
+    "imagePaths": [
+      "women/accessories/watch-analog-digital.jpg"
+    ]
+  },
+  {
+    "sku": "W-SUN-001",
+    "name": "Women Sunglasses",
+    "description": "UV-protected sunglasses.",
+    "price": 1499,
+    "stockQuantity": 20,
+    "categories": [
+      "Women",
+      "Accessories",
+      "Sunglasses"
+    ],
+    "brand": "MCart Optics",
+    "rating": 4.1,
+    "attributes": {
+      "uvProtection": "UV400"
+    },
+    "imagePaths": [
+      "women/accessories/sunglasses.jpg"
+    ]
+  },
+  {
+    "sku": "W-EYE-001",
+    "name": "Women Eyeglasses Frame",
+    "description": "Lightweight eyeglass frame.",
+    "price": 1199,
+    "stockQuantity": 18,
+    "categories": [
+      "Women",
+      "Accessories",
+      "Eye Glasses"
+    ],
+    "brand": "MCart Optics",
+    "rating": 3.9,
+    "attributes": {
+      "frame": "Full Rim"
+    },
+    "imagePaths": [
+      "women/accessories/eyeglasses.jpg"
+    ]
+  },
+  {
+    "sku": "W-BEL-001",
+    "name": "Women Belt",
+    "description": "Slim fit synthetic belt.",
+    "price": 699,
+    "stockQuantity": 34,
+    "categories": [
+      "Women",
+      "Accessories",
+      "Belt"
+    ],
+    "brand": "MCart Accessories",
+    "rating": 4.0,
+    "attributes": {
+      "material": "Synthetic"
+    },
+    "imagePaths": [
+      "women/accessories/belt.jpg"
+    ]
+  },
+  {
+    "sku": "M-TS-001",
+    "name": "Men T-Shirt",
+    "description": "Cotton crew neck t-shirt.",
+    "price": 899,
+    "stockQuantity": 50,
+    "categories": [
+      "Men",
+      "Clothing",
+      "T-Shirts"
+    ],
+    "brand": "MCart Basics",
+    "rating": 4.2,
+    "attributes": {
+      "fit": "Regular"
+    },
+    "imagePaths": [
+      "men/clothing/tshirts.jpg"
+    ]
+  },
+  {
+    "sku": "M-CS-001",
+    "name": "Men Casual Shirt",
+    "description": "Checks casual shirt.",
+    "price": 1399,
+    "stockQuantity": 33,
+    "categories": [
+      "Men",
+      "Clothing",
+      "Casual Shirts"
+    ],
+    "brand": "MCart Basics",
+    "rating": 4.1,
+    "attributes": {
+      "pattern": "Checks"
+    },
+    "imagePaths": [
+      "men/clothing/casual-shirts.jpg"
+    ]
+  },
+  {
+    "sku": "M-FS-001",
+    "name": "Men Formal Shirt",
+    "description": "Slim fit office formal shirt.",
+    "price": 1599,
+    "stockQuantity": 28,
+    "categories": [
+      "Men",
+      "Clothing",
+      "Formal Shirts"
+    ],
+    "brand": "MCart Formal",
+    "rating": 4.3,
+    "attributes": {
+      "fit": "Slim"
+    },
+    "imagePaths": [
+      "men/clothing/formal-shirts.jpg"
+    ]
+  },
+  {
+    "sku": "M-SU-001",
+    "name": "Men Suit",
+    "description": "Two-piece formal suit.",
+    "price": 5999,
+    "stockQuantity": 9,
+    "categories": [
+      "Men",
+      "Clothing",
+      "Suits"
+    ],
+    "brand": "MCart Formal",
+    "rating": 4.5,
+    "attributes": {
+      "piece": "2"
+    },
+    "imagePaths": [
+      "men/clothing/suits.jpg"
+    ]
+  },
+  {
+    "sku": "M-JE-001",
+    "name": "Men Jeans",
+    "description": "Comfort stretch denim jeans.",
+    "price": 1999,
+    "stockQuantity": 31,
+    "categories": [
+      "Men",
+      "Clothing",
+      "Jeans"
+    ],
+    "brand": "MCart Denim",
+    "rating": 4.3,
+    "attributes": {
+      "wash": "Dark"
+    },
+    "imagePaths": [
+      "men/clothing/jeans.jpg"
+    ]
+  },
+  {
+    "sku": "M-CTR-001",
+    "name": "Men Casual Trouser",
+    "description": "Chino casual trousers.",
+    "price": 1699,
+    "stockQuantity": 24,
+    "categories": [
+      "Men",
+      "Clothing",
+      "Casual Trousers"
+    ],
+    "brand": "MCart Basics",
+    "rating": 4.1,
+    "attributes": {
+      "fabric": "Cotton"
+    },
+    "imagePaths": [
+      "men/clothing/casual-trousers.jpg"
+    ]
+  },
+  {
+    "sku": "M-FTR-001",
+    "name": "Men Formal Trouser",
+    "description": "Classic formal trousers.",
+    "price": 1899,
+    "stockQuantity": 20,
+    "categories": [
+      "Men",
+      "Clothing",
+      "Formal Trousers"
+    ],
+    "brand": "MCart Formal",
+    "rating": 4.2,
+    "attributes": {
+      "occasion": "Formal"
+    },
+    "imagePaths": [
+      "men/clothing/formal-trousers.jpg"
+    ]
+  },
+  {
+    "sku": "M-SH-001",
+    "name": "Men Shorts",
+    "description": "Everyday casual shorts.",
+    "price": 1099,
+    "stockQuantity": 37,
+    "categories": [
+      "Men",
+      "Clothing",
+      "Shorts"
+    ],
+    "brand": "MCart Basics",
+    "rating": 4.0,
+    "attributes": {
+      "length": "Knee"
+    },
+    "imagePaths": [
+      "men/clothing/shorts.jpg"
+    ]
+  },
+  {
+    "sku": "M-TP-001",
+    "name": "Men Track Pants",
+    "description": "Athleisure track pants.",
+    "price": 1299,
+    "stockQuantity": 35,
+    "categories": [
+      "Men",
+      "Clothing",
+      "Track Pants"
+    ],
+    "brand": "MCart Sport",
+    "rating": 4.1,
+    "attributes": {
+      "use": "Gym"
+    },
+    "imagePaths": [
+      "men/clothing/track-pants.jpg"
+    ]
+  },
+  {
+    "sku": "M-SSW-001",
+    "name": "Men Sweater Sweatshirt",
+    "description": "Winter sweater sweatshirt combo.",
+    "price": 1999,
+    "stockQuantity": 23,
+    "categories": [
+      "Men",
+      "Clothing",
+      "Sweaters & Sweatshirts"
+    ],
+    "brand": "MCart Warm",
+    "rating": 4.2,
+    "attributes": {
+      "season": "Winter"
+    },
+    "imagePaths": [
+      "men/clothing/sweaters-sweatshirts.jpg"
+    ]
+  },
+  {
+    "sku": "M-JK-001",
+    "name": "Men Jacket",
+    "description": "Padded winter jacket.",
+    "price": 2999,
+    "stockQuantity": 16,
+    "categories": [
+      "Men",
+      "Clothing",
+      "Jackets"
+    ],
+    "brand": "MCart Warm",
+    "rating": 4.4,
+    "attributes": {
+      "insulated": true
+    },
+    "imagePaths": [
+      "men/clothing/jackets.jpg"
+    ]
+  },
+  {
+    "sku": "M-BC-001",
+    "name": "Men Blazer Coat",
+    "description": "Classic blazer coat.",
+    "price": 3599,
+    "stockQuantity": 12,
+    "categories": [
+      "Men",
+      "Clothing",
+      "Blazers & Coats"
+    ],
+    "brand": "MCart Formal",
+    "rating": 4.5,
+    "attributes": {
+      "occasion": "Business"
+    },
+    "imagePaths": [
+      "men/clothing/blazers-coats.jpg"
+    ]
+  },
+  {
+    "sku": "M-SAW-001",
+    "name": "Men Sports Active Wear",
+    "description": "Performance sports active wear.",
+    "price": 1499,
+    "stockQuantity": 29,
+    "categories": [
+      "Men",
+      "Clothing",
+      "Sports & Active Wear"
+    ],
+    "brand": "MCart Sport",
+    "rating": 4.2,
+    "attributes": {
+      "dryFit": true
+    },
+    "imagePaths": [
+      "men/clothing/sports-active.jpg"
+    ]
+  },
+  {
+    "sku": "M-IFW-001",
+    "name": "Men Indian Festive Wear",
+    "description": "Kurta set for festive occasions.",
+    "price": 2499,
+    "stockQuantity": 15,
+    "categories": [
+      "Men",
+      "Clothing",
+      "Indian & Festive Wear"
+    ],
+    "brand": "MCart Ethnic",
+    "rating": 4.3,
+    "attributes": {
+      "occasion": "Festive"
+    },
+    "imagePaths": [
+      "men/clothing/indian-festive.jpg"
+    ]
+  },
+  {
+    "sku": "M-IS-001",
+    "name": "Men Innerwear Sleepwear",
+    "description": "Soft cotton innerwear and sleepwear set.",
+    "price": 999,
+    "stockQuantity": 42,
+    "categories": [
+      "Men",
+      "Clothing",
+      "Innerwear & Sleepwear"
+    ],
+    "brand": "MCart Basics",
+    "rating": 4.0,
+    "attributes": {
+      "pack": "3"
+    },
+    "imagePaths": [
+      "men/clothing/innerwear-sleepwear.jpg"
+    ]
+  },
+  {
+    "sku": "M-WW-001",
+    "name": "Men Watch Wearable",
+    "description": "Smart wearable watch.",
+    "price": 3999,
+    "stockQuantity": 13,
+    "categories": [
+      "Men",
+      "Accessories",
+      "Watches & Wearables"
+    ],
+    "brand": "MCart Time",
+    "rating": 4.4,
+    "attributes": {
+      "smart": true
+    },
+    "imagePaths": [
+      "men/accessories/watches-wearables.jpg"
+    ]
+  },
+  {
+    "sku": "M-SF-001",
+    "name": "Men Sunglasses Frame",
+    "description": "Polarized sunglasses and frame set.",
+    "price": 1699,
+    "stockQuantity": 21,
+    "categories": [
+      "Men",
+      "Accessories",
+      "Sunglasses & Frames"
+    ],
+    "brand": "MCart Optics",
+    "rating": 4.1,
+    "attributes": {
+      "polarized": true
+    },
+    "imagePaths": [
+      "men/accessories/sunglasses-frames.jpg"
+    ]
+  },
+  {
+    "sku": "M-BB-001",
+    "name": "Men Bag Backpack",
+    "description": "Daily commuter backpack.",
+    "price": 1799,
+    "stockQuantity": 26,
+    "categories": [
+      "Men",
+      "Accessories",
+      "Bags & Backpacks"
+    ],
+    "brand": "MCart Carry",
+    "rating": 4.2,
+    "attributes": {
+      "capacityL": 24
+    },
+    "imagePaths": [
+      "men/accessories/bags-backpacks.jpg"
+    ]
+  },
+  {
+    "sku": "M-LT-001",
+    "name": "Men Luggage Trolley",
+    "description": "Hard shell cabin trolley.",
+    "price": 4499,
+    "stockQuantity": 8,
+    "categories": [
+      "Men",
+      "Accessories",
+      "Luggage & Trolleys"
+    ],
+    "brand": "MCart Carry",
+    "rating": 4.5,
+    "attributes": {
+      "wheel": "4"
+    },
+    "imagePaths": [
+      "men/accessories/luggage-trolleys.jpg"
+    ]
+  },
+  {
+    "sku": "M-PCG-001",
+    "name": "Men Grooming Kit",
+    "description": "Personal care and grooming essentials.",
+    "price": 999,
+    "stockQuantity": 27,
+    "categories": [
+      "Men",
+      "Accessories",
+      "Personal Care & Grooming"
+    ],
+    "brand": "MCart Care",
+    "rating": 4.0,
+    "attributes": {
+      "items": 5
+    },
+    "imagePaths": [
+      "men/accessories/personal-care-grooming.jpg"
+    ]
+  },
+  {
+    "sku": "M-WB-001",
+    "name": "Men Wallet Belt Combo",
+    "description": "Leather wallet and belt combo.",
+    "price": 1299,
+    "stockQuantity": 30,
+    "categories": [
+      "Men",
+      "Accessories",
+      "Wallets & Belts"
+    ],
+    "brand": "MCart Accessories",
+    "rating": 4.1,
+    "attributes": {
+      "material": "Leather"
+    },
+    "imagePaths": [
+      "men/accessories/wallets-belts.jpg"
+    ]
+  },
+  {
+    "sku": "M-FA-001",
+    "name": "Men Fashion Accessories Set",
+    "description": "Cap, bracelet, and chain set.",
+    "price": 899,
+    "stockQuantity": 33,
+    "categories": [
+      "Men",
+      "Accessories",
+      "Fashion Accessories"
+    ],
+    "brand": "MCart Accessories",
+    "rating": 3.9,
+    "attributes": {
+      "set": "3-in-1"
+    },
+    "imagePaths": [
+      "men/accessories/fashion-accessories.jpg"
+    ]
+  }
+]

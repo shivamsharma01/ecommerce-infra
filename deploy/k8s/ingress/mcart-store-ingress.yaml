@@ -1,4 +1,4 @@
-# mcart.space / www → path routing (UI at / last). Public traffic: DNS → Terraform static IP → API Gateway → this Ingress (set ingress_https_backend_base_url to this LB’s HTTPS origin).
+# mcart.space / www → path routing (UI at / last). Public traffic: DNS → Terraform static IP → this GKE Ingress.
 # Prerequisites: make apps-apply; managed-certificate.yaml; uncomment managed-certificates when Active.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -8,6 +8,7 @@ metadata:
   labels:
     app.kubernetes.io/name: mcart-ingress
   annotations:
+    kubernetes.io/ingress.global-static-ip-name: mcart-public-ip
     # After: kubectl describe managedcertificate mcart-store-cert -n mcart → Active
     # networking.gke.io/managed-certificates: mcart-store-cert
 spec:

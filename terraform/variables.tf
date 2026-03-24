@@ -176,7 +176,7 @@ variable "node_service_account_id" {
   default     = "mcart-gke-nodes"
 }
 
-# --- Platform: Pub/Sub, Firestore IAM, API Gateway, DNS ------------------------------------------
+# --- Platform: Pub/Sub, Firestore IAM, DNS --------------------------------------------------------
 
 variable "workload_service_accounts" {
   description = <<-EOT
@@ -232,45 +232,21 @@ variable "cloud_dns_zone_name" {
   default     = "mcart-public-zone"
 }
 
-variable "api_gateway_api_id" {
-  type    = string
-  default = "mcart-api"
-}
-
-variable "api_gateway_id" {
-  type    = string
-  default = "mcart-gateway"
-}
-
-variable "api_gateway_config_id" {
-  description = "API config id; bump when OpenAPI/backend changes."
+variable "catalog_images_bucket_name" {
+  description = "GCS bucket for demo product images. Null = auto name based on project."
   type        = string
-  default     = "v1"
+  default     = null
 }
 
-# API Gateway is only available in a subset of regions (not asia-south2 / Mumbai).
-# https://cloud.google.com/api-gateway/docs/deployment-model
-variable "api_gateway_region" {
-  description = "Region for google_api_gateway_gateway and its serverless NEG (must match; must be an API Gateway–supported region)."
+variable "catalog_images_bucket_location" {
+  description = "Location for demo catalog image bucket."
   type        = string
-  default     = "asia-northeast1"
+  default     = "ASIA-SOUTH2"
 }
 
-variable "ingress_https_backend_base_url" {
-  description = <<-EOT
-    HTTPS origin of the GKE Ingress (no trailing slash), must be a hostname — API Gateway rejects IP literals (e.g. https://0.0.0.0).
-    Default is a non-routable placeholder so the first apply can create the API config; replace with the real Ingress URL from
-    `kubectl get ingress -n mcart`, bump api_gateway_config_id, and apply again before relying on traffic.
-  EOT
-  type        = string
-  default     = "https://ingress-backend.pending.invalid"
-}
-
-variable "api_gateway_backend_disable_auth" {
-  description = <<-EOT
-    OpenAPI x-google-backend.disable_auth. When true, API Gateway does not attach Google-signed identity to backend calls (required for typical GKE backends).
-    Client headers (e.g. Authorization: Bearer) are still forwarded; Spring Security validates JWTs on the cluster as usual.
-  EOT
+variable "catalog_images_bucket_public" {
+  description = "If true, grant allUsers objectViewer on catalog image bucket (demo convenience)."
   type        = bool
   default     = true
 }
+

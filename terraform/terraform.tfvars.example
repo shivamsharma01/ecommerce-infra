@@ -13,12 +13,8 @@ node_max_count    = 3
 node_disk_size_gb = 120
 node_preemptible  = true
 
-# After: kubectl get ingress mcart-store -n mcart — set HTTPS origin (hostname OK; raw IP forbidden by API Gateway), bump api_gateway_config_id, re-apply.
-# ingress_https_backend_base_url = "https://YOUR_INGRESS_HOSTNAME"
-# api_gateway_config_id          = "v2"
-#
-# API Gateway is not available in asia-south2; gateway defaults to asia-northeast1 (see variable api_gateway_region).
-# api_gateway_region = "asia-northeast1"
+# Ingress should use the reserved global static IP via annotation:
+#   kubernetes.io/ingress.global-static-ip-name: mcart-public-ip
 
 # Optional Workload Identity bindings (uncomment and set real SA emails):
 # workload_service_accounts = {

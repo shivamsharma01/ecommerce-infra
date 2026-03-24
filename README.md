@@ -1,6 +1,6 @@
 # ecomm-infra
 
-Terraform (GKE, VPC, API Gateway, public HTTPS LB), Helm (PostgreSQL, Redis, Elasticsearch, Flyway bootstrap), and Kubernetes manifests for **mcart**.
+Terraform (GKE, VPC, static public IP + DNS), Helm (PostgreSQL, Redis, Elasticsearch, Flyway bootstrap), and Kubernetes manifests for **mcart**.
 
 **This checkout is wired for:** GCP project **`ecommerce-491019`**, region **`asia-south2`**, zonal cluster **`mcart-gke`** in **`asia-south2-a`**, domain **`mcart.space`**, Artifact Registry **`asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/`**.
 
@@ -45,11 +45,7 @@ terraform init
 terraform plan -out=tfplan && terraform apply tfplan
 ```
 
-**Creates:** VPC, subnet, NAT, GKE, Pub/Sub, global static IP, API Gateway + OpenAPI backend, HTTPS forwarding rule, optional Cloud DNS.
-
-**API Gateway region:** Managed gateways are **not** available in every GKE region (e.g. **not** `asia-south2`). This stack uses **`api_gateway_region`** (default **`asia-northeast1`**) for `google_api_gateway_gateway` and the serverless NEG; GKE stays in `var.region` / `var.zone`. Override `api_gateway_region` in `terraform.tfvars` only with a [supported region](https://cloud.google.com/api-gateway/docs/deployment-model).
-
-**First apply** uses a hostname placeholder for `ingress_https_backend_base_url` (default `https://ingress-backend.pending.invalid`) because API Gateway **rejects IP-only backends** like `https://0.0.0.0`. After workloads + Ingress exist, set it to the real GKE Ingress HTTPS origin, bump `api_gateway_config_id`, and apply again (see §5).
+**Creates:** VPC, subnet, NAT, GKE, Pub/Sub, global static IP, optional Cloud DNS.
 
 ```bash
 gcloud container clusters get-credentials mcart-gke --location asia-south2-a --project ecommerce-491019
@@ -67,7 +63,7 @@ terraform state list | grep 'google_project_service.required' | xargs -r terrafo
 
 Terraform is acting as **whatever the Google provider uses**. If **`GOOGLE_APPLICATION_CREDENTIALS`** is set in your shell, Terraform uses **only** that JSON key’s service account — **not** `gcloud auth application-default` and **not** the account that ran `enable-apis.sh`. Unset it (`unset GOOGLE_APPLICATION_CREDENTIALS`) if you want user ADC instead.
 
-That principal must be allowed to create VPCs, GKE, service accounts, Pub/Sub, API Gateway, load balancers, and project IAM bindings.
+That principal must be allowed to create VPCs, GKE, service accounts, Pub/Sub, load balancers, and project IAM bindings.
 
 **Easiest for a solo project:** use your Google user and grant yourself **Editor** or **Owner** on **`ecommerce-491019`** (IAM → Grant access → Principal = your email → Role = *Editor*).
 
@@ -83,7 +79,7 @@ gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
   --role="roles/editor"
 ```
 
-A **narrower** set (still large) would include at least: `roles/compute.admin`, `roles/container.admin`, `roles/iam.serviceAccountAdmin`, `roles/resourcemanager.projectIamAdmin`, `roles/apigateway.admin`, `roles/pubsub.admin`, plus **Service Management** access for API Gateway (`roles/servicemanagement.admin` or related). In practice **Editor** avoids trial-and-error on individual permissions.
+A **narrower** set (still large) would include at least: `roles/compute.admin`, `roles/container.admin`, `roles/iam.serviceAccountAdmin`, `roles/resourcemanager.projectIamAdmin`, `roles/pubsub.admin`. In practice **Editor** avoids trial-and-error on individual permissions.
 
 **“IAM API has not been used / is disabled”** on project number **A**, while **`enable-apis.sh`** / **`apis-verify`** succeed on **`ecommerce-491019`** (project number **B**): those numbers are **different projects**. Terraform uses **Application Default Credentials (ADC)**, not the same path as `gcloud` CLI unless you align them.
 
@@ -159,7 +155,7 @@ make ingress-apply NS=mcart
 
 When **`kubectl describe managedcertificate mcart-store-cert -n mcart`** shows **Active**, uncomment `networking.gke.io/managed-certificates: mcart-store-cert` in `deploy/k8s/ingress/mcart-store-ingress.yaml` and re-apply.
 
-**Traffic path:** `Browser → mcart.space (DNS → static IP) → HTTPS LB → API Gateway → GKE Ingress → Services`.
+**Traffic path:** `Browser → mcart.space (DNS → static IP) → GKE HTTPS LB (Ingress) → Services`.
 
 **JWT / OIDC:** ConfigMaps use issuer **`https://mcart.space`** (`AUTH_ISSUER_URI`, `SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI`, `API_BASE_URL` on UI).
 
@@ -167,21 +163,22 @@ When **`kubectl describe managedcertificate mcart-store-cert -n mcart`** shows *
 
 ---
 
-## 5. Second Terraform apply (API Gateway → Ingress)
+## 5. Bind Ingress to Terraform static IP
 
 ```bash
 kubectl get ingress mcart-store -n mcart -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
 # If hostname instead of IP, use https://<hostname>
 ```
 
-Set in **`terraform.tfvars`**:
+Ensure `deploy/k8s/ingress/mcart-store-ingress.yaml` contains:
 
-```hcl
-ingress_https_backend_base_url = "https://<ingress-hostname>"
-api_gateway_config_id          = "v2"   # bump from previous
+```yaml
+metadata:
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: mcart-public-ip
 ```
 
-Then `terraform apply`. `api_gateway_backend_disable_auth` defaults to `true` (Google→backend identity); `Authorization` headers still reach Spring.
+Then apply Ingress again (`make ingress-apply`). DNS `A` records for apex/www should point to `terraform output -raw mcart_static_ip_address`.
 
 ---
 
@@ -211,13 +208,13 @@ If the trigger uses a **custom** build service account, grant **`roles/container
 
 ## 7. Cloud Build (service repos)
 
-Each microservice repo has a **`cloudbuild.yaml`** that only **builds and pushes** the image to Artifact Registry. Rolling out a new tag is: update **`ecomm-infra`** `deployment.yaml` (or `kubectl set image`) → run the **ecomm-infra** trigger.
+Each microservice repo has a **`cloudbuild.yaml`** that builds/pushes images and updates the matching image tag in **`ecomm-infra`** `deployment.yaml`. That commit triggers **ecomm-infra** deployment.
 
 ---
 
 ## 8. Cost knobs (Terraform)
 
-Zonal preemptible pool is already oriented toward lower cost. In `terraform.tfvars` you can tune `node_machine_type`, `node_min_count` / `node_max_count`, `node_preemptible`, `node_disk_size_gb`. Fixed cost includes control plane, Cloud NAT, HTTPS LB, API Gateway.
+Zonal preemptible pool is already oriented toward lower cost. In `terraform.tfvars` you can tune `node_machine_type`, `node_min_count` / `node_max_count`, `node_preemptible`, `node_disk_size_gb`. Fixed cost includes control plane, Cloud NAT, and HTTPS LB.
 
 ---
 
@@ -249,7 +246,7 @@ Do these **in order** the first time. Later you only repeat the parts that chang
 
 3. **Terraform (creates the cluster and network)**  
    On your PC: clone **ecomm-infra**, copy **`terraform/terraform.tfvars.example`** to **`terraform/terraform.tfvars`**, adjust if needed, then run **`terraform init`** and **`terraform apply`** inside **`terraform/`**.  
-   This creates **GKE**, **VPC**, **static IP**, **API Gateway** front end, etc.
+   This creates **GKE**, **VPC**, **static IP**, etc.
 
 4. **Point DNS at Google**  
    Take the static IP from **`terraform output`** and create an **A record** for **`mcart.space`** (and **`www`** if you use it) at your domain registrar so traffic hits Google’s load balancer.
@@ -268,8 +265,8 @@ Do these **in order** the first time. Later you only repeat the parts that chang
    Run **`make apps-apply`** and **`make ingress-apply`**. Fix any errors (missing secrets, wrong image tag).  
    Get the **Ingress** IP with **`kubectl get ingress -n mcart`**.
 
-9. **Fix API Gateway → Ingress link**  
-   Put that Ingress URL (as **`https://…`**) into **`ingress_https_backend_base_url`** in **`terraform.tfvars`**, bump **`api_gateway_config_id`**, run **`terraform apply`** again.
+9. **Bind Ingress to reserved static IP**  
+   Ensure Ingress has annotation `kubernetes.io/ingress.global-static-ip-name: mcart-public-ip`, apply Ingress, and verify DNS points to Terraform output `mcart_static_ip_address`.
 
 10. **Managed certificate**  
     When the cert object is **Active**, uncomment the managed-cert annotation in **`deploy/k8s/ingress/mcart-store-ingress.yaml`** and apply again (from PC or via trigger).
@@ -289,3 +286,45 @@ Do these **in order** the first time. Later you only repeat the parts that chang
 
 - Do not commit **`terraform.tfvars`**, **`*.tfstate`**, Helm **`values-*.yaml`** with real passwords, or **`deploy/k8s/apps/**/secret.yaml`**.
 - Commit **`terraform/.terraform.lock.hcl`** after **`terraform init`**.
+
+---
+
+## 12. Demo catalog bootstrap (Firestore + images)
+
+Goal: load a large demo product set with image URLs and make it searchable with minimal manual work.
+
+1. Run Terraform to create infra and the image bucket output:
+
+```bash
+cd terraform
+terraform apply
+terraform output -raw catalog_images_bucket_name
+```
+
+2. Add your images under:
+
+`deploy/catalog/assets/`
+
+Use paths that match each product's `imagePaths` entries in:
+
+`deploy/catalog/products.json`
+
+3. Bootstrap catalog (from `deploy/`):
+
+```bash
+cd deploy
+make catalog-bootstrap PROJECT_ID=ecommerce-491019 BUCKET=<bucket-from-terraform-output>
+```
+
+Optional reindex trigger in the same command:
+
+```bash
+REINDEX_URL="https://mcart.space/product-indexer/admin/reindex" \
+MCART_BEARER_TOKEN="<jwt-with-product.admin-scope>" \
+make catalog-bootstrap PROJECT_ID=ecommerce-491019 BUCKET=<bucket>
+```
+
+Notes:
+- Script upserts Firestore collection `products` and uploads images to `gs://<bucket>/products/...`.
+- If you skip `REINDEX_URL`/token, catalog still lands in Firestore; run reindex later once you have an admin JWT.
+- Product, product-indexer, and search now use the strict enriched schema (`categories`, `brand`, `imageUrls`, `rating`, `attributes`, `inStock`) with no legacy `category` fallback.

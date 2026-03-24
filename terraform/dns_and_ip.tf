@@ -1,5 +1,5 @@
-# Global IPv4 for the public HTTPS LB → API Gateway (DNS A records target this address).
-# GKE Ingress uses a separate ephemeral Google LB IP; set ingress_https_backend_base_url to that HTTPS origin.
+# Global IPv4 reserved for the GKE Ingress external HTTP(S) load balancer.
+# Set Ingress annotation `kubernetes.io/ingress.global-static-ip-name` to var.static_ip_name.
 resource "google_compute_global_address" "mcart_public" {
   name = var.static_ip_name
 }

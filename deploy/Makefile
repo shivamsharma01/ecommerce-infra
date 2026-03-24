@@ -19,7 +19,7 @@ ROOT := $(abspath $(CURDIR)/../..)
 K8S := $(abspath $(CURDIR))/k8s/apps
 ING := $(abspath $(CURDIR))/k8s/ingress
 
-.PHONY: helm-repo k8s-ready kubectl-required data-install data-install-redis data-install-es flyway-install apps-apply ingress-apply
+.PHONY: helm-repo k8s-ready kubectl-required data-install data-install-redis data-install-es flyway-install apps-apply ingress-apply catalog-bootstrap
 
 # Helm reaches the API without the kubectl binary; kubectl cluster-info fails if kubectl is missing.
 k8s-ready:
@@ -113,3 +113,12 @@ apps-apply: k8s-ready kubectl-required
 ingress-apply: k8s-ready kubectl-required
 	$(KUBECTL) apply -f $(ING)/managed-certificate.yaml
 	$(KUBECTL) apply -f $(ING)/mcart-store-ingress.yaml
+
+# Demo catalog bootstrap (images -> GCS, products -> Firestore, optional reindex).
+# Required vars: PROJECT_ID, BUCKET. Optional: CATALOG_JSON, CATALOG_ASSETS_DIR, IMAGE_PREFIX, REINDEX_URL, MCART_BEARER_TOKEN.
+catalog-bootstrap:
+	@if [ -z "$(PROJECT_ID)" ] || [ -z "$(BUCKET)" ]; then \
+	  echo "Usage: make catalog-bootstrap PROJECT_ID=<gcp-project> BUCKET=<catalog-images-bucket>"; \
+	  exit 1; \
+	fi
+	python3 "$(abspath $(CURDIR))/scripts/bootstrap_catalog.py"
