@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
         - name: user
-          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/user:0520c3566a62cc90c37501351206f02217132570
+          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/user:10ee271459639fbae3e3b98595790c83f0012c3e
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
