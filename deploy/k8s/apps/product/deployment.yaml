@@ -44,7 +44,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: product
-          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/product:a21a4cf
+          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/product:38de6bbad6f3043b96d0f70aa9d292d54fabaecd
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
