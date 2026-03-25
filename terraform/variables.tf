@@ -198,8 +198,8 @@ variable "workload_service_accounts" {
 
 variable "extra_project_iam_members" {
   description = "Additional project-level IAM bindings (e.g. legacy serviceAccount:... with roles/pubsub.publisher)."
-  type = map(list(string))
-  default = {}
+  type        = map(list(string))
+  default     = {}
 }
 
 variable "domain_name" {

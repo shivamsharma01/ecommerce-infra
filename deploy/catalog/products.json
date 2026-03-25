@@ -16,7 +16,7 @@
       "color": "Blue",
       "size": "M"
     },
-    "imagePaths": [
+    "imageUrls": [
       "women/indian-western/kurtas-suits.jpg"
     ]
   },
@@ -36,7 +36,7 @@
     "attributes": {
       "fabric": "Rayon"
     },
-    "imagePaths": [
+    "imageUrls": [
       "women/indian-western/kurtis-tunics.jpg"
     ]
   },
@@ -56,7 +56,7 @@
     "attributes": {
       "pack": "2"
     },
-    "imagePaths": [
+    "imageUrls": [
       "women/indian-western/leggings-salwars-churidars.jpg"
     ]
   },
@@ -76,7 +76,7 @@
     "attributes": {
       "fit": "Relaxed"
     },
-    "imagePaths": [
+    "imageUrls": [
       "women/indian-western/skirts-palazzos.jpg"
     ]
   },
