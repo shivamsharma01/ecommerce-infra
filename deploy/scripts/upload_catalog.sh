@@ -21,5 +21,19 @@ set +a
 : "${PROJECT_ID:?Set PROJECT_ID in env file}"
 : "${BUCKET:?Set BUCKET in env file}"
 
-python3 "$DEPLOY_DIR/scripts/bootstrap_catalog.py" "$@"
+PYTHON=python3
+if ! python3 -c "import google.cloud.firestore, google.cloud.storage" 2>/dev/null; then
+  VENV="${DEPLOY_DIR}/.venv-catalog"
+  if [[ ! -x "${VENV}/bin/python" ]]; then
+    echo "Creating Python venv for catalog bootstrap at ${VENV}..."
+    python3 -m venv "${VENV}"
+  fi
+  PYTHON="${VENV}/bin/python"
+  if ! "${PYTHON}" -c "import google.cloud.firestore, google.cloud.storage" 2>/dev/null; then
+    echo "Installing google-cloud-firestore and google-cloud-storage into venv..."
+    "${VENV}/bin/pip" install -q -r "${DEPLOY_DIR}/catalog/requirements-bootstrap.txt"
+  fi
+fi
+
+"${PYTHON}" "$DEPLOY_DIR/scripts/bootstrap_catalog.py" "$@"
 

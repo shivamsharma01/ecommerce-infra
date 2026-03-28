@@ -14,6 +14,9 @@ override.tf.json
 .terraformrc
 terraform.rc
 
+# Catalog bootstrap local venv (upload_catalog.sh)
+deploy/.venv-catalog/
+
 # Helm — generated from *.example.yaml; holds real passwords (never commit)
 deploy/helm/values-postgresql.yaml
 deploy/helm/values-redis.yaml

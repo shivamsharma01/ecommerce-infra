@@ -24,7 +24,18 @@ Example:
 }
 ```
 
-Bootstrap command (from `deploy/`):
+Create the bucket (once per project / demo env):
+
+```bash
+cd deploy
+cp catalog/bootstrap.env.example catalog/bootstrap.env
+# edit PROJECT_ID, BUCKET, BUCKET_LOCATION; set CATALOG_BUCKET_PUBLIC_READ=true for public image URLs
+./scripts/create_catalog_bucket.sh
+```
+
+Product workload write access is applied by Terraform (`workload_service_accounts.product` → `roles/storage.objectAdmin` on this bucket).
+
+Bootstrap images + Firestore (from `deploy/`):
 
 ```bash
 cp catalog/bootstrap.env.example catalog/bootstrap.env
