@@ -52,12 +52,12 @@ output "cloud_dns_zone_name_servers" {
 
 output "catalog_images_bucket_name" {
   description = "GCS bucket used by demo catalog product images."
-  value       = google_storage_bucket.catalog_images.name
+  value       = data.google_storage_bucket.catalog_images.name
 }
 
 output "catalog_images_public_base_url" {
-  description = "Public base URL prefix for objects when catalog_images_bucket_public is true."
-  value       = "https://storage.googleapis.com/${google_storage_bucket.catalog_images.name}"
+  description = "Public base URL prefix for catalog image objects."
+  value       = "https://storage.googleapis.com/${data.google_storage_bucket.catalog_images.name}"
 }
 
 output "public_https_url" {

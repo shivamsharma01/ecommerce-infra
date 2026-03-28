@@ -293,7 +293,7 @@ Do these **in order** the first time. Later you only repeat the parts that chang
 
 Goal: load a large demo product set with image URLs and make it searchable with minimal manual work.
 
-1. Run Terraform to create infra and the image bucket output:
+1. Run Terraform to create infra and confirm the pre-created image bucket name:
 
 ```bash
 cd terraform
@@ -305,26 +305,62 @@ terraform output -raw catalog_images_bucket_name
 
 `deploy/catalog/assets/`
 
-Use paths that match each product's `imagePaths` entries in:
+Use paths that match each product's image metadata in:
 
 `deploy/catalog/products.json`
 
-3. Bootstrap catalog (from `deploy/`):
+Required schema per product:
+
+- `gallery`: ordered list of `{thumbPath, hdPath, alt}`
+- paths are relative to `deploy/catalog/assets`
+
+3. Bootstrap catalog using separate upload files (from `deploy/`):
 
 ```bash
 cd deploy
-make catalog-bootstrap PROJECT_ID=ecommerce-491019 BUCKET=<bucket-from-terraform-output>
+cp catalog/bootstrap.env.example catalog/bootstrap.env
+# edit PROJECT_ID, BUCKET (and optional REINDEX_URL / MCART_BEARER_TOKEN)
+./scripts/upload_catalog.sh
 ```
 
 Optional reindex trigger in the same command:
 
 ```bash
 REINDEX_URL="https://mcart.space/product-indexer/admin/reindex" \
-MCART_BEARER_TOKEN="<jwt-with-product.admin-scope>" \
-make catalog-bootstrap PROJECT_ID=ecommerce-491019 BUCKET=<bucket>
+MCART_BEARER_TOKEN="<jwt-with-reindex-scope>" \
+./scripts/upload_catalog.sh
 ```
 
 Notes:
-- Script upserts Firestore collection `products` and uploads images to `gs://<bucket>/products/...`.
+- Script upserts Firestore collection `products` and uploads images under deterministic per-product folders:
+  - `gs://<bucket>/products/<productId>/gallery/<index>/thumb.<ext>`
+  - `gs://<bucket>/products/<productId>/gallery/<index>/hd.<ext>`
+- Firestore documents include:
+  - `gallery` (`thumbnailUrl`, `hdUrl`, `alt`) for product detail/zoom UX
 - If you skip `REINDEX_URL`/token, catalog still lands in Firestore; run reindex later once you have an admin JWT.
-- Product, product-indexer, and search now use the strict enriched schema (`categories`, `brand`, `imageUrls`, `rating`, `attributes`, `inStock`) with no legacy `category` fallback.
+- If an object already exists with same checksum/size, upload is skipped.
+- If remote object differs, script fails by default; set `FORCE_UPLOAD=true` (or `--force`) to overwrite.
+- Product, product-indexer, and search now use the strict enriched schema (`categories`, `brand`, `gallery`, `rating`, `attributes`, `inStock`) with no legacy fallbacks.
+
+Verification checklist:
+
+1. GCS object layout:
+   - `gs://<bucket>/products/<productId>/gallery/1/thumb.*`
+   - `gs://<bucket>/products/<productId>/gallery/1/hd.*`
+2. Firestore product document contains:
+   - `gallery[]` with `thumbnailUrl`, `hdUrl`, `alt`
+3. Product UI:
+   - Catalog/search cards show thumbnail images
+   - Click card -> `/products/:id` detail page opens
+   - Detail page shows multiple thumbnails + arrows
+   - Zoom opens HD image with left/right navigation
+4. Search/index consistency:
+   - Trigger reindex (or wait for outbox/indexer) after large bootstrap runs
+   - Confirm `/api/search` returns updated products
+
+Rollback / fallback guidance:
+
+- To rollback catalog data quickly, re-run bootstrap with previous `products.json` and image set.
+- To rollback changed images, re-run bootstrap with old assets and `FORCE_UPLOAD=true`.
+- Gallery is required; missing gallery items should be fixed in catalog data before bootstrap.
+- If you need temporary performance relief, skip reindex trigger in bootstrap and execute reindex during low-traffic windows.

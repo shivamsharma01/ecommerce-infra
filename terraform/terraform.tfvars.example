@@ -26,3 +26,6 @@ node_preemptible  = true
 
 # Optional Cloud DNS in GCP (delegate NS at registrar):
 # create_cloud_dns_public_zone = true
+
+# Pre-created catalog bucket (recommended for demo stability):
+# catalog_images_bucket_name = "ecommerce-491019-mcart-catalog-images"

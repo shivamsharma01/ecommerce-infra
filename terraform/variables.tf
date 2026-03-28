@@ -233,20 +233,8 @@ variable "cloud_dns_zone_name" {
 }
 
 variable "catalog_images_bucket_name" {
-  description = "GCS bucket for demo product images. Null = auto name based on project."
+  description = "Pre-created GCS bucket for catalog product images. Null defaults to <project_id>-mcart-catalog-images."
   type        = string
   default     = null
-}
-
-variable "catalog_images_bucket_location" {
-  description = "Location for demo catalog image bucket."
-  type        = string
-  default     = "ASIA-SOUTH2"
-}
-
-variable "catalog_images_bucket_public" {
-  description = "If true, grant allUsers objectViewer on catalog image bucket (demo convenience)."
-  type        = bool
-  default     = true
 }
 

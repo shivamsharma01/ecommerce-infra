@@ -34,7 +34,7 @@ spec:
         app: product
         version: "0.0.1"
     spec:
-      serviceAccountName: default
+      serviceAccountName: product
       terminationGracePeriodSeconds: 30
       securityContext:
         runAsNonRoot: true

@@ -93,6 +93,7 @@ apps-apply: k8s-ready kubectl-required
 	@if [ -f $(K8S)/user/secret.yaml ]; then $(KUBECTL) apply -n $(NS) -f $(K8S)/user/secret.yaml; else echo "user: no secret.yaml (copy secret.example.yaml)"; fi
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/user/deployment.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/user/service.yaml
+	$(KUBECTL) apply -n $(NS) -f $(K8S)/product/serviceaccount.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/product/configmap.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/product/deployment.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/product/service.yaml

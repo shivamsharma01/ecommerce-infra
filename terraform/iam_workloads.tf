@@ -58,6 +58,14 @@ resource "google_project_iam_member" "product_firestore_user" {
   member  = "serviceAccount:${local.product_sa}"
 }
 
+resource "google_storage_bucket_iam_member" "product_catalog_object_admin" {
+  count = local.product_sa != "" ? 1 : 0
+
+  bucket = data.google_storage_bucket.catalog_images.name
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${local.product_sa}"
+}
+
 resource "google_project_iam_member" "product_indexer_firestore_user" {
   count = local.product_indexer_sa != "" ? 1 : 0
 
