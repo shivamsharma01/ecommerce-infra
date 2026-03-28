@@ -32,7 +32,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: search
-          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/search:2e53b8d4abdbf79cdffa6500c6de73611ed86564
+          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/search:b65400cb19ebfdb8d3f7e8a6c4f302a84e9b81f3
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
