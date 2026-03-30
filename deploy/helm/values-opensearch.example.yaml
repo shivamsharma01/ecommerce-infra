@@ -10,6 +10,12 @@ replicas: 1
 
 opensearchJavaOpts: "-Xmx1G -Xms1G"
 
+# Required by OpenSearch Security demo installer (chart >= 2.18 / OpenSearch >= 2.12).
+# Use a strong password (min 8 chars; upper+lower+digit+special).
+extraEnvs:
+  - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
+    value: "CHANGE_ME_Str0ng!"
+
 resources:
   requests:
     cpu: 500m
