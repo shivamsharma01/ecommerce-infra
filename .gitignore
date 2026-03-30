@@ -23,7 +23,6 @@ __pycache__/
 # Helm — generated from *.example.yaml; holds real passwords (never commit)
 deploy/helm/values-postgresql.yaml
 deploy/helm/values-redis.yaml
-deploy/helm/values-elasticsearch.yaml
 deploy/helm/values-opensearch.yaml
 
 # K8s — local secrets (never commit); tracked templates are secret.example.yaml
