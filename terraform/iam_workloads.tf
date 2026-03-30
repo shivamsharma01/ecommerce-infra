@@ -1,11 +1,19 @@
 locals {
   wsa = var.workload_service_accounts
 
-  # optional() attributes are null when unset; coalesce(null, "") errors ("" is skipped by coalesce).
-  auth_sa            = local.wsa.auth == null ? "" : trimspace(local.wsa.auth)
-  user_sa            = local.wsa.user == null ? "" : trimspace(local.wsa.user)
-  product_sa         = local.wsa.product == null ? "" : trimspace(local.wsa.product)
-  product_indexer_sa = local.wsa.product_indexer == null ? "" : trimspace(local.wsa.product_indexer)
+  # When Terraform manages the SAs, bind IAM to the created emails; else use explicit tfvars emails.
+  auth_sa = var.create_workload_service_accounts ? google_service_account.workload_auth[0].email : (
+    local.wsa.auth == null ? "" : trimspace(local.wsa.auth)
+  )
+  user_sa = var.create_workload_service_accounts ? google_service_account.workload_user[0].email : (
+    local.wsa.user == null ? "" : trimspace(local.wsa.user)
+  )
+  product_sa = var.create_workload_service_accounts ? google_service_account.workload_product[0].email : (
+    local.wsa.product == null ? "" : trimspace(local.wsa.product)
+  )
+  product_indexer_sa = var.create_workload_service_accounts ? google_service_account.workload_product_indexer[0].email : (
+    local.wsa.product_indexer == null ? "" : trimspace(local.wsa.product_indexer)
+  )
 
   extra_iam_bindings = flatten([
     for role, members in var.extra_project_iam_members : [

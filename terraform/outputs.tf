@@ -35,6 +35,16 @@ output "node_service_account_email" {
   value       = google_service_account.gke_nodes.email
 }
 
+output "workload_service_account_emails" {
+  description = "GCP emails for microservice Workload Identity when create_workload_service_accounts is true; null otherwise (set workload_service_accounts in tfvars yourself)."
+  value = var.create_workload_service_accounts ? {
+    auth            = google_service_account.workload_auth[0].email
+    user            = google_service_account.workload_user[0].email
+    product         = google_service_account.workload_product[0].email
+    product_indexer = google_service_account.workload_product_indexer[0].email
+  } : null
+}
+
 output "kubectl_context_hint" {
   description = "Example gcloud command to fetch credentials."
   value       = "gcloud container clusters get-credentials ${google_container_cluster.primary.name} --location ${google_container_cluster.primary.location} --project ${var.project_id}"

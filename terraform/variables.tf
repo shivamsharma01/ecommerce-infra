@@ -178,10 +178,21 @@ variable "node_service_account_id" {
 
 # --- Platform: Pub/Sub, Firestore IAM, DNS --------------------------------------------------------
 
+variable "create_workload_service_accounts" {
+  description = <<-EOT
+    If true (default), create mcart-auth, mcart-user, mcart-product, and mcart-product-indexer
+    GCP service accounts and use their emails for IAM in iam_workloads.tf.
+    Set false only when those SAs already exist and you set workload_service_accounts to their full emails.
+  EOT
+  type        = bool
+  default     = true
+}
+
 variable "workload_service_accounts" {
   description = <<-EOT
-    GCP service account emails used by microservices (typically via GKE Workload Identity).
-    When set, Terraform grants least-privilege Pub/Sub (topic/subscription) and optional Firestore IAM.
+    GCP service account emails for IAM when create_workload_service_accounts is false.
+    When create_workload_service_accounts is true, this object is ignored for bindings (Terraform uses
+    the created google_service_account.*.email values instead).
     auth: publishes to user-signup-events (auth OutboxPublisherJob).
     user: subscribes to user-signup-events-sub (UserSignupSubscriber).
     product: publishes to product-events + Firestore (product service).
