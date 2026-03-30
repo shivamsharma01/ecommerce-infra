@@ -7,7 +7,8 @@ metadata:
 data:
   SERVER_PORT: "8083"
   SPRING_APPLICATION_NAME: "search"
-  SPRING_ELASTICSEARCH_URIS: "http://elasticsearch.elasticsearch.svc.cluster.local:9200"
+  # OpenSearch Helm chart (release mcart-os): ClusterIP opensearch-cluster-master
+  SPRING_ELASTICSEARCH_URIS: "http://opensearch-cluster-master.mcart.svc.cluster.local:9200"
   APP_SECURITY_ENABLED: "true"
   SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "https://mcart.space"
   MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED: "true"

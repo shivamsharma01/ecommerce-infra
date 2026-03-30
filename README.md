@@ -1,6 +1,6 @@
 # ecomm-infra
 
-Terraform (GKE, VPC, static public IP + DNS), Helm (PostgreSQL, Redis, Elasticsearch, Flyway bootstrap), and Kubernetes manifests for **mcart**.
+Terraform (GKE, VPC, static public IP + DNS), Helm (PostgreSQL, Redis, OpenSearch, Flyway bootstrap), and Kubernetes manifests for **mcart**.
 
 **This checkout is wired for:** GCP project **`ecommerce-491019`**, region **`asia-south2`**, zonal cluster **`mcart-gke`** in **`asia-south2-a`**, domain **`mcart.space`**, Artifact Registry **`asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/`**.
 
@@ -13,7 +13,7 @@ Terraform (GKE, VPC, static public IP + DNS), Helm (PostgreSQL, Redis, Elasticse
 | Item | Location |
 |------|----------|
 | `terraform.tfvars` | `terraform/` (see `terraform/terraform.tfvars.example`) |
-| Helm passwords | `deploy/helm/values-postgresql.yaml`, `values-redis.yaml`, `values-elasticsearch.yaml` (copy from `*.example.yaml`) |
+| Helm passwords / sizing | `deploy/helm/values-postgresql.yaml`, `values-redis.yaml`, `values-opensearch.yaml` (copy from `*.example.yaml`) |
 | App secrets | `deploy/k8s/apps/<svc>/secret.yaml` (copy from `secret.example.yaml`) |
 
 ---
@@ -110,12 +110,13 @@ From **`deploy/`**:
 ```bash
 cp helm/values-postgresql.example.yaml helm/values-postgresql.yaml
 cp helm/values-redis.example.yaml helm/values-redis.yaml
-cp helm/values-elasticsearch.example.yaml helm/values-elasticsearch.yaml
+cp helm/values-opensearch.example.yaml helm/values-opensearch.yaml
 # Edit passwords; Postgres initdb users must match Flyway below
 
 make data-install data-install-redis data-install-es
 
 kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=postgresql -n mcart --timeout=300s
+kubectl rollout status statefulset/opensearch-cluster-master -n mcart --timeout=600s
 
 printf '%s' "$AUTH_PASS" > /tmp/auth.db.pass && chmod 600 /tmp/auth.db.pass
 printf '%s' "$USER_PASS" > /tmp/user.db.pass && chmod 600 /tmp/user.db.pass
@@ -131,8 +132,8 @@ Canonical SQL: `deploy/helm/mcart-bootstrap/files/{auth,user}/`. **Auth** and **
 
 ## 3. Kubernetes apps + secrets
 
-1. Align **ConfigMaps** if your Helm release names differ (defaults target Bitnami-style DNS under namespace `mcart`).
-2. Copy each **`deploy/k8s/apps/<svc>/secret.example.yaml`** → **`secret.yaml`** and set values matching Helm DB/Redis/ES passwords.
+1. Align **ConfigMaps** if your Helm release names differ (defaults use PostgreSQL/Redis/OpenSearch service DNS under namespace `mcart`).
+2. Copy each **`deploy/k8s/apps/<svc>/secret.example.yaml`** → **`secret.yaml`** and set values matching Helm DB/Redis passwords (and search basic auth only if you enabled it on OpenSearch).
 3. Apply:
 
 ```bash
@@ -258,7 +259,7 @@ Do these **in order** the first time. Later you only repeat the parts that chang
    Still under **`deploy/`**, run **`make flyway-install`** with the same database passwords you put in the Postgres values file.
 
 7. **Kubernetes secrets for apps**  
-   For **auth**, **user**, and optionally **search** / **product-indexer**, copy each **`secret.example.yaml`** to **`secret.yaml`**, fill in real passwords (matching Postgres/Redis/Elasticsearch), then run **`make apps-apply`** **once** from your PC—or apply those YAML files manually.  
+   For **auth**, **user**, and optionally **search** / **product-indexer**, copy each **`secret.example.yaml`** to **`secret.yaml`**, fill in real passwords (matching Postgres/Redis; OpenSearch auth only if configured), then run **`make apps-apply`** **once** from your PC—or apply those YAML files manually.  
    *Cloud Build will not commit `secret.yaml` (it stays local or in a secure store you choose).*
 
 8. **First apply of app YAML + Ingress from your PC (sanity check)**  

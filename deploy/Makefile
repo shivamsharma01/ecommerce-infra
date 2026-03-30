@@ -52,6 +52,7 @@ kubectl-required:
 
 helm-repo:
 	$(HELM) repo add bitnami https://charts.bitnami.com/bitnami 2>/dev/null || true
+	$(HELM) repo add opensearch https://opensearch-project.github.io/helm-charts 2>/dev/null || true
 	$(HELM) repo update
 
 data-install: helm-repo k8s-ready
@@ -62,9 +63,10 @@ data-install-redis: helm-repo k8s-ready
 	test -f helm/values-redis.yaml || (echo "cp helm/values-redis.example.yaml helm/values-redis.yaml && edit"; exit 1)
 	$(HELM) upgrade --install mcart-redis bitnami/redis -n $(NS) -f helm/values-redis.yaml
 
+# OpenSearch (Elasticsearch-compatible HTTP API). Bitnami Elasticsearch images are often unavailable on Docker Hub.
 data-install-es: helm-repo k8s-ready
-	test -f helm/values-elasticsearch.yaml || (echo "cp helm/values-elasticsearch.example.yaml helm/values-elasticsearch.yaml && edit"; exit 1)
-	$(HELM) upgrade --install mcart-es bitnami/elasticsearch -n $(NS) -f helm/values-elasticsearch.yaml
+	test -f helm/values-opensearch.yaml || (echo "cp helm/values-opensearch.example.yaml helm/values-opensearch.yaml && edit"; exit 1)
+	$(HELM) upgrade --install mcart-os opensearch/opensearch -n $(NS) -f helm/values-opensearch.yaml
 
 # Prefer AUTH_DB_PASS_FILE / USER_DB_PASS_FILE (e.g. mkstemp files) over env vars to avoid shell history.
 # Passwords must match auth_user / user_user in helm/values-postgresql.yaml → primary.initdb.scripts.
@@ -98,12 +100,12 @@ apps-apply: k8s-ready kubectl-required
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/product/deployment.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/product/service.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/search/configmap.yaml
-	@if [ -f $(K8S)/search/secret.yaml ]; then $(KUBECTL) apply -n $(NS) -f $(K8S)/search/secret.yaml; else echo "search: no secret.yaml (optional; copy secret.example.yaml if ES uses auth)"; fi
+	@if [ -f $(K8S)/search/secret.yaml ]; then $(KUBECTL) apply -n $(NS) -f $(K8S)/search/secret.yaml; else echo "search: no secret.yaml (optional; copy secret.example.yaml if OpenSearch uses basic auth)"; fi
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/search/deployment.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/search/service.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/product-indexer/serviceaccount.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/product-indexer/configmap.yaml
-	@if [ -f $(K8S)/product-indexer/secret.yaml ]; then $(KUBECTL) apply -n $(NS) -f $(K8S)/product-indexer/secret.yaml; else echo "product-indexer: no secret.yaml (optional; copy secret.example.yaml if ES uses auth)"; fi
+	@if [ -f $(K8S)/product-indexer/secret.yaml ]; then $(KUBECTL) apply -n $(NS) -f $(K8S)/product-indexer/secret.yaml; else echo "product-indexer: no secret.yaml (optional; copy secret.example.yaml if OpenSearch uses basic auth)"; fi
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/product-indexer/deployment.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/product-indexer/service.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/mcart-ui/configmap.yaml

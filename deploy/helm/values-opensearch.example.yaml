@@ -1,0 +1,22 @@
+# OpenSearch (Elasticsearch-compatible REST API). Copy to values-opensearch.yaml and tune.
+#   make data-install-es
+#
+# Service DNS (namespace mcart): opensearch-cluster-master.mcart.svc.cluster.local:9200
+
+clusterName: opensearch-cluster
+nodeGroup: master
+singleNode: true
+replicas: 1
+
+opensearchJavaOpts: "-Xmx1G -Xms1G"
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 2Gi
+  limits:
+    memory: 3Gi
+
+persistence:
+  enabled: true
+  size: 20Gi
