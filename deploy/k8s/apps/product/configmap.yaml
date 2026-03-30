@@ -9,7 +9,7 @@ metadata:
 data:
   SERVER_PORT: "8080"
   SPRING_CLOUD_GCP_PROJECT_ID: "ecommerce-491019"
-  CATALOG_IMAGES_BUCKET: "ecommerce-491019-mcart-catalog-images"
+  CATALOG_IMAGES_BUCKET: "ecommerce-mcart-catalog-image"
   CATALOG_IMAGE_PREFIX: "products"
   SPRING_CLOUD_GCP_FIRESTORE_ENABLED: "true"
   SPRING_CLOUD_GCP_FIRESTORE_HOST: ""

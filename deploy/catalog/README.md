@@ -33,6 +33,18 @@ cp catalog/bootstrap.env.example catalog/bootstrap.env
 ./scripts/create_catalog_bucket.sh
 ```
 
+**Firestore + bootstrap IAM (required before `upload_catalog.sh` works end-to-end):** if you see `The database (default) does not exist`, or GCS/Firestore 403 from the wrong principal, run:
+
+```bash
+# Optional in bootstrap.env: FIRESTORE_LOCATION, CATALOG_BOOTSTRAP_SA_EMAIL, SKIP_CATALOG_IAM
+chmod +x scripts/create_firestore_database.sh
+./scripts/create_firestore_database.sh
+```
+
+The script creates the default **Firestore Native** database if missing, then grants **`roles/datastore.user`** on `PROJECT_ID` and **`roles/storage.objectAdmin`** on `gs://$BUCKET` (when the bucket exists) to the resolved principal: `CATALOG_BOOTSTRAP_MEMBER` / `CATALOG_BOOTSTRAP_SA_EMAIL` / `GOOGLE_APPLICATION_CREDENTIALS` client_email / `gcloud` active user.
+
+Location cannot be changed later; pick the same region as your bucket when possible.
+
 Product workload write access is applied by Terraform (`workload_service_accounts.product` → `roles/storage.objectAdmin` on this bucket).
 
 Bootstrap images + Firestore (from `deploy/`):

@@ -115,6 +115,10 @@ ingress-apply: k8s-ready kubectl-required
 	$(KUBECTL) apply -f $(ING)/managed-certificate.yaml
 	$(KUBECTL) apply -f $(ING)/mcart-store-ingress.yaml
 
+# One-time per project: default Firestore Native database (reads catalog/bootstrap.env).
+catalog-firestore:
+	bash "$(abspath $(CURDIR))/scripts/create_firestore_database.sh"
+
 # Demo catalog bootstrap (images -> GCS, products -> Firestore, optional reindex).
 # Required vars: PROJECT_ID, BUCKET. Optional: CATALOG_JSON, CATALOG_ASSETS_DIR, IMAGE_PREFIX, REINDEX_URL, MCART_BEARER_TOKEN.
 catalog-bootstrap:

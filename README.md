@@ -314,7 +314,19 @@ Required schema per product:
 - `gallery`: ordered list of `{thumbPath, hdPath, alt}`
 - paths are relative to `deploy/catalog/assets`
 
-3. Bootstrap catalog using separate upload files (from `deploy/`):
+3. Create the default **Firestore Native** database (if missing) and **grant IAM** for catalog bootstrap (`roles/datastore.user` on the project, `roles/storage.objectAdmin` on `gs://$BUCKET` when the bucket exists). Requires `gcloud` with rights to create Firestore and change IAM.
+
+```bash
+cd deploy
+cp catalog/bootstrap.env.example catalog/bootstrap.env
+# edit PROJECT_ID, BUCKET; optional FIRESTORE_LOCATION, CATALOG_BOOTSTRAP_SA_EMAIL, BUCKET_PROJECT
+chmod +x scripts/create_firestore_database.sh
+./scripts/create_firestore_database.sh
+```
+
+Set `SKIP_CATALOG_IAM=true` to only ensure Firestore exists. Principal resolution: `CATALOG_BOOTSTRAP_MEMBER` / `CATALOG_BOOTSTRAP_SA_EMAIL` / `GOOGLE_APPLICATION_CREDENTIALS` / active `gcloud` user.
+
+4. Bootstrap catalog using separate upload files (from `deploy/`):
 
 ```bash
 cd deploy

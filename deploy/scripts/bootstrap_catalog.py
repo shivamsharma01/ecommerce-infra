@@ -35,10 +35,39 @@ from pathlib import Path
 from typing import Any, Dict, List
 from urllib.request import Request, urlopen
 
+import google.auth
+from google.api_core.exceptions import NotFound
 from google.cloud import firestore, storage
 
 # Stored document must not duplicate the collection document id; Java @DocumentId maps path only.
 _DELETE_REDUNDANT_PRODUCT_ID = {"productId": firestore.DELETE_FIELD}
+
+
+def _print_credential_hint(project_id: str, bucket: str) -> None:
+    """Log which identity ADC will use — avoids confusion when 403 is a wrong service-account key."""
+    path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "").strip()
+    if path:
+        print(f"GOOGLE_APPLICATION_CREDENTIALS={path}")
+    try:
+        _creds, adc_project = google.auth.default()
+        sa = getattr(_creds, "service_account_email", None)
+        if sa:
+            print(f"Active credential (service account): {sa}")
+        else:
+            print(f"Active credential: user / ADC (default project from metadata: {adc_project!r})")
+        if adc_project and adc_project != project_id:
+            print(
+                f"Note: ADC project ({adc_project}) != PROJECT_ID ({project_id}). "
+                "OK if IAM allows it; otherwise align gcloud project and bootstrap.env."
+            )
+    except Exception as exc:
+        print(f"(Could not read Application Default Credentials: {exc})")
+    print(f"Target: PROJECT_ID={project_id}  BUCKET={bucket}")
+    print(
+        "Requires storage.objects.create (and Firestore write) on that bucket/project. "
+        "403 often means a key from another project: unset GOOGLE_APPLICATION_CREDENTIALS and run "
+        "`gcloud auth application-default login` as a user with access, or grant this SA on the bucket.\n"
+    )
 
 
 def _required_env(name: str) -> str:
@@ -335,6 +364,7 @@ def main() -> None:
     args = _parse_args()
     project_id = _required_env("PROJECT_ID")
     bucket = _required_env("BUCKET")
+    _print_credential_hint(project_id, bucket)
     base_dir = Path(__file__).resolve().parents[1]
     catalog_json = _deploy_relative_path(base_dir, "CATALOG_JSON", "catalog/products.json")
     assets_dir = _deploy_relative_path(base_dir, "CATALOG_ASSETS_DIR", "catalog/assets")
@@ -350,23 +380,36 @@ def main() -> None:
     coll = fs.collection(collection_name)
 
     upserted = 0
-    for raw in products:
-        product_id = _product_id(raw)
-        gallery = _normalize_gallery_input(raw)
-        gallery_urls = _upload_gallery_if_needed(
-            storage_client=storage_client,
-            bucket_name=bucket,
-            assets_root=assets_dir,
-            image_prefix=image_prefix,
-            product_id=product_id,
-            gallery=gallery,
-            force_upload=force_upload,
-        )
-        doc = _normalized_product(raw, gallery_urls)
-        doc_ref = coll.document(product_id)
-        doc_ref.set(doc, merge=True)
-        doc_ref.update(_DELETE_REDUNDANT_PRODUCT_ID)
-        upserted += 1
+    try:
+        for raw in products:
+            product_id = _product_id(raw)
+            gallery = _normalize_gallery_input(raw)
+            gallery_urls = _upload_gallery_if_needed(
+                storage_client=storage_client,
+                bucket_name=bucket,
+                assets_root=assets_dir,
+                image_prefix=image_prefix,
+                product_id=product_id,
+                gallery=gallery,
+                force_upload=force_upload,
+            )
+            doc = _normalized_product(raw, gallery_urls)
+            doc_ref = coll.document(product_id)
+            doc_ref.set(doc, merge=True)
+            doc_ref.update(_DELETE_REDUNDANT_PRODUCT_ID)
+            upserted += 1
+    except NotFound as e:
+        err = str(e).lower()
+        if "database" in err and "does not exist" in err:
+            raise SystemExit(
+                "Firestore has no default database for this project yet.\n"
+                "Create it once (requires gcloud), from the deploy directory:\n"
+                "  chmod +x scripts/create_firestore_database.sh\n"
+                "  ./scripts/create_firestore_database.sh\n"
+                "Then re-run upload_catalog.sh. See deploy/catalog/README.md.\n"
+                f"Original error: {e}"
+            ) from e
+        raise
 
     print(f"Upserted {upserted} products to Firestore collection '{collection_name}' in project '{project_id}'.")
 
