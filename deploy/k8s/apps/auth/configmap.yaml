@@ -7,9 +7,9 @@ metadata:
     app: auth
 data:
   SERVER_PORT: "8081"
-  DB_URL: "jdbc:postgresql://postgresql.auth.svc.cluster.local:5432/auth"
+  DB_URL: "jdbc:postgresql://mcart-pg-postgresql.mcart.svc.cluster.local:5432/auth"
   DB_USERNAME: "auth_user"
-  REDIS_HOST: "redis-service.auth.svc.cluster.local"
+  REDIS_HOST: "mcart-redis-master.mcart.svc.cluster.local"
   REDIS_PORT: "6379"
   AUTH_ISSUER_URI: "https://mcart.space"
   AUTH_VERIFICATION_BASE_URL: "https://mcart.space"
