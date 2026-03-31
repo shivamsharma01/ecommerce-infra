@@ -10,6 +10,10 @@ terraform {
       source  = "hashicorp/google-beta"
       version = ">= 5.40.0, < 7.0.0"
     }
+    null = {
+      source  = "hashicorp/null"
+      version = ">= 3.2.0, < 4.0.0"
+    }
   }
 }
 
