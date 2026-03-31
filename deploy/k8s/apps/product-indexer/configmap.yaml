@@ -9,7 +9,7 @@ data:
   SPRING_APPLICATION_NAME: "product-indexer"
   SPRING_CLOUD_GCP_PROJECT_ID: "ecommerce-491019"
   SPRING_CLOUD_GCP_FIRESTORE_ENABLED: "true"
-  SPRING_ELASTICSEARCH_URIS: "http://opensearch-cluster-master.mcart.svc.cluster.local:9200"
+  OPENSEARCH_URIS: "http://opensearch-cluster-master.mcart.svc.cluster.local:9200"
   SPRING_DATA_ELASTICSEARCH_REPOSITORIES_ENABLED: "false"
   SPRING_DATA_ELASTICSEARCH_AUTO_INDEX_CREATION: "true"
   PRODUCT_INDEXER_PUBSUB_ENABLED: "true"

@@ -228,7 +228,7 @@ Deployments use `envFrom` on `<service>-config` and optional `<service>-secrets`
 | auth | `DB_URL`, `REDIS_HOST`, `AUTH_ISSUER_URI`, `GCP_PROJECT_ID`, OAuth redirect, mail host |
 | user | `SPRING_DATASOURCE_URL`, `SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI`, Pub/Sub |
 | product | Firestore, Pub/Sub, `APP_SECURITY_*`, JWT issuer |
-| search | `SPRING_ELASTICSEARCH_URIS`, JWT issuer |
+| search | `OPENSEARCH_URIS`, JWT issuer |
 | product-indexer | Firestore, ES, Pub/Sub subscription, JWT issuer |
 | mcart-ui | `API_BASE_URL`, `PORT` |
 
