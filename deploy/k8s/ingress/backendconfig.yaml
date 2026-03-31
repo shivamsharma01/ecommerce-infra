@@ -1,0 +1,77 @@
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: product-bc
+  namespace: mcart
+spec:
+  healthCheck:
+    type: HTTP
+    requestPath: /actuator/health
+    port: 8080
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: search-bc
+  namespace: mcart
+spec:
+  healthCheck:
+    type: HTTP
+    requestPath: /health/readiness
+    port: 8083
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: product-indexer-bc
+  namespace: mcart
+spec:
+  healthCheck:
+    type: HTTP
+    requestPath: /health/liveness
+    port: 8085
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: user-bc
+  namespace: mcart
+spec:
+  healthCheck:
+    type: HTTP
+    requestPath: /health/readiness
+    port: 8082
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: auth-bc
+  namespace: mcart
+spec:
+  healthCheck:
+    type: HTTP
+    requestPath: /actuator/health/liveness
+    port: 8081
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: auth-bc-v2
+  namespace: mcart
+spec:
+  healthCheck:
+    type: HTTP
+    requestPath: /actuator/health/liveness
+    port: 8081
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: mcart-ui-bc
+  namespace: mcart
+spec:
+  healthCheck:
+    type: HTTP
+    requestPath: /health
+    port: 4000
+

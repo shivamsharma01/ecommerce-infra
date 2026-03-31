@@ -8,11 +8,12 @@ metadata:
   labels:
     app.kubernetes.io/name: mcart-ingress
   annotations:
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.allow-http: "true"
     kubernetes.io/ingress.global-static-ip-name: mcart-public-ip
-    # After: kubectl describe managedcertificate mcart-store-cert -n mcart → Active
-    # networking.gke.io/managed-certificates: mcart-store-cert
+    After: kubectl describe managedcertificate mcart-store-cert -n mcart → Active
+    networking.gke.io/managed-certificates: mcart-store-cert
 spec:
-  ingressClassName: gce
   rules:
     - host: mcart.space
       http:

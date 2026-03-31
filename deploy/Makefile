@@ -116,6 +116,7 @@ apps-apply: k8s-ready kubectl-required
 
 # GKE Ingress + managed cert (after apps-apply; DNS → Ingress IP; uncomment cert annotation in YAML when ready).
 ingress-apply: k8s-ready kubectl-required
+	$(KUBECTL) apply -f $(ING)/backendconfig.yaml
 	$(KUBECTL) apply -f $(ING)/managed-certificate.yaml
 	$(KUBECTL) apply -f $(ING)/mcart-store-ingress.yaml
 
