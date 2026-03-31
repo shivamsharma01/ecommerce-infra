@@ -23,6 +23,7 @@ spec:
         app: user
         version: "bd3afcd"
     spec:
+      serviceAccountName: user
       containers:
         - name: user
           image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/user:dd6b79d2829f0f819721e3c3c654f0f7ca0b1f49
@@ -48,7 +49,7 @@ spec:
             httpGet:
               path: /health/liveness
               port: http
-            initialDelaySeconds: 30
+            initialDelaySeconds: 90
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
@@ -60,6 +61,13 @@ spec:
             periodSeconds: 5
             timeoutSeconds: 3
             failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /health/readiness
+              port: http
+            failureThreshold: 30
+            periodSeconds: 5
+            timeoutSeconds: 3
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000

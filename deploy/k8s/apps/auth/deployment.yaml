@@ -22,6 +22,7 @@ spec:
         app: auth
         version: "5a77d00"
     spec:
+      serviceAccountName: auth
       containers:
         - name: auth
           image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/auth:fa98a23e1fbd80392453c7ed75fb3fc0bf5e7158

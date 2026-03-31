@@ -87,10 +87,12 @@ flyway-install: k8s-ready
 # Application manifests (canonical copy lives under ecomm-infra/deploy/k8s/apps/<service>/).
 # Per-service secret.yaml is gitignored — copy secret.example.yaml → secret.yaml, edit, then apps-apply applies it if present.
 apps-apply: k8s-ready kubectl-required
+	$(KUBECTL) apply -n $(NS) -f $(K8S)/auth/serviceaccount.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/auth/configmap.yaml
 	@if [ -f $(K8S)/auth/secret.yaml ]; then $(KUBECTL) apply -n $(NS) -f $(K8S)/auth/secret.yaml; else echo "auth: no secret.yaml (copy secret.example.yaml)"; fi
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/auth/deployment.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/auth/service.yaml
+	$(KUBECTL) apply -n $(NS) -f $(K8S)/user/serviceaccount.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/user/configmap.yaml
 	@if [ -f $(K8S)/user/secret.yaml ]; then $(KUBECTL) apply -n $(NS) -f $(K8S)/user/secret.yaml; else echo "user: no secret.yaml (copy secret.example.yaml)"; fi
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/user/deployment.yaml

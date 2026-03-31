@@ -53,7 +53,7 @@ spec:
               cpu: "1000m"
           livenessProbe:
             httpGet:
-              path: /health
+              path: /health/liveness
               port: http
             initialDelaySeconds: 40
             periodSeconds: 10
@@ -61,7 +61,7 @@ spec:
             failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /health
+              path: /health/readiness
               port: http
             initialDelaySeconds: 20
             periodSeconds: 5
@@ -69,7 +69,7 @@ spec:
             failureThreshold: 3
           startupProbe:
             httpGet:
-              path: /health
+              path: /health/readiness
               port: http
             failureThreshold: 30
             periodSeconds: 5
