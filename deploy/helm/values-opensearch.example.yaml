@@ -3,11 +3,29 @@
 #
 # Service DNS (namespace mcart): opensearch-cluster-master.mcart.svc.cluster.local:9200
 #
-# The chart defaults to protocol: https while Spring apps use http://…:9200. Without
-# plugins.security.ssl.http.enabled: false, REST expects TLS and plain HTTP fails.
-# Transport TLS must stay configured (demo PEMs in the image) or the security plugin
-# will not start ("Wrong Transport SSL configuration").
-# Use the same admin password in K8s secrets search-secrets / product-indexer-secrets.
+# =============================================================================
+# Option A — Private dev cluster (simplest for Spring http:// clients)
+# =============================================================================
+# Disable the security plugin: no TLS on 9200, no admin password, no OPENSEARCH_* secrets
+# in search / product-indexer. Use only behind a private network / namespace.
+#
+#   protocol: http
+#   extraEnvs:
+#     - name: DISABLE_SECURITY_PLUGIN
+#       value: "true"
+#
+# Do NOT set OPENSEARCH_INITIAL_ADMIN_PASSWORD when security is disabled.
+# After switching from a security-enabled install, delete the OpenSearch PVC once so the
+# node starts clean (otherwise CrashLoop or inconsistent security state).
+#
+# =============================================================================
+# Option B — Security enabled (production-style)
+# =============================================================================
+# Keep OPENSEARCH_INITIAL_ADMIN_PASSWORD, do NOT set DISABLE_SECURITY_PLUGIN.
+# Use protocol: https and configure clients for TLS + basic auth (admin + that password).
+# Do not hand-edit half a security opensearch.yml in Helm unless it matches OpenSearch 3.x
+# docs; partial YAML often breaks transport SSL validation.
+# =============================================================================
 
 clusterName: opensearch-cluster
 nodeGroup: master
@@ -16,28 +34,11 @@ replicas: 1
 
 protocol: http
 
-config:
-  opensearch.yml: |
-    cluster.name: opensearch-cluster
-    network.host: 0.0.0.0
-
-    plugins.security.ssl.transport.pemcert_filepath: esnode.pem
-    plugins.security.ssl.transport.pemkey_filepath: esnode-key.pem
-    plugins.security.ssl.transport.pemtrustedcas_filepath: root-ca.pem
-    plugins.security.ssl.transport.enforce_hostname_verification: false
-
-    plugins.security.ssl.http.enabled: false
-
-    plugins.security.allow_unsafe_democertificates: true
-    plugins.security.allow_default_init_securityindex: true
-
 opensearchJavaOpts: "-Xmx1G -Xms1G"
 
-# Required by OpenSearch Security demo installer (chart >= 2.18 / OpenSearch >= 2.12).
-# Use a strong password (min 8 chars; upper+lower+digit+special).
 extraEnvs:
-  - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
-    value: "CHANGE_ME_Str0ng!"
+  - name: DISABLE_SECURITY_PLUGIN
+    value: "true"
 
 resources:
   requests:
