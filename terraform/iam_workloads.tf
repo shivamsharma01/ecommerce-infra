@@ -58,6 +58,15 @@ resource "google_pubsub_subscription_iam_member" "product_events_indexer_subscri
   member       = "serviceAccount:${local.product_indexer_sa}"
 }
 
+resource "google_pubsub_subscription_iam_member" "product_pubsub_health_subscriber" {
+  count = var.enable_product_pubsub_health_resources && local.product_sa != "" ? 1 : 0
+
+  project      = var.project_id
+  subscription = google_pubsub_subscription.product_pubsub_health[0].name
+  role         = "roles/pubsub.subscriber"
+  member       = "serviceAccount:${local.product_sa}"
+}
+
 resource "google_project_iam_member" "product_firestore_user" {
   count = local.product_sa != "" ? 1 : 0
 
@@ -69,7 +78,7 @@ resource "google_project_iam_member" "product_firestore_user" {
 resource "google_storage_bucket_iam_member" "product_catalog_object_admin" {
   count = local.product_sa != "" ? 1 : 0
 
-  bucket = data.google_storage_bucket.catalog_images.name
+  bucket = local.catalog_images_bucket_name
   role   = "roles/storage.objectAdmin"
   member = "serviceAccount:${local.product_sa}"
 }

@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Create a GCS bucket for catalog images and optionally allow public read (browser/UI).
 #
-# Product service write access for uploads is granted by Terraform when you set
-# workload_service_accounts.product to your product GCP service account.
+# Prefer letting Terraform create the bucket (create_catalog_images_bucket = true in terraform/).
+# This script remains useful for one-off buckets or non-Terraform workflows. Product write access
+# is granted by Terraform (storage.objectAdmin on the bucket for the product workload SA).
 #
 # Usage (from deploy/):
 #   cp catalog/bootstrap.env.example catalog/bootstrap.env   # edit PROJECT_ID, BUCKET, BUCKET_LOCATION

@@ -294,13 +294,17 @@ Do these **in order** the first time. Later you only repeat the parts that chang
 
 Goal: load a large demo product set with image URLs and make it searchable with minimal manual work.
 
-1. Run Terraform to create infra and confirm the pre-created image bucket name:
+1. Run Terraform to create infra. By default Terraform **creates** the catalog images bucket (`create_catalog_images_bucket = true`), grants the product workload service account **objectAdmin** on it, and (unless disabled) a **Pub/Sub health** topic/subscription for the product service. Confirm the bucket name and wire it into Kubernetes:
 
 ```bash
 cd terraform
 terraform apply
 terraform output -raw catalog_images_bucket_name
 ```
+
+Set **`CATALOG_IMAGES_BUCKET`** in `deploy/k8s/apps/product/configmap.yaml` to that value (or pass the same name via your overlay). If the bucket was created manually earlier and already exists, set `create_catalog_images_bucket = false` in `terraform.tfvars` and keep `catalog_images_bucket_name` in sync; otherwise use `terraform import 'google_storage_bucket.catalog_images_managed[0]' <bucket-name>`.
+
+**mcart-ui SSR host allowlist** (`www.mcart.space`, etc.) is not a GCP resource: keep **`NG_ALLOWED_HOSTS`** in `deploy/k8s/apps/mcart-ui/configmap.yaml` aligned with `security.allowedHosts` in the Angular app when you add hostnames.
 
 2. Add your images under:
 

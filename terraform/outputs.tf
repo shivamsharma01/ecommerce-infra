@@ -61,13 +61,18 @@ output "cloud_dns_zone_name_servers" {
 }
 
 output "catalog_images_bucket_name" {
-  description = "GCS bucket used by demo catalog product images."
-  value       = data.google_storage_bucket.catalog_images.name
+  description = "GCS bucket used by catalog product images (set CATALOG_IMAGES_BUCKET in the product service to this value)."
+  value       = local.catalog_images_bucket_name
 }
 
 output "catalog_images_public_base_url" {
   description = "Public base URL prefix for catalog image objects."
-  value       = "https://storage.googleapis.com/${data.google_storage_bucket.catalog_images.name}"
+  value       = "https://storage.googleapis.com/${local.catalog_images_bucket_name}"
+}
+
+output "product_pubsub_health_subscription" {
+  description = "Pub/Sub subscription id for Spring PubSubHealthIndicator (SPRING_CLOUD_GCP_PUBSUB_HEALTH_SUBSCRIPTION)."
+  value       = try(google_pubsub_subscription.product_pubsub_health[0].name, null)
 }
 
 output "public_https_url" {

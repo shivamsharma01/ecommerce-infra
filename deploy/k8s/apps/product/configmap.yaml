@@ -1,6 +1,7 @@
-# Use Workload Identity for Firestore in GKE (omit JSON key files). Tune security flags per environment.
-# CATALOG_IMAGES_BUCKET must exist in SPRING_CLOUD_GCP_PROJECT_ID; create the bucket and grant the product
-# Kubernetes service account permission to create objects (e.g. roles/storage.objectAdmin on the bucket).
+# Use Workload Identity for Firestore in GKE (omit JSON key files). Tune per environment.
+# Catalog bucket: Terraform can create it (create_catalog_images_bucket) and grant objectAdmin to the product SA.
+# Set CATALOG_IMAGES_BUCKET to `terraform output -raw catalog_images_bucket_name` (must match).
+# Pub/Sub health: Terraform creates topic/subscription mcart-product-pubsub-health* and grants subscriber; subscription id below must match.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -11,11 +12,12 @@ metadata:
 data:
   SERVER_PORT: "8080"
   SPRING_CLOUD_GCP_PROJECT_ID: "ecommerce-491019"
-  CATALOG_IMAGES_BUCKET: "ecommerce-mcart-catalog-image"
+  CATALOG_IMAGES_BUCKET: "ecommerce-mcart-catalog-images"
   CATALOG_IMAGE_PREFIX: "products"
   SPRING_CLOUD_GCP_FIRESTORE_ENABLED: "true"
   SPRING_CLOUD_GCP_FIRESTORE_HOST: ""
   SPRING_CLOUD_GCP_PUBSUB_ENABLED: "true"
+  SPRING_CLOUD_GCP_PUBSUB_HEALTH_SUBSCRIPTION: "mcart-product-pubsub-health-sub"
   APP_SECURITY_ENABLED: "true"
   APP_SECURITY_REQUIRED_SCOPE: "product.admin"
   SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "https://mcart.space"
