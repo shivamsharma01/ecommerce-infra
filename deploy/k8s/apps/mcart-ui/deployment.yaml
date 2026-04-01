@@ -44,7 +44,7 @@ spec:
               app.kubernetes.io/name: mcart-ui
       containers:
         - name: mcart-ui
-          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/mcart-ui:8a14443f0935c7f5e5555a810a037abdfa07aead
+          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/mcart-ui:bb14c577dc2144f8cd0c75ff1fb807fb340444ca
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
