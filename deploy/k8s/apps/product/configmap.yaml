@@ -1,4 +1,6 @@
 # Use Workload Identity for Firestore in GKE (omit JSON key files). Tune security flags per environment.
+# CATALOG_IMAGES_BUCKET must exist in SPRING_CLOUD_GCP_PROJECT_ID; create the bucket and grant the product
+# Kubernetes service account permission to create objects (e.g. roles/storage.objectAdmin on the bucket).
 apiVersion: v1
 kind: ConfigMap
 metadata:
