@@ -28,11 +28,8 @@ node_preemptible  = true
 # Optional Cloud DNS in GCP (delegate NS at registrar):
 # create_cloud_dns_public_zone = true
 
-# Catalog images GCS bucket (Terraform creates it by default):
-# create_catalog_images_bucket = true   # set false if the bucket already exists outside Terraform
-# catalog_images_bucket_name     = "ecommerce-mcart-catalog-images"  # optional; null => "<project_id>-mcart-catalog-images"
-# catalog_images_bucket_location = "ASIA-SOUTH2"                      # optional; defaults to upper(region)
-# catalog_images_bucket_force_destroy = false                        # true only for throwaway envs
+# Existing catalog images bucket (Terraform grants product SA objectAdmin; it does not create the bucket):
+# catalog_images_bucket_name = "ecommerce-mcart-catalog-images"
 #
-# Pub/Sub actuator health for product (dedicated empty subscription; default true):
+# Pub/Sub actuator health for product (topic/sub + subscriber IAM; default true):
 # enable_product_pubsub_health_resources = true

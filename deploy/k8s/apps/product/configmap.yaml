@@ -1,7 +1,6 @@
 # Use Workload Identity for Firestore in GKE (omit JSON key files). Tune per environment.
-# Catalog bucket: Terraform can create it (create_catalog_images_bucket) and grant objectAdmin to the product SA.
-# Set CATALOG_IMAGES_BUCKET to `terraform output -raw catalog_images_bucket_name` (must match).
-# Pub/Sub health: Terraform creates topic/subscription mcart-product-pubsub-health* and grants subscriber; subscription id below must match.
+# CATALOG_IMAGES_BUCKET must match the real GCS bucket name and terraform catalog_images_bucket_name (Terraform grants product SA objectAdmin only; it does not create the bucket).
+# SPRING_CLOUD_GCP_PUBSUB_HEALTH_SUBSCRIPTION matches Terraform topic/sub mcart-product-pubsub-health* when enable_product_pubsub_health_resources is true.
 apiVersion: v1
 kind: ConfigMap
 metadata:

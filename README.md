@@ -294,7 +294,7 @@ Do these **in order** the first time. Later you only repeat the parts that chang
 
 Goal: load a large demo product set with image URLs and make it searchable with minimal manual work.
 
-1. Run Terraform to create infra. By default Terraform **creates** the catalog images bucket (`create_catalog_images_bucket = true`), grants the product workload service account **objectAdmin** on it, and (unless disabled) a **Pub/Sub health** topic/subscription for the product service. Confirm the bucket name and wire it into Kubernetes:
+1. Ensure the catalog **GCS bucket already exists** (e.g. `deploy/scripts/create_catalog_bucket.sh`). Terraform **does not** create it; it grants the product workload service account **objectAdmin** on the bucket named by `catalog_images_bucket_name` (see `terraform output -raw catalog_images_bucket_name`). Optionally Terraform also creates a **Pub/Sub health** topic/subscription for the product service (`enable_product_pubsub_health_resources`, default true).
 
 ```bash
 cd terraform
@@ -302,7 +302,9 @@ terraform apply
 terraform output -raw catalog_images_bucket_name
 ```
 
-Set **`CATALOG_IMAGES_BUCKET`** in `deploy/k8s/apps/product/configmap.yaml` to that value (or pass the same name via your overlay). If the bucket was created manually earlier and already exists, set `create_catalog_images_bucket = false` in `terraform.tfvars` and keep `catalog_images_bucket_name` in sync; otherwise use `terraform import 'google_storage_bucket.catalog_images_managed[0]' <bucket-name>`.
+Set **`CATALOG_IMAGES_BUCKET`** in `deploy/k8s/apps/product/configmap.yaml` to **exactly** that bucket name (a mismatch causes upload 404s while reads can still work if objects were uploaded elsewhere).
+
+If you previously applied Terraform when it briefly **managed** the bucket as a resource, remove it from state before the next apply so Terraform does not try to destroy the bucket: `terraform state rm 'google_storage_bucket.catalog_images_managed[0]'`.
 
 **mcart-ui SSR host allowlist** (`www.mcart.space`, etc.) is not a GCP resource: keep **`NG_ALLOWED_HOSTS`** in `deploy/k8s/apps/mcart-ui/configmap.yaml` aligned with `security.allowedHosts` in the Angular app when you add hostnames.
 

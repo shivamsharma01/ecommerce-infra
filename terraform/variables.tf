@@ -244,27 +244,9 @@ variable "cloud_dns_zone_name" {
 }
 
 variable "catalog_images_bucket_name" {
-  description = "GCS bucket name for catalog product images. When create_catalog_images_bucket is true, Terraform creates this bucket; when false, it must already exist. Null defaults to \"<project_id>-mcart-catalog-images\"."
+  description = "Existing GCS bucket for catalog product images. Null defaults to \"<project_id>-mcart-catalog-images\". Create the bucket outside Terraform; this module grants IAM only."
   type        = string
   default     = null
-}
-
-variable "create_catalog_images_bucket" {
-  description = "If true, create and manage the catalog images bucket in Terraform and grant the product workload SA objectAdmin. If false, the bucket must already exist (previous behavior)."
-  type        = bool
-  default     = true
-}
-
-variable "catalog_images_bucket_location" {
-  description = "GCS location for the catalog bucket (e.g. ASIA-SOUTH2). Defaults to upper(var.region)."
-  type        = string
-  default     = null
-}
-
-variable "catalog_images_bucket_force_destroy" {
-  description = "If true, allow Terraform destroy to delete bucket contents (dev only)."
-  type        = bool
-  default     = false
 }
 
 variable "enable_product_pubsub_health_resources" {

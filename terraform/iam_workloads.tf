@@ -78,7 +78,7 @@ resource "google_project_iam_member" "product_firestore_user" {
 resource "google_storage_bucket_iam_member" "product_catalog_object_admin" {
   count = local.product_sa != "" ? 1 : 0
 
-  bucket = local.catalog_images_bucket_name
+  bucket = data.google_storage_bucket.catalog_images.name
   role   = "roles/storage.objectAdmin"
   member = "serviceAccount:${local.product_sa}"
 }

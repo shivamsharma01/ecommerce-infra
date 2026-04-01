@@ -61,13 +61,13 @@ output "cloud_dns_zone_name_servers" {
 }
 
 output "catalog_images_bucket_name" {
-  description = "GCS bucket used by catalog product images (set CATALOG_IMAGES_BUCKET in the product service to this value)."
-  value       = local.catalog_images_bucket_name
+  description = "GCS bucket used by catalog product images (set CATALOG_IMAGES_BUCKET in the product service to this exact name)."
+  value       = data.google_storage_bucket.catalog_images.name
 }
 
 output "catalog_images_public_base_url" {
   description = "Public base URL prefix for catalog image objects."
-  value       = "https://storage.googleapis.com/${local.catalog_images_bucket_name}"
+  value       = "https://storage.googleapis.com/${data.google_storage_bucket.catalog_images.name}"
 }
 
 output "product_pubsub_health_subscription" {

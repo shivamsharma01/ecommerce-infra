@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 # Create a GCS bucket for catalog images and optionally allow public read (browser/UI).
 #
-# Prefer letting Terraform create the bucket (create_catalog_images_bucket = true in terraform/).
-# This script remains useful for one-off buckets or non-Terraform workflows. Product write access
-# is granted by Terraform (storage.objectAdmin on the bucket for the product workload SA).
+# Create the catalog bucket outside Terraform. Terraform grants the product workload SA
+# storage.objectAdmin on the bucket name configured in terraform (catalog_images_bucket_name).
 #
 # Usage (from deploy/):
 #   cp catalog/bootstrap.env.example catalog/bootstrap.env   # edit PROJECT_ID, BUCKET, BUCKET_LOCATION
