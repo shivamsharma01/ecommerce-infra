@@ -2,11 +2,23 @@
 #   make data-install-es
 #
 # Service DNS (namespace mcart): opensearch-cluster-master.mcart.svc.cluster.local:9200
+#
+# The chart defaults to protocol: https while Spring apps use http://…:9200. Without the
+# config block, OpenSearch expects TLS on 9200 and closes plain HTTP ("Connection is closed").
+# Use the same admin password in K8s secrets search-secrets / product-indexer-secrets.
 
 clusterName: opensearch-cluster
 nodeGroup: master
 singleNode: true
 replicas: 1
+
+protocol: http
+
+config:
+  opensearch.yml: |
+    cluster.name: opensearch-cluster
+    network.host: 0.0.0.0
+    plugins.security.ssl.http.enabled: false
 
 opensearchJavaOpts: "-Xmx1G -Xms1G"
 
