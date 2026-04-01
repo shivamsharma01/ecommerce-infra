@@ -3,8 +3,10 @@
 #
 # Service DNS (namespace mcart): opensearch-cluster-master.mcart.svc.cluster.local:9200
 #
-# The chart defaults to protocol: https while Spring apps use http://…:9200. Without the
-# config block, OpenSearch expects TLS on 9200 and closes plain HTTP ("Connection is closed").
+# The chart defaults to protocol: https while Spring apps use http://…:9200. Without
+# plugins.security.ssl.http.enabled: false, REST expects TLS and plain HTTP fails.
+# Transport TLS must stay configured (demo PEMs in the image) or the security plugin
+# will not start ("Wrong Transport SSL configuration").
 # Use the same admin password in K8s secrets search-secrets / product-indexer-secrets.
 
 clusterName: opensearch-cluster
@@ -18,7 +20,16 @@ config:
   opensearch.yml: |
     cluster.name: opensearch-cluster
     network.host: 0.0.0.0
+
+    plugins.security.ssl.transport.pemcert_filepath: esnode.pem
+    plugins.security.ssl.transport.pemkey_filepath: esnode-key.pem
+    plugins.security.ssl.transport.pemtrustedcas_filepath: root-ca.pem
+    plugins.security.ssl.transport.enforce_hostname_verification: false
+
     plugins.security.ssl.http.enabled: false
+
+    plugins.security.allow_unsafe_democertificates: true
+    plugins.security.allow_default_init_securityindex: true
 
 opensearchJavaOpts: "-Xmx1G -Xms1G"
 
