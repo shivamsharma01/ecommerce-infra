@@ -46,7 +46,7 @@ spec:
               app.kubernetes.io/name: product-indexer
       containers:
         - name: product-indexer
-          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/product-indexer:d11a7b0776ee04b16d738325adb7a353f0c99741
+          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/product-indexer:114772f0229ddcc52dba45bb8bdfe318d3ece3d8
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
