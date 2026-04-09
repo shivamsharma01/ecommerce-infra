@@ -1,10 +1,4 @@
-# Global IPv4 reserved for the GKE Ingress external HTTP(S) load balancer.
-# Set Ingress annotation `kubernetes.io/ingress.global-static-ip-name` to var.static_ip_name.
-resource "google_compute_global_address" "mcart_public" {
-  name = var.static_ip_name
-}
-
-# Regional IPv4 reserved for the Envoy Gateway Service type LoadBalancer (Gateway API parallel rollout).
+# Regional IPv4 for the Envoy Gateway Service (LoadBalancer).
 resource "google_compute_address" "mcart_gateway" {
   name   = var.gateway_static_ip_name
   region = var.region

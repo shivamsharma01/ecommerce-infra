@@ -1,14 +1,7 @@
-# Deploy Kubernetes manifests to GKE (apps + ingress). Wire this file to your Cloud Build trigger
-# on the ecomm-infra repository (Cloud Source Repositories, Bitbucket, etc.—not GitHub required).
+# Cloud Build: apply GKE workloads (apps + Gateway API edge).
+# IAM: grant the Cloud Build SA roles/container.developer on the project.
 #
-# IAM: grant the Cloud Build service account (default: PROJECT_NUMBER@cloudbuild.gserviceaccount.com)
-#       the role roles/container.developer on the project (Kubernetes Engine Developer).
-#
-# Substitutions (override in the trigger if your cluster differs):
-#   _CLUSTER_NAME      — GKE cluster name (default mcart-gke)
-#   _GKE_LOCATION      — zone (e.g. asia-south2-a) OR region (e.g. asia-south2)
-#   _GKE_LOCATION_KIND — "zone" or "region"
-#   _K8S_NAMESPACE     — target namespace (default mcart)
+# Substitutions: _CLUSTER_NAME, _GKE_LOCATION, _GKE_LOCATION_KIND (zone|region), _K8S_NAMESPACE
 
 substitutions:
   _CLUSTER_NAME: mcart-gke
@@ -30,7 +23,8 @@ steps:
       - |
         export DEBIAN_FRONTEND=noninteractive
         apt-get update -qq
-        apt-get install -y -qq make
+        apt-get install -y -qq make curl
+        curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
         case "${_GKE_LOCATION_KIND}" in
           region)
@@ -47,4 +41,5 @@ steps:
 
         cd deploy
         make apps-apply NS="${_K8S_NAMESPACE}"
-        make ingress-apply NS="${_K8S_NAMESPACE}"
+        make gateway-install
+        make gateway-apply

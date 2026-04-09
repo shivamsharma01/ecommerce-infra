@@ -11,5 +11,5 @@ data:
   PORT: "4000"
   # Angular SSR SSRF guard — must match Host headers users hit (comma-separated). See angular.json security.allowedHosts.
   NG_ALLOWED_HOSTS: "localhost,mcart.space,www.mcart.space"
-  # Browser / SSR may read API base URL from env at build or runtime — set to your public API or Ingress:
+  # Public origin for browser/SSR API calls (must match Gateway hostname + TLS):
   API_BASE_URL: "https://mcart.space"

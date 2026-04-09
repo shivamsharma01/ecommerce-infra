@@ -1,3 +1,9 @@
+# Public vs JWT at edge mirrors Spring Security in each service:
+# - auth: permitAll on /auth/*, /.well-known, /oauth2, /login (see AuthorizationServerConfig)
+# - product: GET/HEAD /api/** public; mutations need JWT + SCOPE_product.admin (SecurityConfig)
+# - search: POST /api/search permitAll; GET/HEAD /api/** need JWT when scoped (SecurityConfig)
+# - user: actuator/health/docs permitAll in-app; /user/** authenticated (SecurityConfig)
+# - product-indexer: only /product-indexer/admin/** needs JWT + scopes; OPTIONS public for CORS
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -31,6 +37,93 @@ spec:
         - name: auth
           namespace: mcart
           port: 8081
+    # Product catalog reads are public; writes stay on mcart-protected (JWT).
+    - name: product-read-public
+      matches:
+        - path:
+            type: PathPrefix
+            value: "/api/products"
+          method: GET
+        - path:
+            type: PathPrefix
+            value: "/api/products"
+          method: HEAD
+        - path:
+            type: PathPrefix
+            value: "/api/products"
+          method: OPTIONS
+      backendRefs:
+        - name: product
+          namespace: mcart
+          port: 80
+    # springdoc / Swagger (must be before UI / catch-all).
+    - name: product-openapi
+      matches:
+        - path:
+            type: PathPrefix
+            value: "/v3/api-docs"
+          method: GET
+        - path:
+            type: PathPrefix
+            value: "/v3/api-docs"
+          method: HEAD
+        - path:
+            type: PathPrefix
+            value: "/v3/api-docs"
+          method: OPTIONS
+        - path:
+            type: PathPrefix
+            value: "/swagger-ui"
+          method: GET
+        - path:
+            type: PathPrefix
+            value: "/swagger-ui"
+          method: HEAD
+        - path:
+            type: PathPrefix
+            value: "/swagger-ui"
+          method: OPTIONS
+      backendRefs:
+        - name: product
+          namespace: mcart
+          port: 80
+    # Search: POST /api/search is intentionally public in search SecurityConfig.
+    - name: search-post-public
+      matches:
+        - path:
+            type: PathPrefix
+            value: "/api/search"
+          method: POST
+        - path:
+            type: PathPrefix
+            value: "/api/search"
+          method: OPTIONS
+      backendRefs:
+        - name: search
+          namespace: mcart
+          port: 80
+    # CORS preflight for /user (all /user API calls require JWT except OPTIONS).
+    - name: user-options-public
+      matches:
+        - path:
+            type: PathPrefix
+            value: "/user"
+          method: OPTIONS
+      backendRefs:
+        - name: user
+          namespace: mcart
+          port: 8082
+    # CORS preflight for product-indexer admin (JWT required for real admin calls).
+    - name: product-indexer-admin-options-public
+      matches:
+        - path:
+            type: PathPrefix
+            value: "/product-indexer/admin"
+          method: OPTIONS
+      backendRefs:
+        - name: product-indexer
+          namespace: mcart
+          port: 80
     # UI catch-all (must be last)
     - name: ui
       matches:
@@ -96,6 +189,19 @@ spec:
         - path:
             type: PathPrefix
             value: "/api/products"
+          method: POST
+        - path:
+            type: PathPrefix
+            value: "/api/products"
+          method: PUT
+        - path:
+            type: PathPrefix
+            value: "/api/products"
+          method: PATCH
+        - path:
+            type: PathPrefix
+            value: "/api/products"
+          method: DELETE
       backendRefs:
         - name: product
           namespace: mcart
@@ -109,9 +215,27 @@ spec:
               - "x-mcart-auth-sub"
               - "x-mcart-auth-scope"
       matches:
+        # POST /api/search is public (see mcart-public.search-post-public).
         - path:
             type: PathPrefix
             value: "/api/search"
+          method: GET
+        - path:
+            type: PathPrefix
+            value: "/api/search"
+          method: HEAD
+        - path:
+            type: PathPrefix
+            value: "/api/search"
+          method: PUT
+        - path:
+            type: PathPrefix
+            value: "/api/search"
+          method: PATCH
+        - path:
+            type: PathPrefix
+            value: "/api/search"
+          method: DELETE
       backendRefs:
         - name: search
           namespace: mcart
@@ -128,6 +252,27 @@ spec:
         - path:
             type: PathPrefix
             value: "/user"
+          method: GET
+        - path:
+            type: PathPrefix
+            value: "/user"
+          method: HEAD
+        - path:
+            type: PathPrefix
+            value: "/user"
+          method: POST
+        - path:
+            type: PathPrefix
+            value: "/user"
+          method: PUT
+        - path:
+            type: PathPrefix
+            value: "/user"
+          method: PATCH
+        - path:
+            type: PathPrefix
+            value: "/user"
+          method: DELETE
       backendRefs:
         - name: user
           namespace: mcart
@@ -141,9 +286,31 @@ spec:
               - "x-mcart-auth-sub"
               - "x-mcart-auth-scope"
       matches:
+        # Only /product-indexer/admin/** is secured in product-indexer SecurityConfig.
         - path:
             type: PathPrefix
-            value: "/product-indexer"
+            value: "/product-indexer/admin"
+          method: GET
+        - path:
+            type: PathPrefix
+            value: "/product-indexer/admin"
+          method: HEAD
+        - path:
+            type: PathPrefix
+            value: "/product-indexer/admin"
+          method: POST
+        - path:
+            type: PathPrefix
+            value: "/product-indexer/admin"
+          method: PUT
+        - path:
+            type: PathPrefix
+            value: "/product-indexer/admin"
+          method: PATCH
+        - path:
+            type: PathPrefix
+            value: "/product-indexer/admin"
+          method: DELETE
       backendRefs:
         - name: product-indexer
           namespace: mcart

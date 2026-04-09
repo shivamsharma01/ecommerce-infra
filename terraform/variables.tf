@@ -214,21 +214,15 @@ variable "extra_project_iam_members" {
 }
 
 variable "domain_name" {
-  description = "Primary public hostname (no scheme), e.g. mcart.space. Used for managed cert and optional Cloud DNS records."
+  description = "Primary public hostname (no scheme), e.g. mcart.space. Used for optional Cloud DNS and app issuer URLs."
   type        = string
   default     = "mcart.space"
 }
 
 variable "domain_aliases" {
-  description = "Extra hostnames for the managed SSL certificate (e.g. www.mcart.space)."
+  description = "Extra hostnames (e.g. www) for public DNS A records to the gateway IP."
   type        = list(string)
   default     = ["www.mcart.space"]
-}
-
-variable "static_ip_name" {
-  description = "GCP resource name for the global IPv4 attached to the public HTTPS load balancer (DNS points here)."
-  type        = string
-  default     = "mcart-public-ip"
 }
 
 variable "gateway_static_ip_name" {

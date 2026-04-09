@@ -50,11 +50,6 @@ output "kubectl_context_hint" {
   value       = "gcloud container clusters get-credentials ${google_container_cluster.primary.name} --location ${google_container_cluster.primary.location} --project ${var.project_id}"
 }
 
-output "mcart_static_ip_address" {
-  description = "Global IPv4 for DNS: apex and www A records → this address (public HTTPS LB on GKE Ingress)."
-  value       = google_compute_global_address.mcart_public.address
-}
-
 output "mcart_gateway_static_ip_address" {
   description = "Regional IPv4 reserved for the Envoy Gateway Service type LoadBalancer (single public entrypoint)."
   value       = google_compute_address.mcart_gateway.address
@@ -81,6 +76,6 @@ output "product_pubsub_health_subscription" {
 }
 
 output "public_https_url" {
-  description = "Browser origin once DNS points at mcart_static_ip_address (https://var.domain_name)."
+  description = "Public site URL once DNS points at mcart_gateway_static_ip_address."
   value       = "https://${var.domain_name}"
 }

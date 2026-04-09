@@ -15,11 +15,6 @@ spec:
         remoteJWKS:
           uri: https://mcart.space/oauth2/jwks
           cacheDuration: 5m
-    claimToHeaders:
-      - claim: userId
-        header: x-mcart-user-id
-      - claim: sub
-        header: x-mcart-auth-sub
-      - claim: scope
-        header: x-mcart-auth-scope
+        # claimToHeaders is not valid on spec.jwt in Envoy Gateway v1.7.1 CRD (strict decode error).
+        # JWT signature + issuer validation still applies; backends continue to validate the Bearer token.
 

@@ -17,10 +17,9 @@ GKE_LOCATION ?= asia-south2-a
 export AUTH_DB_PASS AUTH_DB_PASS_FILE USER_DB_PASS USER_DB_PASS_FILE
 ROOT := $(abspath $(CURDIR)/../..)
 K8S := $(abspath $(CURDIR))/k8s/apps
-ING := $(abspath $(CURDIR))/k8s/ingress
 GW  := $(abspath $(CURDIR))/k8s/gateway
 
-.PHONY: helm-repo k8s-ready kubectl-required data-install data-install-redis data-install-es flyway-install apps-apply ingress-apply gateway-install gateway-apply catalog-bootstrap
+.PHONY: helm-repo k8s-ready kubectl-required data-install data-install-redis data-install-es flyway-install apps-apply gateway-install gateway-apply catalog-bootstrap
 
 # Helm reaches the API without the kubectl binary; kubectl cluster-info fails if kubectl is missing.
 k8s-ready:
@@ -28,7 +27,7 @@ k8s-ready:
 	if command -v $(KUBECTL) >/dev/null 2>&1 && $(KUBECTL) cluster-info >/dev/null 2>&1; then exit 0; fi; \
 	echo "Cannot reach the Kubernetes API (Helm could not list kube-system; kubectl check also failed or kubectl is missing)."; \
 	if ! command -v $(KUBECTL) >/dev/null 2>&1; then \
-	  echo "Install kubectl for diagnostics and for make apps-apply / ingress-apply:"; \
+	  echo "Install kubectl for diagnostics and for make apps-apply / gateway-apply:"; \
 	  echo "  gcloud components install kubectl"; \
 	fi; \
 	if command -v $(KUBECTL) >/dev/null 2>&1; then \
@@ -115,25 +114,34 @@ apps-apply: k8s-ready kubectl-required
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/mcart-ui/deployment.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/mcart-ui/service.yaml
 
-# GKE Ingress + managed cert (after apps-apply; DNS → Ingress IP; uncomment cert annotation in YAML when ready).
-ingress-apply: k8s-ready kubectl-required
-	$(KUBECTL) apply -f $(ING)/backendconfig.yaml
-	$(KUBECTL) apply -f $(ING)/managed-certificate.yaml
-	$(KUBECTL) apply -f $(ING)/mcart-store-ingress.yaml
-
-# Gateway API + JWT verification (Envoy Gateway). This is a parallel rollout path; see k8s/gateway/README.md.
+# Gateway API + JWT (Envoy Gateway + cert-manager). See k8s/gateway/README.md.
+# install.yaml ships CRDs + controller only — it does NOT create a GatewayClass (see 00-gatewayclass.yaml).
+# Do not use `helm install ... gateway-helm --version v0.0.0-latest` for production; use the pinned install.yaml.
 gateway-install: k8s-ready
-	@echo "Installing Envoy Gateway v1.7.1 (cluster-wide CRDs/controllers)..."
+	@echo "Installing Envoy Gateway v1.7.1 (official install.yaml: CRDs + controller)..."
 	$(KUBECTL) apply --server-side -f "https://github.com/envoyproxy/gateway/releases/download/v1.7.1/install.yaml"
 	$(KUBECTL) wait --timeout=5m -n envoy-gateway-system deployment/envoy-gateway --for=condition=Available
+	@echo "Creating GatewayClass envoy-gateway (required; not in upstream install.yaml)..."
+	$(KUBECTL) apply -f $(GW)/00-gatewayclass.yaml
+	@echo "Verifying GatewayClass is visible and accepted:"
+	@$(KUBECTL) get gatewayclass envoy-gateway -o wide
 
-	@echo "Installing cert-manager v1.16.3..."
-	$(KUBECTL) apply -f "https://github.com/cert-manager/cert-manager/releases/download/v1.16.3/cert-manager.yaml"
-	@echo "IMPORTANT: cert-manager must be configured with Gateway API support enabled."
-	@echo "If your cert-manager install does not enable Gateway API, install via Helm with enableGatewayAPI=true."
+	@echo "Installing cert-manager via Helm (Gateway API HTTP-01 solver enabled)..."
+	$(HELM) repo add jetstack https://charts.jetstack.io 2>/dev/null || true
+	$(HELM) repo update
+	$(HELM) upgrade --install cert-manager jetstack/cert-manager \
+	  --namespace cert-manager --create-namespace \
+	  --version v1.16.3 \
+	  --set crds.enabled=true \
+	  --set config.enableGatewayAPI=true
+	$(KUBECTL) wait --timeout=5m -n cert-manager deploy/cert-manager --for=condition=Available
+	$(KUBECTL) wait --timeout=5m -n cert-manager deploy/cert-manager-webhook --for=condition=Available
+	$(KUBECTL) wait --timeout=5m -n cert-manager deploy/cert-manager-cainjector --for=condition=Available
 
 gateway-apply: k8s-ready kubectl-required
 	$(KUBECTL) apply -f $(GW)/00-namespace.yaml
+	$(KUBECTL) apply -f $(GW)/00-gatewayclass.yaml
+	$(KUBECTL) apply -f $(GW)/05-referencegrant.yaml
 	$(KUBECTL) apply -f $(GW)/01-gateway.yaml
 	$(KUBECTL) apply -f $(GW)/02-httproutes.yaml
 	$(KUBECTL) apply -f $(GW)/03-securitypolicy-jwt.yaml

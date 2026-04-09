@@ -1,0 +1,15 @@
+# HTTPRoutes live in mcart-gateway but backend Services are in mcart.
+# Gateway API requires an explicit grant in the backend namespace.
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: mcart-gateway-to-services
+  namespace: mcart
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: mcart-gateway
+  to:
+    - group: ""
+      kind: Service

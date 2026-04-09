@@ -2,8 +2,6 @@ apiVersion: v1
 kind: Service
 metadata:
   name: auth
-  annotations:
-    cloud.google.com/backend-config: '{"default":"auth-bc-v2"}'
   labels:
     app: auth
 spec:
