@@ -1,13 +1,21 @@
-# Cloud Build: apply GKE workloads (apps + Gateway API edge).
-# IAM: grant the Cloud Build SA roles/container.developer on the project.
+# Cloud Build: apply GKE workloads (microservices in mcart namespace).
 #
-# Substitutions: _CLUSTER_NAME, _GKE_LOCATION, _GKE_LOCATION_KIND (zone|region), _K8S_NAMESPACE
+# IAM: grant the Cloud Build service account roles/container.developer (namespace-scoped deploy is enough for apps-apply).
+#
+# Envoy Gateway install.yaml patches ClusterRoles, webhooks, etc. That needs cluster-admin-style permissions
+# (e.g. container.clusterRoles.update on GKE). Do NOT run gateway-install from CI unless the build SA has those
+# roles — run it once manually, then use _RUN_GATEWAY_APPLY=true only when you change files under deploy/k8s/gateway/.
+#
+# Substitutions: _CLUSTER_NAME, _GKE_LOCATION, _GKE_LOCATION_KIND (zone|region), _K8S_NAMESPACE,
+#   _RUN_GATEWAY_INSTALL (true|false), _RUN_GATEWAY_APPLY (true|false)
 
 substitutions:
   _CLUSTER_NAME: mcart-gke
   _GKE_LOCATION: asia-south2-a
   _GKE_LOCATION_KIND: zone
   _K8S_NAMESPACE: mcart
+  _RUN_GATEWAY_INSTALL: "false"
+  _RUN_GATEWAY_APPLY: "false"
 
 options:
   logging: CLOUD_LOGGING_ONLY
@@ -41,5 +49,17 @@ steps:
 
         cd deploy
         make apps-apply NS="${_K8S_NAMESPACE}"
-        make gateway-install
-        make gateway-apply
+
+        if [ "${_RUN_GATEWAY_INSTALL}" = "true" ]; then
+          echo "Running gateway-install (requires cluster-wide RBAC on the build identity)..."
+          make gateway-install
+        else
+          echo "Skipping gateway-install (set substitution _RUN_GATEWAY_INSTALL=true if SA has cluster admin + you need it)."
+        fi
+
+        if [ "${_RUN_GATEWAY_APPLY}" = "true" ]; then
+          echo "Running gateway-apply..."
+          make gateway-apply
+        else
+          echo "Skipping gateway-apply (set _RUN_GATEWAY_APPLY=true when gateway manifests change)."
+        fi

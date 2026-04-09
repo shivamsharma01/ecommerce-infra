@@ -16,7 +16,7 @@ Public HTTPS uses **Kubernetes Gateway API + Envoy Gateway + cert-manager** (not
 | [`deploy/helm/`](deploy/helm/) | Bitnami PostgreSQL/Redis, OpenSearch, one-shot Flyway bootstrap chart |
 | [`deploy/k8s/apps/`](deploy/k8s/apps/) | Deployments, Services, ConfigMaps for each microservice (secrets via gitignored `secret.yaml`) |
 | [`deploy/k8s/gateway/`](deploy/k8s/gateway/) | `Gateway`, `HTTPRoute`, JWT `SecurityPolicy`, cert-manager `ClusterIssuer` + `Certificate` |
-| [`cloudbuild.yaml`](cloudbuild.yaml) | Cloud Build: `make apps-apply`, `make gateway-install`, `make gateway-apply` |
+| [`cloudbuild.yaml`](cloudbuild.yaml) | Cloud Build: `make apps-apply` by default; gateway steps opt-in via `_RUN_GATEWAY_INSTALL` / `_RUN_GATEWAY_APPLY` |
 
 ---
 
@@ -39,7 +39,7 @@ Public HTTPS uses **Kubernetes Gateway API + Envoy Gateway + cert-manager** (not
 5. **Apps:** copy `secret.example.yaml` → `secret.yaml` where needed, `make apps-apply NS=mcart`.
 6. **Edge:** `make gateway-install && make gateway-apply`, then bind the regional IP to the Envoy **LoadBalancer** Service (see gateway README). Point DNS at that IP.
 
-**Cloud Build:** grant the build service account `roles/container.developer`. The trigger runs `cloudbuild.yaml` (apps + gateway). It does **not** apply gitignored secrets.
+**Cloud Build:** grant the build service account `roles/container.developer`. The default trigger only runs `apps-apply` (microservices). `gateway-install` needs extra GKE IAM (cluster roles / webhooks); run it once from an admin context, then set `_RUN_GATEWAY_APPLY=true` on the trigger when you change `deploy/k8s/gateway/`. It does **not** apply gitignored secrets.
 
 ---
 
