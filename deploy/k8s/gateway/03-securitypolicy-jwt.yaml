@@ -1,0 +1,25 @@
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: mcart-jwt
+  namespace: mcart-gateway
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: mcart-protected
+  jwt:
+    providers:
+      - name: mcart-auth
+        issuer: https://mcart.space
+        remoteJWKS:
+          uri: https://mcart.space/oauth2/jwks
+          cacheDuration: 5m
+    claimToHeaders:
+      - claim: userId
+        header: x-mcart-user-id
+      - claim: sub
+        header: x-mcart-auth-sub
+      - claim: scope
+        header: x-mcart-auth-scope
+

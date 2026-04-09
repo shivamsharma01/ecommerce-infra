@@ -55,6 +55,11 @@ output "mcart_static_ip_address" {
   value       = google_compute_global_address.mcart_public.address
 }
 
+output "mcart_gateway_static_ip_address" {
+  description = "Regional IPv4 reserved for the Envoy Gateway Service type LoadBalancer (single public entrypoint)."
+  value       = google_compute_address.mcart_gateway.address
+}
+
 output "cloud_dns_zone_name_servers" {
   description = "Delegate your registrar to these NS records when create_cloud_dns_public_zone is true."
   value       = try(google_dns_managed_zone.public[0].name_servers, null)

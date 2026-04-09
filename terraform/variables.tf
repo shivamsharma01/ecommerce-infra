@@ -231,6 +231,12 @@ variable "static_ip_name" {
   default     = "mcart-public-ip"
 }
 
+variable "gateway_static_ip_name" {
+  description = "GCP resource name for the (regional) IPv4 attached to the Envoy Gateway Service type LoadBalancer."
+  type        = string
+  default     = "mcart-gateway-ip"
+}
+
 variable "create_cloud_dns_public_zone" {
   description = "If true, create a Cloud DNS public zone for var.domain_name and A records to the static IP (requires NS delegation at registrar)."
   type        = bool

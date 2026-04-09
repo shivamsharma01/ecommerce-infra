@@ -1,0 +1,151 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: mcart-public
+  namespace: mcart-gateway
+  labels:
+    app.kubernetes.io/name: mcart-gateway
+spec:
+  parentRefs:
+    - name: mcart
+  hostnames:
+    - "mcart.space"
+    - "www.mcart.space"
+  rules:
+    # Authorization Server + Auth REST must stay publicly reachable.
+    - name: auth-oidc-and-rest
+      matches:
+        - path:
+            type: PathPrefix
+            value: "/.well-known"
+        - path:
+            type: PathPrefix
+            value: "/oauth2"
+        - path:
+            type: PathPrefix
+            value: "/login"
+        - path:
+            type: PathPrefix
+            value: "/auth"
+      backendRefs:
+        - name: auth
+          namespace: mcart
+          port: 8081
+    # UI catch-all (must be last)
+    - name: ui
+      matches:
+        - path:
+            type: PathPrefix
+            value: "/"
+      backendRefs:
+        - name: mcart-ui
+          namespace: mcart
+          port: 80
+
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: mcart-http-to-https
+  namespace: mcart-gateway
+spec:
+  parentRefs:
+    - name: mcart
+      sectionName: http
+  hostnames:
+    - "mcart.space"
+    - "www.mcart.space"
+  rules:
+    - name: redirect
+      matches:
+        - path:
+            type: PathPrefix
+            value: "/"
+      filters:
+        - type: RequestRedirect
+          requestRedirect:
+            scheme: https
+            statusCode: 301
+
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: mcart-protected
+  namespace: mcart-gateway
+  labels:
+    app.kubernetes.io/name: mcart-gateway
+    mcart.security/jwt: "required"
+spec:
+  parentRefs:
+    - name: mcart
+  hostnames:
+    - "mcart.space"
+    - "www.mcart.space"
+  rules:
+    # Prevent clients from spoofing identity headers; only the gateway may add them.
+    - name: protected-api
+      filters:
+        - type: RequestHeaderModifier
+          requestHeaderModifier:
+            remove:
+              - "x-mcart-user-id"
+              - "x-mcart-auth-sub"
+              - "x-mcart-auth-scope"
+      matches:
+        - path:
+            type: PathPrefix
+            value: "/api/products"
+      backendRefs:
+        - name: product
+          namespace: mcart
+          port: 80
+    - name: protected-search
+      filters:
+        - type: RequestHeaderModifier
+          requestHeaderModifier:
+            remove:
+              - "x-mcart-user-id"
+              - "x-mcart-auth-sub"
+              - "x-mcart-auth-scope"
+      matches:
+        - path:
+            type: PathPrefix
+            value: "/api/search"
+      backendRefs:
+        - name: search
+          namespace: mcart
+          port: 80
+    - name: protected-user
+      filters:
+        - type: RequestHeaderModifier
+          requestHeaderModifier:
+            remove:
+              - "x-mcart-user-id"
+              - "x-mcart-auth-sub"
+              - "x-mcart-auth-scope"
+      matches:
+        - path:
+            type: PathPrefix
+            value: "/user"
+      backendRefs:
+        - name: user
+          namespace: mcart
+          port: 8082
+    - name: protected-indexer
+      filters:
+        - type: RequestHeaderModifier
+          requestHeaderModifier:
+            remove:
+              - "x-mcart-user-id"
+              - "x-mcart-auth-sub"
+              - "x-mcart-auth-scope"
+      matches:
+        - path:
+            type: PathPrefix
+            value: "/product-indexer"
+      backendRefs:
+        - name: product-indexer
+          namespace: mcart
+          port: 80
+

@@ -4,6 +4,12 @@ resource "google_compute_global_address" "mcart_public" {
   name = var.static_ip_name
 }
 
+# Regional IPv4 reserved for the Envoy Gateway Service type LoadBalancer (Gateway API parallel rollout).
+resource "google_compute_address" "mcart_gateway" {
+  name   = var.gateway_static_ip_name
+  region = var.region
+}
+
 resource "google_dns_managed_zone" "public" {
   count = var.create_cloud_dns_public_zone ? 1 : 0
 
@@ -19,7 +25,8 @@ resource "google_dns_record_set" "apex_a" {
   managed_zone = google_dns_managed_zone.public[0].name
   type         = "A"
   ttl          = 300
-  rrdatas      = [google_compute_global_address.mcart_public.address]
+  # Gateway is the single public entrypoint now.
+  rrdatas      = [google_compute_address.mcart_gateway.address]
 }
 
 resource "google_dns_record_set" "alias_a" {
@@ -29,5 +36,8 @@ resource "google_dns_record_set" "alias_a" {
   managed_zone = google_dns_managed_zone.public[0].name
   type         = "A"
   ttl          = 300
-  rrdatas      = [google_compute_global_address.mcart_public.address]
+  # Gateway is the single public entrypoint now.
+  rrdatas      = [google_compute_address.mcart_gateway.address]
 }
+
+## No parallel rollout hostname: single flow uses apex + aliases only.
