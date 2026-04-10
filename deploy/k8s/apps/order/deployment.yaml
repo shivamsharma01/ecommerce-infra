@@ -18,6 +18,7 @@ spec:
         app.kubernetes.io/name: order
         app: order
     spec:
+      serviceAccountName: order
       terminationGracePeriodSeconds: 30
       containers:
         - name: order

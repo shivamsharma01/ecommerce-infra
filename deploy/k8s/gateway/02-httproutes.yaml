@@ -93,6 +93,17 @@ spec:
         - name: product-indexer
           namespace: mcart
           port: 80
+    # CORS preflight for /inventory (JWT required for real calls; see mcart-protected).
+    - name: inventory-options-public
+      matches:
+        - path:
+            type: PathPrefix
+            value: "/inventory"
+          method: OPTIONS
+      backendRefs:
+        - name: inventory
+          namespace: mcart
+          port: 80
     # UI catch-all (must be last)
     - name: ui
       matches:
@@ -328,6 +339,43 @@ spec:
           method: DELETE
       backendRefs:
         - name: product-indexer
+          namespace: mcart
+          port: 80
+    - name: protected-inventory
+      filters:
+        - type: RequestHeaderModifier
+          requestHeaderModifier:
+            remove:
+              - "x-mcart-user-id"
+              - "x-mcart-auth-sub"
+              - "x-mcart-auth-scope"
+      matches:
+        - path:
+            type: PathPrefix
+            value: "/inventory"
+          method: GET
+        - path:
+            type: PathPrefix
+            value: "/inventory"
+          method: HEAD
+        - path:
+            type: PathPrefix
+            value: "/inventory"
+          method: POST
+        - path:
+            type: PathPrefix
+            value: "/inventory"
+          method: PUT
+        - path:
+            type: PathPrefix
+            value: "/inventory"
+          method: PATCH
+        - path:
+            type: PathPrefix
+            value: "/inventory"
+          method: DELETE
+      backendRefs:
+        - name: inventory
           namespace: mcart
           port: 80
 

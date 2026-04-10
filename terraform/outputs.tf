@@ -43,6 +43,8 @@ output "workload_service_account_emails" {
     product         = google_service_account.workload_product[0].email
     product_indexer = google_service_account.workload_product_indexer[0].email
     email           = google_service_account.workload_email[0].email
+    inventory       = google_service_account.workload_inventory[0].email
+    order             = google_service_account.workload_order[0].email
   } : null
 }
 

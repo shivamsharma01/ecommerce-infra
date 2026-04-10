@@ -18,6 +18,7 @@ spec:
         app.kubernetes.io/name: inventory
         app: inventory
     spec:
+      serviceAccountName: inventory
       terminationGracePeriodSeconds: 30
       containers:
         - name: inventory

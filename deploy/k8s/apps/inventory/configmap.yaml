@@ -12,4 +12,9 @@ data:
   SPRING_DATASOURCE_URL: "jdbc:postgresql://mcart-pg-postgresql.mcart.svc.cluster.local:5432/inventory"
   SPRING_DATASOURCE_USERNAME: "inventory_user"
   SPRING_DATASOURCE_PASSWORD: "MY_PASSWORD"
+  SPRING_CLOUD_GCP_PROJECT_ID: "ecommerce-491019"
+  SPRING_CLOUD_GCP_PUBSUB_ENABLED: "true"
+  INVENTORY_PUBSUB_ENABLED: "true"
+  INVENTORY_PUBSUB_SUBSCRIPTION: "inventory-product-events-sub"
+  INVENTORY_PRODUCT_BASE_URL: "http://product.mcart.svc.cluster.local"
 

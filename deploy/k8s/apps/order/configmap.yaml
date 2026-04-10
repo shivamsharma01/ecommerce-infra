@@ -16,4 +16,9 @@ data:
   ORDER_INVENTORY_BASE_URL: "http://inventory.mcart.svc.cluster.local"
   ORDER_PAYMENT_BASE_URL: "http://payment.mcart.svc.cluster.local"
   ORDER_PRODUCT_BASE_URL: "http://product.mcart.svc.cluster.local"
+  ORDER_USER_BASE_URL: "http://user.mcart.svc.cluster.local:8082"
+  SPRING_CLOUD_GCP_PROJECT_ID: "ecommerce-491019"
+  SPRING_CLOUD_GCP_PUBSUB_ENABLED: "true"
+  ORDER_PUBSUB_ENABLED: "true"
+  ORDER_PUBSUB_TOPIC: "order-paid-events"
 

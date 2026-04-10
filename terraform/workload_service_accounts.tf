@@ -41,3 +41,19 @@ resource "google_service_account" "workload_email" {
   account_id   = "mcart-email"
   display_name = "MCart email service (Pub/Sub verification-email subscriber + SMTP)"
 }
+
+resource "google_service_account" "workload_inventory" {
+  count = var.create_workload_service_accounts ? 1 : 0
+
+  project      = var.project_id
+  account_id   = "mcart-inventory"
+  display_name = "MCart inventory (Pub/Sub product-events subscriber)"
+}
+
+resource "google_service_account" "workload_order" {
+  count = var.create_workload_service_accounts ? 1 : 0
+
+  project      = var.project_id
+  account_id   = "mcart-order"
+  display_name = "MCart order service (Pub/Sub order-paid publisher)"
+}

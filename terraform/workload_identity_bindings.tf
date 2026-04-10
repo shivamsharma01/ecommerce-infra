@@ -46,3 +46,19 @@ resource "google_service_account_iam_member" "wi_email" {
   member             = "serviceAccount:${local.workload_pool}[${local.workload_ns}/email]"
 }
 
+resource "google_service_account_iam_member" "wi_inventory" {
+  count = local.inventory_sa != "" && var.enable_workload_identity ? 1 : 0
+
+  service_account_id = "projects/${var.project_id}/serviceAccounts/${local.inventory_sa}"
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "serviceAccount:${local.workload_pool}[${local.workload_ns}/inventory]"
+}
+
+resource "google_service_account_iam_member" "wi_order" {
+  count = local.order_sa != "" && var.enable_workload_identity ? 1 : 0
+
+  service_account_id = "projects/${var.project_id}/serviceAccounts/${local.order_sa}"
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "serviceAccount:${local.workload_pool}[${local.workload_ns}/order]"
+}
+

@@ -11,6 +11,28 @@ resource "google_pubsub_subscription" "product_events_sub" {
   depends_on = [google_pubsub_topic.product_events]
 }
 
+resource "google_pubsub_subscription" "inventory_product_events_sub" {
+  name  = "inventory-product-events-sub"
+  topic = google_pubsub_topic.product_events.name
+
+  ack_deadline_seconds = 60
+
+  depends_on = [google_pubsub_topic.product_events]
+}
+
+resource "google_pubsub_topic" "order_paid_events" {
+  name = "order-paid-events"
+}
+
+resource "google_pubsub_subscription" "order_paid_email_sub" {
+  name  = "order-paid-email-sub"
+  topic = google_pubsub_topic.order_paid_events.name
+
+  ack_deadline_seconds = 120
+
+  depends_on = [google_pubsub_topic.order_paid_events]
+}
+
 resource "google_pubsub_topic" "user_signup_events" {
   name = "user-signup-events"
 }

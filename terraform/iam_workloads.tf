@@ -17,6 +17,12 @@ locals {
   email_sa = var.create_workload_service_accounts ? google_service_account.workload_email[0].email : (
     local.wsa.email == null ? "" : trimspace(local.wsa.email)
   )
+  inventory_sa = var.create_workload_service_accounts ? google_service_account.workload_inventory[0].email : (
+    local.wsa.inventory == null ? "" : trimspace(local.wsa.inventory)
+  )
+  order_sa = var.create_workload_service_accounts ? google_service_account.workload_order[0].email : (
+    local.wsa.order == null ? "" : trimspace(local.wsa.order)
+  )
 
   extra_iam_bindings = flatten([
     for role, members in var.extra_project_iam_members : [
@@ -77,6 +83,33 @@ resource "google_pubsub_subscription_iam_member" "product_events_indexer_subscri
   subscription = google_pubsub_subscription.product_events_sub.name
   role         = "roles/pubsub.subscriber"
   member       = "serviceAccount:${local.product_indexer_sa}"
+}
+
+resource "google_pubsub_subscription_iam_member" "inventory_product_events_subscriber" {
+  count = local.inventory_sa != "" ? 1 : 0
+
+  project      = var.project_id
+  subscription = google_pubsub_subscription.inventory_product_events_sub.name
+  role         = "roles/pubsub.subscriber"
+  member       = "serviceAccount:${local.inventory_sa}"
+}
+
+resource "google_pubsub_topic_iam_member" "order_order_paid_publisher" {
+  count = local.order_sa != "" ? 1 : 0
+
+  project = var.project_id
+  topic   = google_pubsub_topic.order_paid_events.name
+  role    = "roles/pubsub.publisher"
+  member  = "serviceAccount:${local.order_sa}"
+}
+
+resource "google_pubsub_subscription_iam_member" "order_paid_email_subscriber" {
+  count = local.email_sa != "" ? 1 : 0
+
+  project      = var.project_id
+  subscription = google_pubsub_subscription.order_paid_email_sub.name
+  role         = "roles/pubsub.subscriber"
+  member       = "serviceAccount:${local.email_sa}"
 }
 
 resource "google_pubsub_subscription_iam_member" "product_pubsub_health_subscriber" {

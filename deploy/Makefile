@@ -123,6 +123,7 @@ apps-apply: k8s-ready kubectl-required
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/product/configmap.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/product/deployment.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/product/service.yaml
+	$(KUBECTL) apply -n $(NS) -f $(K8S)/inventory/serviceaccount.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/inventory/configmap.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/inventory/deployment.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/inventory/service.yaml
@@ -132,6 +133,7 @@ apps-apply: k8s-ready kubectl-required
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/payment/configmap.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/payment/deployment.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/payment/service.yaml
+	$(KUBECTL) apply -n $(NS) -f $(K8S)/order/serviceaccount.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/order/configmap.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/order/deployment.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/order/service.yaml
