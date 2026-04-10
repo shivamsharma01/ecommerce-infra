@@ -31,7 +31,12 @@
 #    export FLYWAY_PASSWORD='user_password'
 #    ./scripts/run-flyway-local.sh user
 #
-#    Same pattern for: inventory, cart, payment, order (see values-postgresql for DB names and users).
+#    Same pattern for: inventory, cart, payment, order (DB names and users in values-postgresql.yaml).
+#
+#    If Postgres was created by Bitnami Helm using deploy/helm/values-postgresql.yaml, every app user
+#    (auth_user, cart_user, …) is created with the SAME password as in that file's init script — the
+#    placeholder is MY_PASSWORD, not cart_password / auth_password. Match FLYWAY_PASSWORD to that, or
+#    run: ALTER USER cart_user WITH PASSWORD 'cart_password'; (and use cart_password in Flyway).
 #
 # If Flyway is ever run on the host JVM (not this script), use localhost instead of host.docker.internal.
 set -euo pipefail
