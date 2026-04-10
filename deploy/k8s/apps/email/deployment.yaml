@@ -23,7 +23,7 @@ spec:
       serviceAccountName: email
       containers:
         - name: email
-          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/email:latest
+          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/email:ce9a368d7500353f475ee0a5ce729d4b003044d0
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
