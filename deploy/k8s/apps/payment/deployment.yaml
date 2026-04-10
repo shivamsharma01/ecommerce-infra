@@ -21,7 +21,7 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
         - name: payment
-          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/payment:latest
+          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/payment:2feab96dce40f755d21eb6ad44e26f5c6bad5473
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
