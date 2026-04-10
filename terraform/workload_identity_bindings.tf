@@ -38,3 +38,11 @@ resource "google_service_account_iam_member" "wi_product_indexer" {
   member             = "serviceAccount:${local.workload_pool}[${local.workload_ns}/product-indexer]"
 }
 
+resource "google_service_account_iam_member" "wi_email" {
+  count = local.email_sa != "" && var.enable_workload_identity ? 1 : 0
+
+  service_account_id = "projects/${var.project_id}/serviceAccounts/${local.email_sa}"
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "serviceAccount:${local.workload_pool}[${local.workload_ns}/email]"
+}
+

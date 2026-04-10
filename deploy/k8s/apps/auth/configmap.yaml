@@ -17,7 +17,6 @@ data:
   OAUTH2_CLIENT_ID: "client-app"
   GCP_PROJECT_ID: "ecommerce-491019"
   AUTH_PUBSUB_USER_SIGNUP_TOPIC: "user-signup-events"
-  SPRING_MAIL_HOST: "smtp.gmail.com"
-  SPRING_MAIL_PORT: "587"
+  AUTH_PUBSUB_EMAIL_VERIFICATION_TOPIC: "email-verification-events"
   JWT_ACCESS_TTL_SECONDS: "900"
   JWT_REFRESH_TTL_SECONDS: "2592000"

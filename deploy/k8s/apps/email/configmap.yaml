@@ -1,0 +1,16 @@
+# Workload config for email service (Pub/Sub subscriber + SMTP via Secret).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: email-config
+  labels:
+    app: email
+data:
+  SERVER_PORT: "8089"
+  SPRING_CLOUD_GCP_PROJECT_ID: "ecommerce-491019"
+  SPRING_CLOUD_GCP_PUBSUB_ENABLED: "true"
+  EMAIL_PUBSUB_ENABLED: "true"
+  EMAIL_PUBSUB_SUBSCRIPTION: "email-verification-events-sub"
+  SPRING_MAIL_HOST: "smtp.gmail.com"
+  SPRING_MAIL_PORT: "587"
+  SPRING_MAIL_SSL_TRUST: "smtp.gmail.com"

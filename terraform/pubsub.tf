@@ -24,6 +24,19 @@ resource "google_pubsub_subscription" "user_signup_events_sub" {
   depends_on = [google_pubsub_topic.user_signup_events]
 }
 
+resource "google_pubsub_topic" "email_verification_events" {
+  name = "email-verification-events"
+}
+
+resource "google_pubsub_subscription" "email_verification_events_sub" {
+  name  = "email-verification-events-sub"
+  topic = google_pubsub_topic.email_verification_events.name
+
+  ack_deadline_seconds = 120
+
+  depends_on = [google_pubsub_topic.email_verification_events]
+}
+
 # Dedicated topic/subscription with no publishers: Spring Cloud GCP PubSubHealthIndicator pulls here
 # so the product SA only needs subscriber on this subscription (not on product-events-sub).
 resource "google_pubsub_topic" "product_pubsub_health" {

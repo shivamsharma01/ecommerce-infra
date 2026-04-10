@@ -1,16 +1,15 @@
-# Image line is updated by service Cloud Build (short SHA).
+# Image tag updated by email repo Cloud Build.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth
+  name: email
   labels:
-    app: auth
-    version: "5a77d00"
+    app: email
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: auth
+      app: email
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -19,23 +18,22 @@ spec:
   template:
     metadata:
       labels:
-        app: auth
-        version: "5a77d00"
+        app: email
     spec:
-      serviceAccountName: auth
+      serviceAccountName: email
       containers:
-        - name: auth
-          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/auth:c8d048a22899b859361d991279fb95a9461883bd
+        - name: email
+          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/email:latest
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
-              containerPort: 8081
+              containerPort: 8089
               protocol: TCP
           envFrom:
             - configMapRef:
-                name: auth-config
+                name: email-config
             - secretRef:
-                name: auth-secrets
+                name: email-secrets
                 optional: true
           resources:
             requests:
@@ -46,14 +44,14 @@ spec:
               cpu: "500m"
           startupProbe:
             httpGet:
-              path: /actuator/health/readiness
+              path: /health/readiness
               port: http
             failureThreshold: 30
             periodSeconds: 5
             timeoutSeconds: 3
           livenessProbe:
             httpGet:
-              path: /actuator/health/liveness
+              path: /health/liveness
               port: http
             initialDelaySeconds: 40
             periodSeconds: 10
@@ -61,7 +59,7 @@ spec:
             failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /actuator/health/readiness
+              path: /health/readiness
               port: http
             initialDelaySeconds: 30
             periodSeconds: 5

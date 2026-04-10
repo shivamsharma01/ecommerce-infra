@@ -14,6 +14,9 @@ locals {
   product_indexer_sa = var.create_workload_service_accounts ? google_service_account.workload_product_indexer[0].email : (
     local.wsa.product_indexer == null ? "" : trimspace(local.wsa.product_indexer)
   )
+  email_sa = var.create_workload_service_accounts ? google_service_account.workload_email[0].email : (
+    local.wsa.email == null ? "" : trimspace(local.wsa.email)
+  )
 
   extra_iam_bindings = flatten([
     for role, members in var.extra_project_iam_members : [
@@ -31,6 +34,15 @@ resource "google_pubsub_topic_iam_member" "auth_user_signup_publisher" {
   member  = "serviceAccount:${local.auth_sa}"
 }
 
+resource "google_pubsub_topic_iam_member" "auth_email_verification_publisher" {
+  count = local.auth_sa != "" ? 1 : 0
+
+  project = var.project_id
+  topic   = google_pubsub_topic.email_verification_events.name
+  role    = "roles/pubsub.publisher"
+  member  = "serviceAccount:${local.auth_sa}"
+}
+
 resource "google_pubsub_subscription_iam_member" "user_signup_subscriber" {
   count = local.user_sa != "" ? 1 : 0
 
@@ -38,6 +50,15 @@ resource "google_pubsub_subscription_iam_member" "user_signup_subscriber" {
   subscription = google_pubsub_subscription.user_signup_events_sub.name
   role         = "roles/pubsub.subscriber"
   member       = "serviceAccount:${local.user_sa}"
+}
+
+resource "google_pubsub_subscription_iam_member" "email_verification_subscriber" {
+  count = local.email_sa != "" ? 1 : 0
+
+  project      = var.project_id
+  subscription = google_pubsub_subscription.email_verification_events_sub.name
+  role         = "roles/pubsub.subscriber"
+  member       = "serviceAccount:${local.email_sa}"
 }
 
 resource "google_pubsub_topic_iam_member" "product_events_publisher" {

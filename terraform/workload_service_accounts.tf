@@ -33,3 +33,11 @@ resource "google_service_account" "workload_product_indexer" {
   account_id   = "mcart-product-indexer"
   display_name = "MCart product-indexer (Pub/Sub + OpenSearch pipeline)"
 }
+
+resource "google_service_account" "workload_email" {
+  count = var.create_workload_service_accounts ? 1 : 0
+
+  project      = var.project_id
+  account_id   = "mcart-email"
+  display_name = "MCart email service (Pub/Sub verification-email subscriber + SMTP)"
+}
