@@ -22,7 +22,7 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
         - name: inventory
-          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/inventory:latest
+          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/inventory:ecc5fb4db4885f2b943ed001ef6cc7ceca9fb1eb
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
