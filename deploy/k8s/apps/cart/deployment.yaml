@@ -21,7 +21,7 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
         - name: cart
-          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/cart:latest
+          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/cart:6d6d0817ddeb21ebbb9be0cff746e8f200deee77
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
