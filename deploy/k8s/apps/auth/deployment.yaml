@@ -25,7 +25,7 @@ spec:
       serviceAccountName: auth
       containers:
         - name: auth
-          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/auth:4f64296ff82c216199a351da2310dbf03a90a0c5
+          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/auth:431013bdf70432fe3304d9f5acf8e91b90faa487
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
