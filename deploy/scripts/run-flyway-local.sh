@@ -31,12 +31,14 @@
 #    export FLYWAY_PASSWORD='user_password'
 #    ./scripts/run-flyway-local.sh user
 #
+#    Same pattern for: inventory, cart, payment, order (see values-postgresql for DB names and users).
+#
 # If Flyway is ever run on the host JVM (not this script), use localhost instead of host.docker.internal.
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEPLOY="$(cd "$SCRIPT_DIR/.." && pwd)"
-DB="${1:?usage: $0 auth|user}"
-case "$DB" in auth|user) ;; *) echo "Argument must be auth or user"; exit 1;; esac
+DB="${1:?usage: $0 auth|user|inventory|cart|payment|order}"
+case "$DB" in auth|user|inventory|cart|payment|order) ;; *) echo "Invalid DB: $DB"; exit 1;; esac
 SQL_DIR="$DEPLOY/helm/mcart-bootstrap/files/$DB"
 test -d "$SQL_DIR" || { echo "Missing $SQL_DIR"; exit 1; }
 : "${FLYWAY_URL:?Set FLYWAY_URL (jdbc:postgresql://...)}"

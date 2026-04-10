@@ -1,0 +1,15 @@
+# Workload config for inventory service (Postgres + JWT issuer).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: inventory-config
+  labels:
+    app.kubernetes.io/name: inventory
+    app: inventory
+data:
+  SERVER_PORT: "8086"
+  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "https://mcart.space"
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://mcart-pg-postgresql.mcart.svc.cluster.local:5432/inventory"
+  SPRING_DATASOURCE_USERNAME: "inventory_user"
+  SPRING_DATASOURCE_PASSWORD: "MY_PASSWORD"
+

@@ -1,8 +1,11 @@
-1. Ensure PostgreSQL is running and initdb created databases "{{ .Values.auth.database }}" and "{{ .Values.user.database }}" with matching users.
+1. Ensure PostgreSQL is running and initdb created databases for auth, user, inventory, cart, payment, and order with matching users (see values-postgresql initdb scripts).
 2. Install with passwords set, e.g.:
      helm upgrade --install mcart-bootstrap . -n {{ .Values.namespace }} \
-       --set auth.password=... --set user.password=...
+       --set auth.password=... --set user.password=... \
+       --set inventory.password=... --set cart.password=... \
+       --set payment.password=... --set order.password=...
    or use existingSecret in values.
 3. Watch jobs: kubectl get jobs -n {{ .Values.namespace }} -w
-4. If a Flyway job fails (BackoffLimitExceeded): kubectl logs -n {{ .Values.namespace }} job/{{ include "mcart-bootstrap.fullname" . }}-flyway-auth --tail=200
-   (or …-flyway-user). Fix password vs initdb, then: helm uninstall mcart-bootstrap -n {{ .Values.namespace }} && re-install.
+4. If a Flyway job fails (BackoffLimitExceeded): kubectl logs -n {{ .Values.namespace }} job/<job-name> --tail=200
+   Job names: …-flyway-auth, …-flyway-user, …-flyway-inventory, …-flyway-cart, …-flyway-payment, …-flyway-order.
+   Fix password vs initdb, then: helm uninstall mcart-bootstrap -n {{ .Values.namespace }} && re-install.

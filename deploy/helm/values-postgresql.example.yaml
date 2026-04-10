@@ -3,7 +3,7 @@
 #   helm upgrade --install mcart-pg bitnami/postgresql -n mcart --create-namespace -f values-postgresql.yaml
 #
 # Replace MY_PASSWORD with strong distinct values before apply (examples use one placeholder).
-# Use the same auth/user DB passwords in mcart-bootstrap (--set auth.password / user.password).
+# Use the same app-user passwords in mcart-bootstrap (auth, user, inventory, cart, payment, order).
 
 auth:
   postgresPassword: MY_PASSWORD

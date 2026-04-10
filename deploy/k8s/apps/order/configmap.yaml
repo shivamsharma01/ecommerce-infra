@@ -1,0 +1,19 @@
+# Workload config for order service (Postgres + JWT issuer + internal base URLs).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: order-config
+  labels:
+    app.kubernetes.io/name: order
+    app: order
+data:
+  SERVER_PORT: "8089"
+  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "https://mcart.space"
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://mcart-pg-postgresql.mcart.svc.cluster.local:5432/order"
+  SPRING_DATASOURCE_USERNAME: "order_user"
+  SPRING_DATASOURCE_PASSWORD: "MY_PASSWORD"
+  ORDER_CART_BASE_URL: "http://cart.mcart.svc.cluster.local"
+  ORDER_INVENTORY_BASE_URL: "http://inventory.mcart.svc.cluster.local"
+  ORDER_PAYMENT_BASE_URL: "http://payment.mcart.svc.cluster.local"
+  ORDER_PRODUCT_BASE_URL: "http://product.mcart.svc.cluster.local"
+

@@ -22,9 +22,33 @@ user:
   username: user_user
   password: ""
 
+inventory:
+  database: inventory
+  username: inventory_user
+  password: ""
+
+cart:
+  database: cart
+  username: cart_user
+  password: ""
+
+payment:
+  database: payment
+  username: payment_user
+  password: ""
+
+order:
+  database: order
+  username: order_user
+  password: ""
+
 # Optional: pull app passwords from an existing Secret instead of values
 existingSecret:
   enabled: false
   name: mcart-db-app-credentials
   authPasswordKey: auth-password
   userPasswordKey: user-password
+  inventoryPasswordKey: inventory-password
+  cartPasswordKey: cart-password
+  paymentPasswordKey: payment-password
+  orderPasswordKey: order-password

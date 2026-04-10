@@ -206,6 +206,52 @@ spec:
         - name: product
           namespace: mcart
           port: 80
+    - name: protected-cart
+      filters:
+        - type: RequestHeaderModifier
+          requestHeaderModifier:
+            remove:
+              - "x-mcart-user-id"
+              - "x-mcart-auth-sub"
+              - "x-mcart-auth-scope"
+      matches:
+        - path:
+            type: PathPrefix
+            value: "/cart"
+          method: GET
+        - path:
+            type: PathPrefix
+            value: "/cart"
+          method: POST
+        - path:
+            type: PathPrefix
+            value: "/cart"
+          method: DELETE
+      backendRefs:
+        - name: cart
+          namespace: mcart
+          port: 80
+    - name: protected-orders
+      filters:
+        - type: RequestHeaderModifier
+          requestHeaderModifier:
+            remove:
+              - "x-mcart-user-id"
+              - "x-mcart-auth-sub"
+              - "x-mcart-auth-scope"
+      matches:
+        - path:
+            type: PathPrefix
+            value: "/orders"
+          method: GET
+        - path:
+            type: PathPrefix
+            value: "/orders"
+          method: POST
+      backendRefs:
+        - name: order
+          namespace: mcart
+          port: 80
     - name: protected-search
       filters:
         - type: RequestHeaderModifier

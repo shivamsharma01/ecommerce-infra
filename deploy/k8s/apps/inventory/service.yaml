@@ -1,0 +1,19 @@
+# ClusterIP: port 80 → container port 8086 (named port http on Deployment).
+apiVersion: v1
+kind: Service
+metadata:
+  name: inventory
+  labels:
+    app.kubernetes.io/name: inventory
+    app: inventory
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: inventory
+    app: inventory
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+

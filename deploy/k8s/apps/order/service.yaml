@@ -1,0 +1,19 @@
+# ClusterIP: port 80 → container port 8089 (named port http on Deployment).
+apiVersion: v1
+kind: Service
+metadata:
+  name: order
+  labels:
+    app.kubernetes.io/name: order
+    app: order
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: order
+    app: order
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+

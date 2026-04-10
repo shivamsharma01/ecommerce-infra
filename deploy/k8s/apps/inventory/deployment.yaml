@@ -1,0 +1,46 @@
+# Image tag should be updated by inventory repo build pipeline.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventory
+  labels:
+    app.kubernetes.io/name: inventory
+    app: inventory
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: inventory
+      app: inventory
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: inventory
+        app: inventory
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: inventory
+          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/inventory:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8086
+          envFrom:
+            - configMapRef:
+                name: inventory-config
+          readinessProbe:
+            httpGet:
+              path: /health/readiness
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health/liveness
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+

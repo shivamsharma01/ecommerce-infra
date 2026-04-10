@@ -1,0 +1,17 @@
+# Workload config for cart service (Postgres + JWT issuer + inventory base-url).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cart-config
+  labels:
+    app.kubernetes.io/name: cart
+    app: cart
+data:
+  SERVER_PORT: "8087"
+  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "https://mcart.space"
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://mcart-pg-postgresql.mcart.svc.cluster.local:5432/cart"
+  SPRING_DATASOURCE_USERNAME: "cart_user"
+  SPRING_DATASOURCE_PASSWORD: "MY_PASSWORD"
+  CART_INVENTORY_BASE_URL: "http://inventory.mcart.svc.cluster.local"
+  CART_INVENTORY_CHECK_ON_WRITE: "true"
+

@@ -1,0 +1,19 @@
+# ClusterIP: port 80 → container port 8088 (named port http on Deployment).
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment
+  labels:
+    app.kubernetes.io/name: payment
+    app: payment
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: payment
+    app: payment
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+

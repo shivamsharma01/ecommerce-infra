@@ -1,0 +1,17 @@
+# Workload config for payment service (Postgres + JWT issuer).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: payment-config
+  labels:
+    app.kubernetes.io/name: payment
+    app: payment
+data:
+  SERVER_PORT: "8088"
+  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "https://mcart.space"
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://mcart-pg-postgresql.mcart.svc.cluster.local:5432/payment"
+  SPRING_DATASOURCE_USERNAME: "payment_user"
+  SPRING_DATASOURCE_PASSWORD: "MY_PASSWORD"
+  PAYMENT_MOCK_MODE: "success"
+  PAYMENT_MOCK_DELAY_MS: "800"
+

@@ -1,0 +1,46 @@
+# Image tag should be updated by cart repo build pipeline.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cart
+  labels:
+    app.kubernetes.io/name: cart
+    app: cart
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cart
+      app: cart
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cart
+        app: cart
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: cart
+          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/cart:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8087
+          envFrom:
+            - configMapRef:
+                name: cart-config
+          readinessProbe:
+            httpGet:
+              path: /health/readiness
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health/liveness
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+
