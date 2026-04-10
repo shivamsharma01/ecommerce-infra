@@ -6,7 +6,7 @@ metadata:
   labels:
     app: email
 data:
-  SERVER_PORT: "8089"
+  SERVER_PORT: "8090"
   SPRING_CLOUD_GCP_PROJECT_ID: "ecommerce-491019"
   SPRING_CLOUD_GCP_PUBSUB_ENABLED: "true"
   EMAIL_PUBSUB_ENABLED: "true"

@@ -10,6 +10,6 @@ spec:
     app: email
   ports:
     - name: http
-      port: 8089
+      port: 8090
       targetPort: http
       protocol: TCP
