@@ -29,7 +29,7 @@ spec:
             optional: true
       containers:
         - name: auth
-          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/auth:1244c5f8bf022a50931906d79f3a48b09dec8a66
+          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/auth:35c24084b6489bc52e68bade93f124f21253c915
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
