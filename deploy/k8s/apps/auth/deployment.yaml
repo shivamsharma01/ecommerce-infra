@@ -1,4 +1,3 @@
-# Image line is updated by service Cloud Build (short SHA).
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -23,6 +22,11 @@ spec:
         version: "5a77d00"
     spec:
       serviceAccountName: auth
+      volumes:
+        - name: jwt-rsa
+          secret:
+            secretName: auth-jwt-rsa
+            optional: true
       containers:
         - name: auth
           image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/auth:1244c5f8bf022a50931906d79f3a48b09dec8a66
@@ -67,6 +71,10 @@ spec:
             periodSeconds: 5
             timeoutSeconds: 3
             failureThreshold: 3
+          volumeMounts:
+            - name: jwt-rsa
+              mountPath: /etc/mcart/jwt
+              readOnly: true
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000

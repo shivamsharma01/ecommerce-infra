@@ -1,5 +1,3 @@
-# Image line is updated by service Cloud Build (short SHA).
-# Health: GET /health/liveness , GET /health/readiness
 apiVersion: apps/v1
 kind: Deployment
 metadata:

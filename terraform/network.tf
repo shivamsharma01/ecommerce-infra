@@ -41,3 +41,21 @@ resource "google_compute_router_nat" "gke" {
     filter = "ERRORS_ONLY"
   }
 }
+
+# GKE runs in this VPC (not the default network). Rules on `default` do not affect the cluster.
+# External LoadBalancer / Gateway traffic hits node ports on instances tagged by the node pool.
+resource "google_compute_firewall" "gke_gateway_http_https" {
+  name    = "${var.network_name}-allow-gateway-http-https"
+  network = google_compute_network.main.name
+
+  description = "TCP 80/443 to GKE nodes for Gateway LB, ACME HTTP-01, and HTTPS"
+
+  source_ranges = ["0.0.0.0/0"]
+
+  allow {
+    protocol = "tcp"
+    ports    = ["80", "443"]
+  }
+
+  target_tags = ["gke-node", var.environment]
+}

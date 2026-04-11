@@ -1,4 +1,3 @@
-# ClusterIP Service for mcart-ui (Gateway HTTPRoute backends).
 apiVersion: v1
 kind: Service
 metadata:

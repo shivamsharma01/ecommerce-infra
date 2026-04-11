@@ -1,4 +1,3 @@
-# Public, non-sensitive runtime config for the Angular SSR container.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -9,7 +8,5 @@ metadata:
 data:
   NODE_ENV: "production"
   PORT: "4000"
-  # Angular SSR SSRF guard — must match Host headers users hit (comma-separated). See angular.json security.allowedHosts.
   NG_ALLOWED_HOSTS: "localhost,mcart.space,www.mcart.space"
-  # Public origin for browser/SSR API calls (must match Gateway hostname + TLS):
   API_BASE_URL: "https://mcart.space"

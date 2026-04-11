@@ -1,4 +1,3 @@
-# ClusterIP: port 80 → container port 8080 (named port http on Deployment).
 apiVersion: v1
 kind: Service
 metadata:

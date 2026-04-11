@@ -6,7 +6,6 @@ metadata:
     app.kubernetes.io/name: product-indexer
 data:
   SERVER_PORT: "8085"
-  SPRING_APPLICATION_NAME: "product-indexer"
   SPRING_CLOUD_GCP_PROJECT_ID: "ecommerce-491019"
   SPRING_CLOUD_GCP_FIRESTORE_ENABLED: "true"
   OPENSEARCH_URIS: "http://opensearch-cluster-master.mcart.svc.cluster.local:9200"

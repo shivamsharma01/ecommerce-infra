@@ -1,5 +1,5 @@
 # Public vs JWT at edge mirrors Spring Security in each service:
-# - auth: permitAll on /auth/*, /.well-known, /oauth2, /login (see AuthorizationServerConfig)
+# - auth: permitAll on /auth/*, /.well-known/openid-configuration, /oauth2, /login (see AuthorizationServerConfig)
 # - product: GET/HEAD /api/** public; mutations need JWT + SCOPE_product.admin (SecurityConfig)
 # - search: POST /api/search permitAll; GET/HEAD /api/** need JWT when scoped (SecurityConfig)
 # - user: actuator/health permitAll in-app; /user/** authenticated (SecurityConfig)
@@ -19,11 +19,13 @@ spec:
     - "www.mcart.space"
   rules:
     # Authorization Server + Auth REST must stay publicly reachable.
+    # Do not use PathPrefix "/.well-known" — it steals cert-manager HTTP-01 paths
+    # (/.well-known/acme-challenge/...) and breaks Let's Encrypt. Auth only exposes OIDC discovery.
     - name: auth-oidc-and-rest
       matches:
         - path:
             type: PathPrefix
-            value: "/.well-known"
+            value: "/.well-known/openid-configuration"
         - path:
             type: PathPrefix
             value: "/oauth2"
@@ -116,31 +118,11 @@ spec:
           port: 80
 
 ---
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: mcart-http-to-https
-  namespace: mcart-gateway
-spec:
-  parentRefs:
-    - name: mcart
-      sectionName: http
-  hostnames:
-    - "mcart.space"
-    - "www.mcart.space"
-  rules:
-    - name: redirect
-      matches:
-        - path:
-            type: PathPrefix
-            value: "/"
-      filters:
-        - type: RequestRedirect
-          requestRedirect:
-            scheme: https
-            statusCode: 301
-
----
+# Intentionally no HTTP→HTTPS redirect HTTPRoute on listener :80.
+# A catch-all PathPrefix "/" redirect competes with cert-manager's Gateway HTTP-01 solver
+# (same match specificity / merge order) and can 301 challenge URLs to https:// before a
+# public cert exists. mcart-public still attaches to both listeners; users should use https://
+# (add HSTS on 443 responses in-app or a GCP load-balancer redirect after TLS works).
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:

@@ -1,4 +1,3 @@
-# Image tag should be updated by inventory repo build pipeline.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -44,4 +43,3 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
-

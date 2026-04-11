@@ -1,4 +1,3 @@
-# Workload config for cart service (Postgres + JWT issuer + inventory base-url).
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -14,4 +13,3 @@ data:
   SPRING_DATASOURCE_PASSWORD: "MY_PASSWORD"
   CART_INVENTORY_BASE_URL: "http://inventory.mcart.svc.cluster.local"
   CART_INVENTORY_CHECK_ON_WRITE: "true"
-

@@ -1,4 +1,3 @@
-# Image tag updated by search repo Cloud Build (short SHA).
 apiVersion: apps/v1
 kind: Deployment
 metadata:

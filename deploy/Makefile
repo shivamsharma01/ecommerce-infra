@@ -21,7 +21,7 @@ ROOT := $(abspath $(CURDIR)/../..)
 K8S := $(abspath $(CURDIR))/k8s/apps
 GW  := $(abspath $(CURDIR))/k8s/gateway
 
-.PHONY: helm-repo k8s-ready kubectl-required data-install data-install-redis data-install-es flyway-install apps-apply gateway-install gateway-apply catalog-bootstrap
+.PHONY: helm-repo k8s-ready kubectl-required data-install data-install-redis data-install-es flyway-install apps-apply gateway-install gateway-apply catalog-bootstrap ensure-auth-jwt-secret
 
 # Helm reaches the API without the kubectl binary; kubectl cluster-info fails if kubectl is missing.
 k8s-ready:
@@ -174,8 +174,13 @@ gateway-install: k8s-ready
 	$(KUBECTL) wait --timeout=5m -n cert-manager deploy/cert-manager-webhook --for=condition=Available
 	$(KUBECTL) wait --timeout=5m -n cert-manager deploy/cert-manager-cainjector --for=condition=Available
 
+# One-time per cluster (idempotent): shared RSA key for multi-replica auth JWT signing.
+ensure-auth-jwt-secret: k8s-ready kubectl-required
+	bash "$(abspath $(CURDIR))/scripts/ensure_auth_jwt_rsa_secret.sh"
+
 gateway-apply: k8s-ready kubectl-required
 	$(KUBECTL) apply -f $(GW)/00-namespace.yaml
+	$(KUBECTL) apply -f $(GW)/00-envoyproxy.yaml
 	$(KUBECTL) apply -f $(GW)/00-gatewayclass.yaml
 	$(KUBECTL) apply -f $(GW)/05-referencegrant.yaml
 	$(KUBECTL) apply -f $(GW)/01-gateway.yaml

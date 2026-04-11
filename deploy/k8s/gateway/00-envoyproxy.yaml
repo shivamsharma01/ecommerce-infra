@@ -1,0 +1,15 @@
+# Envoy Gateway defaults envoy Service externalTrafficPolicy to Local. With a single Envoy
+# replica on a multi-node pool, the GCP target pool can target a node that has no Envoy pod,
+# so port 80 on the LB VIP never connects (Let's Encrypt sees "timeout during connect").
+# Cluster preserves correct forwarding via kube-proxy while the LB targets any node.
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: EnvoyProxy
+metadata:
+  name: mcart-envoy-proxy
+  namespace: envoy-gateway-system
+spec:
+  provider:
+    type: Kubernetes
+    kubernetes:
+      envoyService:
+        externalTrafficPolicy: Cluster
