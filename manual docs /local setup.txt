@@ -1,0 +1,196 @@
+1. run postgresql container and redis container
+	docker run -d \
+	  --name postgres-db \
+	  -p 5433:5432 \
+	  -e POSTGRES_USER=postgres \
+	  -e POSTGRES_PASSWORD=postgres \
+	  postgres:16
+	  
+	docker run -d \
+	  --name auth-redis \
+	  -p 6379:6379 \
+	  -v redis-data:/data \
+	  redis:7 \
+	  redis-server --appendonly yes --requirepass myStrongRedisPassword
+  
+  
+2. create the necessary users and databases
+docker exec -i postgres-db psql -U postgres <<'SQL'
+CREATE USER auth_user WITH PASSWORD 'auth_password';
+CREATE DATABASE auth OWNER auth_user;
+GRANT ALL PRIVILEGES ON DATABASE auth TO auth_user;
+SQL
+
+docker exec -i postgres-db psql -U postgres <<'SQL'
+CREATE USER user_user WITH PASSWORD 'user_password';
+CREATE DATABASE "user" OWNER user_user;
+GRANT ALL PRIVILEGES ON DATABASE "user" TO user_user;
+SQL
+
+docker exec -i postgres-db psql -U postgres <<'SQL'
+CREATE USER inventory_user WITH PASSWORD 'inventory_password';
+CREATE DATABASE inventory OWNER inventory_user;
+GRANT ALL PRIVILEGES ON DATABASE inventory TO inventory_user;
+
+CREATE USER cart_user WITH PASSWORD 'cart_password';
+CREATE DATABASE cart OWNER cart_user;
+GRANT ALL PRIVILEGES ON DATABASE cart TO cart_user;
+
+CREATE USER payment_user WITH PASSWORD 'payment_password';
+CREATE DATABASE payment OWNER payment_user;
+GRANT ALL PRIVILEGES ON DATABASE payment TO payment_user;
+
+CREATE USER order_user WITH PASSWORD 'order_password';
+CREATE DATABASE "order" OWNER order_user;
+GRANT ALL PRIVILEGES ON DATABASE "order" TO order_user;
+SQL
+
+3. run the flyway scripts
+	export FLYWAY_URL='jdbc:postgresql://host.docker.internal:5433/auth'
+	export FLYWAY_USER='auth_user'
+	export FLYWAY_PASSWORD='auth_password'
+
+	cd /home/shivam-sharma/project/mcart/ecomm-infra/deploy
+	./scripts/run-flyway-local.sh auth
+
+
+
+	export FLYWAY_URL='jdbc:postgresql://host.docker.internal:5433/user'
+	export FLYWAY_USER='user_user'
+	export FLYWAY_PASSWORD='user_password'
+	./scripts/run-flyway-local.sh user
+	
+	
+	export FLYWAY_URL='jdbc:postgresql://host.docker.internal:5433/inventory'
+	export FLYWAY_USER='inventory_user'
+	export FLYWAY_PASSWORD='inventory_password'
+	./scripts/run-flyway-local.sh inventory
+	
+	
+	export FLYWAY_URL='jdbc:postgresql://host.docker.internal:5433/cart'
+	export FLYWAY_USER='cart_user'
+	export FLYWAY_PASSWORD='cart_password'
+	./scripts/run-flyway-local.sh cart
+	
+	
+	export FLYWAY_URL='jdbc:postgresql://host.docker.internal:5433/payment'
+	export FLYWAY_USER='payment_user'
+	export FLYWAY_PASSWORD='payment_password'
+	./scripts/run-flyway-local.sh payment
+	
+	
+	export FLYWAY_URL='jdbc:postgresql://host.docker.internal:5433/order'
+	export FLYWAY_USER='order_user'
+	export FLYWAY_PASSWORD='order_password'
+	./scripts/run-flyway-local.sh order
+
+gcloud config set project my-project-chat-ai-487408
+export GOOGLE_APPLICATION_CREDENTIALS=/home/shivam-sharma/.gcp/my-project-chat-ai-487408-cede89e389c0.json
+
+4. run auth service
+	./gradlew bootRun --args='--spring.profiles.active=local' 
+
+{
+    "identifier": "bootstrap.admin@mcart.internal",
+    "password": "ChangeMeAfterFirstDeploy!"
+}
+
+5. run user service
+	./gradlew bootRun --args='--spring.profiles.active=local' 
+
+
+6. run product service
+	./gradlew bootRun --args='--spring.profiles.active=local' 
+	
+
+
+7. run product-indexer service
+	./gradlew bootRun --args='--spring.profiles.active=local' 
+
+
+8. run search service
+	./gradlew bootRun
+
+
+9. run email service
+	export SPRING_MAIL_USERNAME='shivamsharma.ade@gmail.com' && export SPRING_MAIL_PASSWORD='cgjmiswqrgeakpqn' && ./gradlew bootRun --args='--spring.profiles.active=local' 
+
+
+10. inventory
+	./gradlew bootRun --args='--spring.profiles.active=local' 
+	
+
+11. cart
+	./gradlew bootRun --args='--spring.profiles.active=local' 
+	
+
+12. Order
+	./gradlew bootRun --args='--spring.profiles.active=local' 
+
+
+13. Payment
+	./gradlew bootRun --args='--spring.profiles.active=local' 
+
+==========================
+
+lsof -i :8081
+
+# Stop it (replace PID with the actual process ID)
+kill <PID>
+======================
+
+
+```
+
+---
+
+## 2. Connect to PostgreSQL
+
+docker exec -it postgres-db psql -U postgres
+
+\c auth
+select * from auth_user;
+select * from auth_identity;
+
+delete from auth_identity where upper(email) like 'SHIVAMSHARMA.ADE@GMAIL.COM';
+
+\c user
+select * from user_profile;
+
+delete from user_profile where upper(email) like 'SHIVAMSHARMA.ADE@GMAIL.COM';
+
+gcloud services enable \
+  firestore.googleapis.com \
+  pubsub.googleapis.com
+
+gcloud config set project my-project-chat-ai-487408
+gcloud pubsub topics create product-events
+gcloud pubsub subscriptions create product-events-sub --topic=product-events --ack-deadline=60
+
+
+gcloud pubsub topics create user-signup-events
+gcloud pubsub subscriptions create user-signup-events-sub --topic=user-signup-events --ack-deadline=60
+
+gcloud pubsub topics create email-verification-events
+gcloud pubsub subscriptions create email-verification-events-sub --topic=email-verification-events --ack-deadline=60
+
+gcloud pubsub topics create order-paid-events
+gcloud pubsub subscriptions create order-paid-email-sub --topic=order-paid-events --ack-deadline=60
+
+gcloud pubsub topics create inventory-product-events
+gcloud pubsub subscriptions create inventory-product-events-sub --topic=inventory-product-events --ack-deadline=60
+
+
+gcloud projects add-iam-policy-binding my-project-chat-ai-487408 \
+  --member="serviceAccount:firestore-java-app@my-project-chat-ai-487408.iam.gserviceaccount.com" \
+  --role="roles/pubsub.publisher"
+
+gcloud projects add-iam-policy-binding my-project-chat-ai-487408 \
+  --member="serviceAccount:firestore-java-app@my-project-chat-ai-487408.iam.gserviceaccount.com" \
+  --role="roles/pubsub.subscriber"
+
+gcloud projects add-iam-policy-binding my-project-chat-ai-487408 \
+  --member="serviceAccount:firestore-java-app@my-project-chat-ai-487408.iam.gserviceaccount.com" \
+  --role="roles/storage.objectCreator"
+
+

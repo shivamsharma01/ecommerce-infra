@@ -1,0 +1,206 @@
+Install gcloud on linux
+
+	curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-linux-x86_64.tar.gz
+
+	tar -xf google-cloud-cli-linux-x86_64.tar.gz
+	
+	cd google-cloud-sdk/
+
+	./google-cloud-sdk/install.sh
+	
+	gcloud init
+	
+
+-----------------------------------------------------
+Kubectl commands
+  
+ 
+	rollout restart
+		kubectl rollout restart deployment search -n mcart
+	
+	or delete and k8s will automatically create them
+		kubectl delete pod -l app=search -n mcart	
+		
+	
+	kubectl get pods -n mcart -w
+
+
+=====================================================
+Gateway flow (new)
+
+0) Infra (Terraform)
+	cd ~/project/mcart/ecomm-infra/terraform
+
+	unset GOOGLE_APPLICATION_CREDENTIALS
+
+	gcloud config set project ecommerce-491019
+
+	gcloud config get-value project
+
+	gcloud auth application-default login
+
+	terraform init
+
+	terraform plan -out=tfplan
+
+	terraform apply tfplan
+
+	#Optional but useful (get the reserved Gateway IP from Terraform):
+	terraform output -raw mcart_gateway_static_ip_address
+	
+1) Connect to the cluster
+	gcloud container clusters get-credentials mcart-gke --location asia-south2-a --project ecommerce-491019
+
+	kubectl get nodes
+	
+	kubectl get ns
+
+2) Install data dependencies
+	cd ~/project/mcart/ecomm-infra/deploy
+
+	make data-install data-install-redis data-install-es
+
+	kubectl -n mcart get pods
+
+3) DB bootstrap (Flyway)
+	export AUTH_PASS='MY_PASSWORD'
+	
+	export USER_PASS='MY_PASSWORD'
+	
+	printf '%s' "$AUTH_PASS" > /tmp/auth.db.pass && chmod 600 /tmp/auth.db.pass
+	
+	printf '%s' "$USER_PASS" > /tmp/user.db.pass && chmod 600 /tmp/user.db.pass
+	
+	make flyway-install AUTH_DB_PASS_FILE=/tmp/auth.db.pass USER_DB_PASS_FILE=/tmp/user.db.pass
+	
+	rm -f /tmp/auth.db.pass /tmp/user.db.pass
+
+4) Deploy apps
+	make apps-apply NS=mcart
+
+	kubectl get pods -n mcart
+
+	kubectl get deploy -n mcart
+
+	#Sanity checks (same as before):
+	kubectl exec -n mcart deploy/product -c product -- curl -i http://auth:8081/actuator/health/liveness
+	
+	kubectl exec -n mcart deploy/product -c product -- curl -i http://search:80/health/readiness
+
+5) Install Gateway controller + cert-manager, then apply Gateway + routes + JWT + cert
+	cd ~/project/mcart/ecomm-infra/deploy
+
+	# 5a) Install Envoy Gateway (controller + CRDs)
+		kubectl apply --server-side -f "https://github.com/envoyproxy/gateway/releases/download/v1.7.1/install.yaml"
+		kubectl wait --timeout=5m -n envoy-gateway-system deployment/envoy-gateway --for=condition=Available
+
+	# 5b) Install cert-manager via Helm (Gateway API enabled)
+		helm repo add jetstack https://charts.jetstack.io
+		helm repo update
+
+		helm upgrade --install cert-manager jetstack/cert-manager \
+		  --namespace cert-manager --create-namespace \
+		  --version v1.16.3 \
+		  --set crds.enabled=true \
+		  --set config.enableGatewayAPI=true
+
+		kubectl wait --timeout=5m -n cert-manager deploy/cert-manager --for=condition=Available
+		kubectl wait --timeout=5m -n cert-manager deploy/cert-manager-webhook --for=condition=Available
+		kubectl wait --timeout=5m -n cert-manager deploy/cert-manager-cainjector --for=condition=Available
+		
+		kubectl get crd | grep certificaterequests
+	
+	
+	# 5c) Apply the MCART Gateway resources (Gateway/HTTPRoutes/JWT + ClusterIssuer + Certificate)
+		make gateway-apply
+		
+		#verify
+		kubectl get gateway -n mcart-gateway
+		kubectl get httproute -n mcart-gateway
+		kubectl get securitypolicy -n mcart-gateway
+
+6) Bind the reserved static IP to the Envoy LoadBalancer Service
+	#Envoy Gateway creates the LB Service automatically. Patch it to use the Terraform-reserved IP:
+
+	GW_IP=$(cd ~/project/mcart/ecomm-infra/terraform && terraform output -raw mcart_gateway_static_ip_address)
+	
+	echo "$GW_IP"
+
+	ENVOY_SVC=$(kubectl get svc -n envoy-gateway-system \
+  	--selector gateway.envoyproxy.io/owning-gateway-namespace=mcart-gateway,gateway.envoyproxy.io/owning-gateway-name=mcart \
+  	-o jsonpath='{.items[0].metadata.name}')
+
+	echo "$ENVOY_SVC"
+
+	kubectl -n envoy-gateway-system patch svc "$ENVOY_SVC" -p "{\"spec\":{\"loadBalancerIP\":\"$GW_IP\"}}"
+	
+	kubectl -n envoy-gateway-system get svc "$ENVOY_SVC" -w
+
+7) DNS
+	#Now DNS should map mcart.space and www.mcart.space to the reserved gateway IP (Terraform does this only if you manage Cloud DNS via create_cloud_dns_public_zone=true; 			otherwise do it at your registrar/DNS provider).
+
+Confirm what IP you should set:
+	cd ~/project/mcart/ecomm-infra/terraform
+	
+	terraform output -raw mcart_gateway_static_ip_address
+
+8) Validate HTTPS + OIDC + JWT enforcement
+	#Wait for cert-manager to issue the cert:
+	kubectl -n mcart-gateway get certificate,secret
+
+	kubectl -n mcart-gateway describe certificate mcart-tls
+
+	#Validate public endpoints (should work without token):
+	curl -i https://mcart.space/.well-known/openid-configuration
+
+	curl -i https://mcart.space/oauth2/jwks
+
+	curl -i https://mcart.space/
+
+	#Validate protected endpoints (should be 401 without token):
+	curl -i https://mcart.space/api/products
+
+	curl -i https://mcart.space/user
+	
+	#Validate with token:
+	TOKEN="paste_access_token_here"
+	curl -i -H "Authorization: Bearer ${TOKEN}" https://mcart.space/api/products
+
+
+==========================
+Deployment Delete
+
+	kubectl delete namespace mcart
+
+	kubectl delete -f deploy/k8s/gateway/
+
+	kubectl delete -f https://github.com/envoyproxy/gateway/releases/download/v1.7.1/install.yaml
+
+	helm uninstall cert-manager -n cert-manager
+
+	kubectl delete namespace cert-manager
+
+	terraform plan -destroy
+
+	terraform destroy
+
+
+Kubectl commands
+	1. view logs
+	kubectl logs deploy/PRODUCT_DEPLOYMENT -n NAMESPACE --tail=200 -f
+	
+	2. All pods in a namespace by label
+	kubectl logs -n NAMESPACE -l app.kubernetes.io/name=mcart-product --tail=100 -f --prefix --max-log-requests=20
+	
+	3. cloud logging
+	gcloud logging read \
+	  'resource.type="k8s_container"
+	   resource.labels.namespace_name="NAMESPACE"
+	   resource.labels.cluster_name="CLUSTER_NAME"' \
+	  --limit=50 --format='table(timestamp,resource.labels.pod_name,jsonPayload.message,textPayload)' \
+	  --freshness=1h
+	
+	4. Logs Explorer (UI)
+	Logging → Logs Explorer → use query builder with resource.type="k8s_container" and namespace_name, pod_name, container_name, or text search.
+
+
