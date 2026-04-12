@@ -33,5 +33,3 @@ resource "google_dns_record_set" "alias_a" {
   # Gateway is the single public entrypoint now.
   rrdatas      = [google_compute_address.mcart_gateway.address]
 }
-
-## No parallel rollout hostname: single flow uses apex + aliases only.
