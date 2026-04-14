@@ -21,7 +21,7 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
         - name: order
-          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/order:22ffe37951ad79f64efc1d52467e02078123779d
+          image: asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/order:5f7fb85aef433d91bfa85ff12ea869e607b5d830
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
