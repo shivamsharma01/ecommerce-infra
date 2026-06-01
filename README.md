@@ -6,6 +6,8 @@ Infrastructure and Kubernetes config for the **mcart** demo on **Google Cloud**:
 
 Public HTTPS uses **Kubernetes Gateway API + Envoy Gateway + cert-manager** (not GCE Ingress). Details: [`deploy/k8s/gateway/README.md`](deploy/k8s/gateway/README.md).
 
+**Cloud Shell runbook (deploy + teardown, first-time vs redeploy):** [`CLOUD_SHELL_DEPLOYMENT.md`](CLOUD_SHELL_DEPLOYMENT.md).
+
 ---
 
 ## What this repo does
