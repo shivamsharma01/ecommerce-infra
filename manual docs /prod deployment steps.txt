@@ -170,19 +170,33 @@ Confirm what IP you should set:
 ==========================
 Deployment Delete
 
-	kubectl delete namespace mcart
+	# 1) Kubernetes (from deploy/ for gateway manifests)
+	kubectl delete namespace mcart --ignore-not-found --timeout=120s
 
-	kubectl delete -f deploy/k8s/gateway/
+	cd ~/mcart/ecomm-infra/deploy
+	kubectl delete -f k8s/gateway/ --ignore-not-found
+	kubectl delete namespace mcart-gateway --ignore-not-found --timeout=120s
+	kubectl delete namespace envoy-gateway-system --ignore-not-found --timeout=120s
+	kubectl delete gatewayclass envoy-gateway --ignore-not-found
 
-	kubectl delete -f https://github.com/envoyproxy/gateway/releases/download/v1.7.1/install.yaml
+	helm uninstall cert-manager -n cert-manager --ignore-not-found
+	kubectl delete namespace cert-manager --ignore-not-found --timeout=120s
+	kubectl delete --ignore-not-found -f \
+	  "https://github.com/envoyproxy/gateway/releases/download/v1.7.1/install.yaml"
 
-	helm uninstall cert-manager -n cert-manager
+	# 2) Wait for LBs / delete stuck GKE firewalls (see gateway README)
+	gcloud compute forwarding-rules list --project=ecommerce-491019 --regions=asia-south2
+	cd ~/mcart/ecomm-infra/terraform
+	export PROJECT_ID=ecommerce-491019 NETWORK_NAME=mcart-vpc
+	bash scripts/gke_lb_firewall_cleanup.sh
 
-	kubectl delete namespace cert-manager
+	# 3) Optional: cart_items document cleanup on destroy
+	pip3 install --user google-cloud-firestore
 
-	terraform plan -destroy
-
-	terraform destroy
+	# 4) Terraform — keeps Firestore composite indexes in GCP (no index rebuild wait on redeploy)
+	make destroy
+	# or: ./scripts/destroy-preserve-firestore-indexes.sh
+	# Do NOT use plain "terraform destroy" unless you want indexes deleted too.
 
 
 Kubectl commands

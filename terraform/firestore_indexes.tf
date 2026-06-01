@@ -17,5 +17,10 @@ resource "google_firestore_index" "product_outbox_events_status_created_at" {
     field_path = "createdAt"
     order      = "ASCENDING"
   }
+
+  # Kept across infra teardown; use scripts/destroy-preserve-firestore-indexes.sh before destroy.
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 

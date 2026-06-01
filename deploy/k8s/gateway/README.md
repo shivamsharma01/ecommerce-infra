@@ -43,7 +43,7 @@ Versus a pure **GCE Ingress** setup you pay for **extra pods** (Envoy data plane
 
 ## Destroy / teardown
 
-Before `terraform destroy`, delete Gateway-backed Services / namespace `mcart-gateway` and wait for GCP LBs to drain. `terraform/destroy_cleanup.tf` runs [`../../../terraform/scripts/gke_lb_firewall_cleanup.sh`](../../../terraform/scripts/gke_lb_firewall_cleanup.sh) to remove stuck **`k8s-fw-*`** firewall rules.
+Before Terraform teardown, delete Gateway-backed Services / namespace `mcart-gateway` and wait for GCP LBs to drain. Then from `terraform/`, run [`../../../terraform/scripts/destroy-preserve-firestore-indexes.sh`](../../../terraform/scripts/destroy-preserve-firestore-indexes.sh) (or `make destroy`) so **Firestore composite indexes are kept** in GCP. `terraform/destroy_cleanup.tf` runs [`../../../terraform/scripts/gke_lb_firewall_cleanup.sh`](../../../terraform/scripts/gke_lb_firewall_cleanup.sh) to remove stuck **`k8s-fw-*`** firewall rules during destroy.
 
 ## Upgrading from old GCE Ingress state
 

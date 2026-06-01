@@ -2,7 +2,7 @@
 # If `terraform` is not installed, use Docker (same image as CI can use):
 #   make validate-docker
 
-.PHONY: validate validate-docker fmt apis-enable apis-verify auth-check
+.PHONY: validate validate-docker fmt apis-enable apis-verify auth-check destroy
 
 # One-time per project: enable GCP APIs (requires Owner or Service Usage Admin on gcloud).
 # Example: make apis-enable PROJECT_ID=ecommerce-491019
@@ -31,3 +31,7 @@ validate-docker:
 
 fmt:
 	terraform fmt -recursive .
+
+# Detach Firestore composite indexes from state, then destroy remaining infra (indexes stay in GCP).
+destroy:
+	bash scripts/destroy-preserve-firestore-indexes.sh

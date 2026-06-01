@@ -40,3 +40,22 @@ Public HTTPS uses **Kubernetes Gateway API + Envoy Gateway + cert-manager** (not
 6. **Edge:** `make gateway-install && make gateway-apply`, then bind the regional IP to the Envoy **LoadBalancer** Service (see gateway README). Point DNS at that IP.
 
 **Cloud Build:** grant the build service account `roles/container.developer`. The default trigger only runs `apps-apply` (microservices). `gateway-install` needs extra GKE IAM (cluster roles / webhooks); run it once from an admin context, then set `_RUN_GATEWAY_APPLY=true` on the trigger when you change `deploy/k8s/gateway/`. It does **not** apply gitignored secrets.
+
+---
+
+## Teardown
+
+1. **Kubernetes** (cluster must still exist): delete `mcart`, `mcart-gateway`, `envoy-gateway-system`, and `cert-manager` (Helm + namespaces). Wait until forwarding rules and `k8s-*` firewalls are gone; see [`deploy/k8s/gateway/README.md`](deploy/k8s/gateway/README.md).
+2. **Optional:** `pip install google-cloud-firestore` if you want destroy to run `cart_items` document cleanup (`enable_cart_firestore_destroy_cleanup`, default `true` in `cart_firestore.tf`).
+3. **Terraform** — use the script that **keeps Firestore composite indexes** (cart `cart_items`, product `outbox_events`) so the next deploy does not wait for index builds:
+
+```bash
+cd terraform
+make destroy
+# or: ./scripts/destroy-preserve-firestore-indexes.sh
+# or: ./scripts/destroy-preserve-firestore-indexes.sh -auto-approve
+```
+
+Do **not** run bare `terraform destroy` unless you intend to delete those indexes too (they have `lifecycle.prevent_destroy` and will block destroy unless removed from state first).
+
+**Not removed by Terraform:** Artifact Registry images, Firestore `(default)` database, catalog GCS bucket, Secret Manager secrets, registrar DNS. Delete `outbox_events` / `products` collection data manually in the console if you want a data-only reset without dropping indexes.

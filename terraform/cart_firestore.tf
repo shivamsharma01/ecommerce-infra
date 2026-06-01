@@ -25,6 +25,11 @@ resource "google_firestore_index" "cart_items_user_updated_at" {
     field_path = "updatedAt"
     order      = "DESCENDING"
   }
+
+  # Kept across infra teardown; use scripts/destroy-preserve-firestore-indexes.sh before destroy.
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "google_firestore_document" "cart_bootstrap" {
