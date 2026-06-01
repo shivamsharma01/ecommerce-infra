@@ -17,6 +17,7 @@ spec:
         app.kubernetes.io/name: cart
         app: cart
     spec:
+      serviceAccountName: cart
       terminationGracePeriodSeconds: 30
       containers:
         - name: cart

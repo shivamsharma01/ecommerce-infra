@@ -23,6 +23,9 @@ locals {
   order_sa = var.create_workload_service_accounts ? google_service_account.workload_order[0].email : (
     local.wsa.order == null ? "" : trimspace(local.wsa.order)
   )
+  cart_sa = var.create_workload_service_accounts ? google_service_account.workload_cart[0].email : (
+    local.wsa.cart == null ? "" : trimspace(local.wsa.cart)
+  )
 
   extra_iam_bindings = flatten([
     for role, members in var.extra_project_iam_members : [
@@ -143,6 +146,14 @@ resource "google_project_iam_member" "product_indexer_firestore_user" {
   project = var.project_id
   role    = "roles/datastore.user"
   member  = "serviceAccount:${local.product_indexer_sa}"
+}
+
+resource "google_project_iam_member" "cart_firestore_user" {
+  count = local.cart_sa != "" ? 1 : 0
+
+  project = var.project_id
+  role    = "roles/datastore.user"
+  member  = "serviceAccount:${local.cart_sa}"
 }
 
 resource "google_project_iam_member" "extra" {

@@ -1,6 +1,6 @@
 # ecomm-infra
 
-Infrastructure and Kubernetes config for the **mcart** demo on **Google Cloud**: Terraform (VPC, GKE, DNS, IAM), Helm (PostgreSQL, Redis, OpenSearch, Flyway bootstrap), and manifests for **auth**, **user**, **email**, **product**, **search**, **product-indexer**, and **mcart-ui**.
+Infrastructure and Kubernetes config for the **mcart** demo on **Google Cloud**: Terraform (VPC, GKE, DNS, IAM, Firestore indexes and cart bootstrap/cleanup), Helm (PostgreSQL, Redis, OpenSearch, Flyway bootstrap for non-cart databases), and manifests for **auth**, **user**, **email**, **product**, **cart**, **search**, **product-indexer**, and **mcart-ui**. The **cart** service uses Firestore only (no PostgreSQL database).
 
 **Default wiring in this repo:** GCP project `ecommerce-491019`, region `asia-south2`, zonal cluster `mcart-gke` (`asia-south2-a`), public hostname `mcart.space`, Artifact Registry `asia-south2-docker.pkg.dev/ecommerce-491019/docker-apps/`.
 
@@ -12,7 +12,7 @@ Public HTTPS uses **Kubernetes Gateway API + Envoy Gateway + cert-manager** (not
 
 | Area | Purpose |
 |------|---------|
-| [`terraform/`](terraform/) | VPC, subnet, NAT, GKE, workload service accounts + IAM, Pub/Sub, **regional static IP** for the gateway LB, optional Cloud DNS |
+| [`terraform/`](terraform/) | VPC, subnet, NAT, GKE, workload service accounts + IAM, Pub/Sub, Firestore cart index + bootstrap doc + optional destroy cleanup, **regional static IP** for the gateway LB, optional Cloud DNS |
 | [`deploy/helm/`](deploy/helm/) | Bitnami PostgreSQL/Redis, OpenSearch, one-shot Flyway bootstrap chart |
 | [`deploy/k8s/apps/`](deploy/k8s/apps/) | Deployments, Services, ConfigMaps for each microservice (secrets via gitignored `secret.yaml`) |
 | [`deploy/k8s/gateway/`](deploy/k8s/gateway/) | `Gateway`, `HTTPRoute`, JWT `SecurityPolicy`, cert-manager `ClusterIssuer` + `Certificate` |
@@ -33,7 +33,7 @@ Public HTTPS uses **Kubernetes Gateway API + Envoy Gateway + cert-manager** (not
 ## Quick start (new environment)
 
 1. **APIs:** `cd terraform && ./scripts/enable-apis.sh <project_id>` (once per project).
-2. **Terraform:** `terraform init && terraform apply` → note `terraform output -raw mcart_gateway_static_ip_address`.
+2. **Terraform:** `terraform init && terraform apply` → note `terraform output -raw mcart_gateway_static_ip_address`. Destroy runs an optional script to delete Firestore `cart_items` documents (`pip install google-cloud-firestore` for the operator running `terraform destroy`; see `terraform/cart_firestore.tf`).
 3. **Cluster:** `gcloud container clusters get-credentials …`
 4. **Data:** `cd deploy` — copy Helm values examples, `make data-install data-install-redis data-install-es`, then `make flyway-install` with DB passwords.
 5. **Apps:** copy `secret.example.yaml` → `secret.yaml` where needed, `make apps-apply NS=mcart`.

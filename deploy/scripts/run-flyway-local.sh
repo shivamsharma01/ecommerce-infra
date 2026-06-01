@@ -31,19 +31,18 @@
 #    export FLYWAY_PASSWORD='user_password'
 #    ./scripts/run-flyway-local.sh user
 #
-#    Same pattern for: inventory, cart, payment, order (DB names and users in values-postgresql.yaml).
+#    Same pattern for: inventory, payment, order (DB names and users in values-postgresql.yaml).
 #
 #    If Postgres was created by Bitnami Helm using deploy/helm/values-postgresql.yaml, every app user
-#    (auth_user, cart_user, …) is created with the SAME password as in that file's init script — the
-#    placeholder is MY_PASSWORD, not cart_password / auth_password. Match FLYWAY_PASSWORD to that, or
-#    run: ALTER USER cart_user WITH PASSWORD 'cart_password'; (and use cart_password in Flyway).
+#    (auth_user, inventory_user, …) is created with the SAME password as in that file's init script — the
+#    placeholder is MY_PASSWORD, not auth_password. Match FLYWAY_PASSWORD to that, or ALTER USER … PASSWORD.
 #
 # If Flyway is ever run on the host JVM (not this script), use localhost instead of host.docker.internal.
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEPLOY="$(cd "$SCRIPT_DIR/.." && pwd)"
-DB="${1:?usage: $0 auth|user|inventory|cart|payment|order}"
-case "$DB" in auth|user|inventory|cart|payment|order) ;; *) echo "Invalid DB: $DB"; exit 1;; esac
+DB="${1:?usage: $0 auth|user|inventory|payment|order}"
+case "$DB" in auth|user|inventory|payment|order) ;; *) echo "Invalid DB: $DB"; exit 1;; esac
 SQL_DIR="$DEPLOY/helm/mcart-bootstrap/files/$DB"
 test -d "$SQL_DIR" || { echo "Missing $SQL_DIR"; exit 1; }
 : "${FLYWAY_URL:?Set FLYWAY_URL (jdbc:postgresql://...)}"

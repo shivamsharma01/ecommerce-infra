@@ -32,10 +32,6 @@ CREATE USER inventory_user WITH PASSWORD 'inventory_password';
 CREATE DATABASE inventory OWNER inventory_user;
 GRANT ALL PRIVILEGES ON DATABASE inventory TO inventory_user;
 
-CREATE USER cart_user WITH PASSWORD 'cart_password';
-CREATE DATABASE cart OWNER cart_user;
-GRANT ALL PRIVILEGES ON DATABASE cart TO cart_user;
-
 CREATE USER payment_user WITH PASSWORD 'payment_password';
 CREATE DATABASE payment OWNER payment_user;
 GRANT ALL PRIVILEGES ON DATABASE payment TO payment_user;
@@ -66,12 +62,7 @@ SQL
 	export FLYWAY_PASSWORD='inventory_password'
 	./scripts/run-flyway-local.sh inventory
 	
-	
-	export FLYWAY_URL='jdbc:postgresql://host.docker.internal:5433/cart'
-	export FLYWAY_USER='cart_user'
-	export FLYWAY_PASSWORD='cart_password'
-	./scripts/run-flyway-local.sh cart
-	
+	# Cart service uses Firestore (not PostgreSQL / Flyway).
 	
 	export FLYWAY_URL='jdbc:postgresql://host.docker.internal:5433/payment'
 	export FLYWAY_USER='payment_user'

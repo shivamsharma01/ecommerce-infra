@@ -27,11 +27,6 @@ inventory:
   username: inventory_user
   password: ""
 
-cart:
-  database: cart
-  username: cart_user
-  password: ""
-
 payment:
   database: payment
   username: payment_user
@@ -49,6 +44,5 @@ existingSecret:
   authPasswordKey: auth-password
   userPasswordKey: user-password
   inventoryPasswordKey: inventory-password
-  cartPasswordKey: cart-password
   paymentPasswordKey: payment-password
   orderPasswordKey: order-password

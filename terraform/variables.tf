@@ -181,7 +181,7 @@ variable "node_service_account_id" {
 variable "create_workload_service_accounts" {
   description = <<-EOT
     If true (default), create mcart-auth, mcart-user, mcart-product, mcart-product-indexer, mcart-email,
-    mcart-inventory, and mcart-order
+    mcart-inventory, mcart-order, and mcart-cart
     GCP service accounts and use their emails for IAM in iam_workloads.tf.
     Set false only when those SAs already exist and you set workload_service_accounts to their full emails.
   EOT
@@ -201,6 +201,7 @@ variable "workload_service_accounts" {
     email: subscribes to email-verification-events-sub + order-paid-email-sub (email service).
     inventory: subscribes to inventory-product-events-sub.
     order: publishes to order-paid-events.
+    cart: reads/writes Firestore cart_items.
   EOT
   type = object({
     auth            = optional(string)
@@ -210,6 +211,7 @@ variable "workload_service_accounts" {
     email           = optional(string)
     inventory       = optional(string)
     order           = optional(string)
+    cart            = optional(string)
   })
   default = {}
 }

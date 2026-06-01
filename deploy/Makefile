@@ -15,7 +15,7 @@ GKE_CLUSTER ?= mcart-gke
 GKE_LOCATION ?= asia-south2-a
 # So `make flyway-install AUTH_DB_PASS=...` is visible in the recipe (and passwords with `$` are not mangled by Make).
 export AUTH_DB_PASS AUTH_DB_PASS_FILE USER_DB_PASS USER_DB_PASS_FILE \
-	INVENTORY_DB_PASS INVENTORY_DB_PASS_FILE CART_DB_PASS CART_DB_PASS_FILE \
+	INVENTORY_DB_PASS INVENTORY_DB_PASS_FILE \
 	PAYMENT_DB_PASS PAYMENT_DB_PASS_FILE ORDER_DB_PASS ORDER_DB_PASS_FILE
 ROOT := $(abspath $(CURDIR)/../..)
 K8S := $(abspath $(CURDIR))/k8s/apps
@@ -78,11 +78,10 @@ flyway-install: k8s-ready
 	if { [ -z "$${AUTH_DB_PASS_FILE-}" ] && [ -z "$${AUTH_DB_PASS-}" ]; } \
 	  || { [ -z "$${USER_DB_PASS_FILE-}" ] && [ -z "$${USER_DB_PASS-}" ]; } \
 	  || { [ -z "$${INVENTORY_DB_PASS_FILE-}" ] && [ -z "$${INVENTORY_DB_PASS-}" ]; } \
-	  || { [ -z "$${CART_DB_PASS_FILE-}" ] && [ -z "$${CART_DB_PASS-}" ]; } \
 	  || { [ -z "$${PAYMENT_DB_PASS_FILE-}" ] && [ -z "$${PAYMENT_DB_PASS-}" ]; } \
 	  || { [ -z "$${ORDER_DB_PASS_FILE-}" ] && [ -z "$${ORDER_DB_PASS-}" ]; }; then \
 	  echo "Set AUTH_DB_PASS or AUTH_DB_PASS_FILE, USER_DB_PASS or USER_DB_PASS_FILE,"; \
-	  echo "and INVENTORY_*, CART_*, PAYMENT_*, ORDER_* (or *_DB_PASS_FILE for each)."; \
+	  echo "and INVENTORY_*, PAYMENT_*, ORDER_* (or *_DB_PASS_FILE for each)."; \
 	  echo "They must match CREATE USER ... PASSWORD in helm/values-postgresql.yaml (initdb)."; \
 	  exit 1; \
 	fi; \
@@ -92,14 +91,12 @@ flyway-install: k8s-ready
 	else USER_ARG="--set user.password=$${USER_DB_PASS}"; fi; \
 	if [ -n "$${INVENTORY_DB_PASS_FILE-}" ]; then INV_ARG="--set-file inventory.password=$${INVENTORY_DB_PASS_FILE}"; \
 	else INV_ARG="--set inventory.password=$${INVENTORY_DB_PASS}"; fi; \
-	if [ -n "$${CART_DB_PASS_FILE-}" ]; then CART_ARG="--set-file cart.password=$${CART_DB_PASS_FILE}"; \
-	else CART_ARG="--set cart.password=$${CART_DB_PASS}"; fi; \
 	if [ -n "$${PAYMENT_DB_PASS_FILE-}" ]; then PAY_ARG="--set-file payment.password=$${PAYMENT_DB_PASS_FILE}"; \
 	else PAY_ARG="--set payment.password=$${PAYMENT_DB_PASS}"; fi; \
 	if [ -n "$${ORDER_DB_PASS_FILE-}" ]; then ORD_ARG="--set-file order.password=$${ORDER_DB_PASS_FILE}"; \
 	else ORD_ARG="--set order.password=$${ORDER_DB_PASS}"; fi; \
 	$(HELM) upgrade --install mcart-bootstrap helm/mcart-bootstrap -n $(NS) \
-	  $$AUTH_ARG $$USER_ARG $$INV_ARG $$CART_ARG $$PAY_ARG $$ORD_ARG
+	  $$AUTH_ARG $$USER_ARG $$INV_ARG $$PAY_ARG $$ORD_ARG
 
 # Application manifests (canonical copy lives under ecomm-infra/deploy/k8s/apps/<service>/).
 # Per-service secret.yaml is gitignored — copy secret.example.yaml → secret.yaml, edit, then apps-apply applies it if present.
@@ -127,6 +124,7 @@ apps-apply: k8s-ready kubectl-required ensure-auth-jwt-secret
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/inventory/configmap.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/inventory/deployment.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/inventory/service.yaml
+	$(KUBECTL) apply -n $(NS) -f $(K8S)/cart/serviceaccount.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/cart/configmap.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/cart/deployment.yaml
 	$(KUBECTL) apply -n $(NS) -f $(K8S)/cart/service.yaml

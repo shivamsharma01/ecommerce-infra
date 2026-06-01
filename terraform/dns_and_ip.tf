@@ -20,7 +20,7 @@ resource "google_dns_record_set" "apex_a" {
   type         = "A"
   ttl          = 300
   # Gateway is the single public entrypoint now.
-  rrdatas      = [google_compute_address.mcart_gateway.address]
+  rrdatas = [google_compute_address.mcart_gateway.address]
 }
 
 resource "google_dns_record_set" "alias_a" {
@@ -31,5 +31,5 @@ resource "google_dns_record_set" "alias_a" {
   type         = "A"
   ttl          = 300
   # Gateway is the single public entrypoint now.
-  rrdatas      = [google_compute_address.mcart_gateway.address]
+  rrdatas = [google_compute_address.mcart_gateway.address]
 }

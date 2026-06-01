@@ -57,3 +57,11 @@ resource "google_service_account" "workload_order" {
   account_id   = "mcart-order"
   display_name = "MCart order service (Pub/Sub order-paid publisher)"
 }
+
+resource "google_service_account" "workload_cart" {
+  count = var.create_workload_service_accounts ? 1 : 0
+
+  project      = var.project_id
+  account_id   = "mcart-cart"
+  display_name = "MCart cart service (Firestore cart_items)"
+}
