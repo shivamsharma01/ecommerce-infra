@@ -77,6 +77,7 @@ Other services do not use Redis. Connection strings and passwords come from Helm
 
 ## Related docs
 
-- [Cloud Shell deployment runbook](../ecomm-infra/CLOUD_SHELL_DEPLOYMENT.md)
-- [Gateway README](../ecomm-infra/deploy/k8s/gateway/README.md)
+- [Edge gateway, TLS, JWT, Helm sequence diagrams](./sequence-diagrams/edge-gateway-tls-jwt-helm.md)
+- [Cloud Shell deployment runbook](../CLOUD_SHELL_DEPLOYMENT.md)
+- [Gateway README](../deploy/k8s/gateway/README.md)
 - [System overview](./00-system-overview.md)

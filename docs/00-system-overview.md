@@ -59,6 +59,8 @@ Two HTTPRoutes on `mcart.space`:
 
 Services still enforce their own JWT rules (scopes, `emailVerified`, admin scopes).
 
+See [Edge gateway, TLS, JWT, Helm sequence diagrams](./sequence-diagrams/edge-gateway-tls-jwt-helm.md) for step-by-step flows.
+
 ## Repository map
 
 | Repo | Role |
