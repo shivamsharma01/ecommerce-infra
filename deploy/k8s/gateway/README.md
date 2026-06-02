@@ -12,6 +12,13 @@ make gateway-install   # Envoy v1.7.1 install.yaml + GatewayClass + cert-manager
 make gateway-apply     # Gateway, HTTPRoutes, JWT policy, ClusterIssuer, Certificate, ReferenceGrant
 ```
 
+If `kubectl get gateway` fails with `the server doesn't have a resource type "gateway"`, install Gateway API CRDs:
+
+```bash
+kubectl apply -f "https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.1.0/standard-install.yaml"
+kubectl get crd gateways.gateway.networking.k8s.io httproutes.gateway.networking.k8s.io
+```
+
 Upstream **`install.yaml` does not create a `GatewayClass`**. This repo adds [`00-gatewayclass.yaml`](00-gatewayclass.yaml) (`envoy-gateway`). Do not install Envoy with ad-hoc `gateway-helm` “latest” charts for prod.
 
 ## After apply

@@ -142,6 +142,12 @@ export CLUSTER=mcart-gke
 
 gcloud config set project "$PROJECT"
 
+# Cloud Shell sometimes has broken IPv6 routes which can make Terraform fail
+# with errors like: "dial tcp [2404:...]:443: cannot assign requested address".
+# Disabling IPv6 is a reliable workaround for Terraform talking to googleapis.com.
+sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1
+sudo sysctl -w net.ipv6.conf.default.disable_ipv6=1
+
 curl -sI --connect-timeout 10 https://compute.googleapis.com | head -1
 curl -sI --connect-timeout 10 https://firestore.googleapis.com | head -1
 ```
@@ -283,6 +289,11 @@ cd "$MCART/deploy"
 make gateway-install
 make gateway-apply
 
+# If you see: "the server doesn't have a resource type \"gateway\""
+# your cluster is missing Gateway API CRDs. gateway-install installs them.
+# Verify:
+kubectl get crd gateways.gateway.networking.k8s.io httproutes.gateway.networking.k8s.io
+
 kubectl get gateway -n mcart-gateway
 kubectl get httproute -n mcart-gateway
 kubectl get securitypolicy -n mcart-gateway
@@ -370,6 +381,10 @@ export ZONE=asia-south2-a
 export CLUSTER=mcart-gke
 
 gcloud config set project "$PROJECT"
+
+# Same Cloud Shell networking workaround as deploy:
+sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1
+sudo sysctl -w net.ipv6.conf.default.disable_ipv6=1
 
 curl -sI --connect-timeout 10 https://compute.googleapis.com | head -1
 curl -sI --connect-timeout 10 https://firestore.googleapis.com | head -1

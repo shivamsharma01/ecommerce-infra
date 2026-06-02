@@ -152,6 +152,10 @@ apps-apply: k8s-ready kubectl-required ensure-auth-jwt-secret
 # install.yaml ships CRDs + controller only — it does NOT create a GatewayClass (see 00-gatewayclass.yaml).
 # Do not use `helm install ... gateway-helm --version v0.0.0-latest` for production; use the pinned install.yaml.
 gateway-install: k8s-ready
+	@echo "Installing Kubernetes Gateway API CRDs (required for kind=Gateway/HTTPRoute)..."
+	$(KUBECTL) apply -f "https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.1.0/standard-install.yaml"
+	@echo "Verifying Gateway API CRDs exist:"
+	@$(KUBECTL) get crd gateways.gateway.networking.k8s.io httproutes.gateway.networking.k8s.io >/dev/null
 	@echo "Installing Envoy Gateway v1.7.1 (official install.yaml: CRDs + controller)..."
 	$(KUBECTL) apply --server-side -f "https://github.com/envoyproxy/gateway/releases/download/v1.7.1/install.yaml"
 	$(KUBECTL) wait --timeout=5m -n envoy-gateway-system deployment/envoy-gateway --for=condition=Available
