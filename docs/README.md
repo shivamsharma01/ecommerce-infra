@@ -9,6 +9,12 @@ Tutor-style guides for each repository in this monorepo. Use this index to jump 
 | [mcart-ui](./mcart-ui.md) | Angular storefront, routes, API usage |
 | [ecommerce (diagrams only)](./ecommerce.md) | Architecture / sequence diagrams (not runnable code) |
 
+### Sequence diagrams
+
+| Diagram | What it covers |
+|---------|----------------|
+| [Product image GCS flow](./sequence-diagrams/product-image-gcs-flow.md) | Admin upload (IAM write) vs UI public read (no GCS credentials) |
+
 ### Microservices
 
 | Service | Document |
