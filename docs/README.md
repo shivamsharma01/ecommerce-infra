@@ -15,6 +15,7 @@ Tutor-style guides for each repository in this monorepo. Use this index to jump 
 |---------|----------------|
 | [Product image GCS flow](./sequence-diagrams/product-image-gcs-flow.md) | Admin upload (IAM write) vs UI public read (no GCS credentials) |
 | [Edge gateway, TLS, JWT, Helm](./sequence-diagrams/edge-gateway-tls-jwt-helm.md) | Gateway API CRDs, Envoy, cert-manager TLS, OAuth2/OIDC, SecurityPolicy JWT, Helm data install |
+| [Interview prep & demo script](./interview-prep-and-demo.md) | Draw.io findings, 30+ Q&A, demo talking points |
 
 ### Microservices
 

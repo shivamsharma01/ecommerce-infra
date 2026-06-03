@@ -1,6 +1,8 @@
 # ecommerce (documentation repo)
 
-This folder is **not a runnable application**. It holds architecture artifacts for the MCART platform.
+This folder holds **architecture artifacts** for the MCART platform (Draw.io diagrams and text sequence files). It is **not runnable application code**.
+
+**Interview prep, diagram analysis, and demo script:** [interview-prep-and-demo.md](./interview-prep-and-demo.md)
 
 ## Contents
 
