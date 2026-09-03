@@ -1,0 +1,24 @@
+title Gateway install (make gateway-install)
+participant Operator
+participant Kubernetes API
+participant Gateway API CRDs
+participant Envoy Gateway Controller
+participant cert-manager
+
+Operator -> Kubernetes API: kubectl apply\nGateway API standard-install.yaml v1.1.0
+
+Kubernetes API -> Gateway API CRDs: Register kinds:\nGateway, HTTPRoute,\nGatewayClass, ReferenceGrant, …
+
+Operator -> Kubernetes API: kubectl apply\nEnvoy Gateway install.yaml v1.7.1
+
+Kubernetes API -> Envoy Gateway Controller: Start deployment\n(envoy-gateway-system)
+
+Operator -> Kubernetes API: kubectl apply\n00-gatewayclass.yaml\n(name: envoy-gateway)
+
+Note over Operator,Kubernetes API: GatewayClass links controller\n→ EnvoyProxy mcart-envoy-proxy
+
+Operator -> cert-manager: helm upgrade --install cert-manager\n(enableGatewayAPI=true)
+
+cert-manager -> Kubernetes API: Install cert-manager CRDs +\ncontroller + webhook
+
+Note over Operator,cert-manager: Cluster can now accept\nGateway / HTTPRoute / Certificate resources

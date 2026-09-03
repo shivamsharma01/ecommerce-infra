@@ -1,0 +1,30 @@
+title Product Image Read (public UI)
+participant MCart UI
+participant API Gateway
+participant Product Service
+participant Firestore
+participant GCS Bucket
+
+MCart UI -> API Gateway: GET /api/products/{id}\n(no Authorization header)
+
+API Gateway -> Product Service: GET /api/products/{id}\n(public route; no JWT at edge)
+
+Product Service -> Product Service: GET /api/** permitAll\n(no GCS credentials used)
+
+Product Service -> Firestore: Load product by id
+
+Firestore --> Product Service: ProductDocument {\n  gallery: [{ thumbnailUrl, hdUrl }]\n  (https://storage.googleapis.com/… URLs only)\n}
+
+Product Service --> API Gateway: 200 OK\n(JSON with image URLs, not bytes)
+
+API Gateway --> MCart UI: 200 OK
+
+MCart UI -> MCart UI: <img [src]="gallery[0].thumbnailUrl">
+
+MCart UI -> GCS Bucket: GET https://storage.googleapis.com/{bucket}/products/…/thumb.jpg\n(no Authorization header)
+
+GCS Bucket -> GCS Bucket: IAM: allUsers → storage.objectViewer\n(public read)
+
+GCS Bucket --> MCart UI: 200 OK\n(image bytes)
+
+MCart UI -> MCart UI: Browser displays image

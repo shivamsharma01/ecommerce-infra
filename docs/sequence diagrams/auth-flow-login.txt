@@ -1,0 +1,14 @@
+title Auth Flow (login)
+participant Client
+participant API Gateway
+participant Auth Service
+
+Client -> API Gateway: POST /login\n(username + password)
+
+API Gateway -> Auth Service: POST /auth/login\n(username + password)
+
+Auth Service -> Auth Service:1. fetch user with claims\n2. verify password\n3. generate jwt and attach claims
+
+Auth Service --> API Gateway: Response: {\n"access_token": "jwt",\n"token_type": "Bearer",\n"expires_in": 3600\n}
+
+API Gateway --> Client:  Response: {\n"access_token": "jwt",\n"token_type": "Bearer",\n"expires_in": 3600\n}

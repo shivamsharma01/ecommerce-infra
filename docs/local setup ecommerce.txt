@@ -32,6 +32,10 @@ CREATE USER inventory_user WITH PASSWORD 'inventory_password';
 CREATE DATABASE inventory OWNER inventory_user;
 GRANT ALL PRIVILEGES ON DATABASE inventory TO inventory_user;
 
+CREATE USER cart_user WITH PASSWORD 'cart_password';
+CREATE DATABASE cart OWNER cart_user;
+GRANT ALL PRIVILEGES ON DATABASE cart TO cart_user;
+
 CREATE USER payment_user WITH PASSWORD 'payment_password';
 CREATE DATABASE payment OWNER payment_user;
 GRANT ALL PRIVILEGES ON DATABASE payment TO payment_user;
@@ -62,7 +66,12 @@ SQL
 	export FLYWAY_PASSWORD='inventory_password'
 	./scripts/run-flyway-local.sh inventory
 	
-	# Cart service uses Firestore (not PostgreSQL / Flyway).
+	
+	export FLYWAY_URL='jdbc:postgresql://host.docker.internal:5433/cart'
+	export FLYWAY_USER='cart_user'
+	export FLYWAY_PASSWORD='cart_password'
+	./scripts/run-flyway-local.sh cart
+	
 	
 	export FLYWAY_URL='jdbc:postgresql://host.docker.internal:5433/payment'
 	export FLYWAY_USER='payment_user'
@@ -75,6 +84,7 @@ SQL
 	export FLYWAY_PASSWORD='order_password'
 	./scripts/run-flyway-local.sh order
 
+# Set your GCP project and credentials path (never commit the JSON key file)
 gcloud config set project "${GCP_PROJECT_ID:?Set GCP_PROJECT_ID}"
 export GOOGLE_APPLICATION_CREDENTIALS="${GOOGLE_APPLICATION_CREDENTIALS:?Set path to your GCP service account key JSON}"
 
@@ -175,6 +185,7 @@ gcloud pubsub topics create inventory-product-events
 gcloud pubsub subscriptions create inventory-product-events-sub --topic=inventory-product-events --ack-deadline=60
 
 
+# Replace YOUR_GCP_PROJECT and YOUR_FIRESTORE_SA with your project values
 gcloud projects add-iam-policy-binding YOUR_GCP_PROJECT \
   --member="serviceAccount:YOUR_FIRESTORE_SA@YOUR_GCP_PROJECT.iam.gserviceaccount.com" \
   --role="roles/pubsub.publisher"

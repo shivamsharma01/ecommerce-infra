@@ -1,0 +1,23 @@
+title Auth Flow (Signup)
+
+participant Client
+participant API Gateway
+participant Auth Service
+participant User Service
+
+
+Client -> API Gateway: POST /signup\n(credentials + profile details)
+
+API Gateway -> Auth Service: POST /auth/users\n(username + password)
+
+Auth Service -> Auth Service:store username\n + hashed password\n + claims
+
+Auth Service --> API Gateway:201 Created (userId)
+
+API Gateway -> User Service:POST /internal/users\n(userId + profile details)
+
+User Service -> User Service:store userId + profile details
+
+User Service --> API Gateway:200 OK
+
+API Gateway --> Client:200 OK

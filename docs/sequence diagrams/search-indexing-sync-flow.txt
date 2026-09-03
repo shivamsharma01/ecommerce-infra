@@ -1,0 +1,31 @@
+title Search Indexing & Synchronization
+
+actor Admin
+participant API Gateway
+participant Product Service
+participant Firestore
+participant Outbox
+participant Pub/Sub
+participant Product Indexer
+participant Elasticsearch
+
+note over API Gateway: JWKS fetched & cached\nat startup (not per request)
+
+
+Admin -> API Gateway:API call\nAdd/Delete/Modify
+
+API Gateway -> Product Service:API call routed after\n token verification
+
+Product Service -> Firestore:Update firestore product document
+
+Product Service --> Outbox: Event stored atomically\n with product update
+
+Outbox --> Pub/Sub: Async publisher\n(with retries)\npushes event to\ntopic: product.events
+
+note over Pub/Sub: Retries on failure →\nDLQ (product.events.dlq)
+
+note over Product Indexer: subscribe to topic\n\nIdempotent processing using\neventId/productId\n\nDLQ replay + periodic reindex for recovery
+
+Product Indexer -> Elasticsearch: store denormalized\nproduct document
+
+note over Elasticsearch: Eventual consistency (< few seconds)

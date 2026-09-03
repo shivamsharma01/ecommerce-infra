@@ -1,0 +1,26 @@
+title Flow for Product Search
+
+actor User
+participant API Gateway
+participant Search Service
+participant Redis
+participant Elasticsearch
+
+note over API Gateway: JWKS fetched & cached at startup (not per request)
+
+
+User -> API Gateway:Browser sends search request
+
+API Gateway -> Search Service:Search query + filters + pagination
+
+Search Service -> Redis:Check distributed cache \n(key = normalized query + filters)
+
+Search Service -> Elasticsearch:(If not found in Redis)\nComplex search query\n(scoring, faceting, pagination)
+
+Elasticsearch --> Search Service: Product documents (denormalized) + facets
+
+
+
+Search Service --> API Gateway:200 OK (results + facets)
+
+API Gateway --> User:200 OK

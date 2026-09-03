@@ -1,0 +1,31 @@
+title Product Image Upload (admin create)
+participant Admin UI
+participant API Gateway
+participant Product Service
+participant GCS Bucket
+participant Firestore
+
+Admin UI -> API Gateway: POST /api/products/upload\n(multipart: product JSON + image files)\nAuthorization: Bearer {jwt}
+
+API Gateway -> API Gateway: Validate JWT\n(protected route)
+
+API Gateway -> Product Service: POST /api/products/upload\n(forward Authorization header)
+
+Product Service -> Product Service: 1. Validate JWT\n2. Require SCOPE_product.admin\n3. Validate gallery manifest + file parts
+
+Product Service -> Product Service: ADC via Workload Identity\n(K8s SA product → GCP SA mcart-product@…)
+
+loop For each gallery image (thumb + hd)
+  Product Service -> GCS Bucket: storage.create(\n  products/sku-{slug}/gallery/{n}/thumb.jpg,\n  products/sku-{slug}/gallery/{n}/hd.jpg\n)\n[IAM: roles/storage.objectAdmin]
+  GCS Bucket --> Product Service: Object created
+end
+
+Product Service -> Product Service: Build public URLs:\nhttps://storage.googleapis.com/{bucket}/{object}
+
+Product Service -> Firestore: Save product +\noutbox (gallery[].thumbnailUrl, hdUrl)
+
+Firestore --> Product Service: OK
+
+Product Service --> API Gateway: 201 Created\nProductResponse { gallery: [{ thumbnailUrl, hdUrl }] }
+
+API Gateway --> Admin UI: 201 Created

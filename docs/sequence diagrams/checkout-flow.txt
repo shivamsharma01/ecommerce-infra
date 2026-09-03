@@ -1,0 +1,57 @@
+title Checkout Flow (Hosted Payment)
+
+participant Client
+participant API Gateway
+participant Order Service
+participant Cart Service
+participant Inventory Service
+participant Payment Service
+participant Payment Gateway
+participant Notification Service
+participant Event Bus
+
+Client -> API Gateway: POST /checkout\n{\n  "cartId": "cart-123",\n  "paymentMethod": "UPI",// or CARD, WALLET\n  "gateway": "RAZORPAY"\n}
+
+API Gateway -> API Gateway:Verify JWT\nExtract userId = sub
+
+API Gateway -> Order Service:Start checkout\n(userId, cartId, paymentMethod)
+
+Order Service -> Cart Service:Get cart details\n    (cartId)
+
+Cart Service --> Order Service:Cart items + prices
+
+Order Service -> Inventory Service:Reserve inventory\n(itemId, quantity)
+
+Inventory Service --> Order Service:Inventory reserved
+
+Order Service -> Order Service:                   Create order\n(status = PENDING, items, totalAmount)
+
+Order Service -> Payment Service:Create payment session\n(orderId, amount, paymentMethod)
+
+Payment Service -> Payment Gateway:Create checkout session
+
+Payment Gateway --> Payment Service:payment_url + payment_session_id
+
+Payment Service --> Order Service:payment_url
+
+Order Service --> API Gateway:200 OK\n(orderId, payment_url)
+
+API Gateway --> Client:200 OK\n(orderId, payment_url)
+
+note over Client:User is redirected to payment_url
+
+Client -> Payment Gateway:(browser redirect)\nUser completes payment
+
+Payment Gateway -> Payment Service:Webhook\n(payment_success, orderId)
+
+Payment Service -> Payment Service:Validate webhook\nEnsure idempotency
+
+Payment Service --> Event Bus:Publish PaymentSucceeded event
+
+Event Bus --> Order Service:Update order status = PAID
+
+Event Bus --> Inventory Service:Deduct reserved inventory
+
+Event Bus --> Cart Service:Delete cart
+
+Event Bus --> Notification Service:Send confirmation email
