@@ -188,3 +188,76 @@ gcloud projects add-iam-policy-binding YOUR_GCP_PROJECT \
   --role="roles/storage.objectCreator"
 
 
+=================================Local setup on Linux ================================
+
+1. To setup emulator locally, we need to run this command which will setup and run the pub/sub emulator locally so no need of gcloud:
+   
+   docker run -d --name pubsub-emulator -p 8086:8085 google/cloud-sdk:latest gcloud beta emulators pubsub start --host-port=0.0.0.0:8085
+
+2. Update the application-local.yaml files on each service:
+   
+   Wherever you see under "cloud:"
+   cloud:
+    gcp:
+      project-id: "${MCART_GCP_PROJECT_ID:${SPRING_CLOUD_GCP_PROJECT_ID:my-project-chat-ai-487408}}"
+      credentials:
+        location: ${GCP_CREDENTIALS_PATH:}
+      pubsub:
+        enabled: ${SPRING_CLOUD_GCP_PUBSUB_ENABLED:true}
+
+   we need to update 1. we need to remove "credentials:" and we need to add "emulator-host: "localhost:8086" 
+   cloud:
+    gcp:
+      project-id: "${MCART_GCP_PROJECT_ID:${SPRING_CLOUD_GCP_PROJECT_ID:my-project-chat-ai-487408}}"
+      pubsub:
+        enabled: ${SPRING_CLOUD_GCP_PUBSUB_ENABLED:true}
+        emulator-host: "localhost:8085"
+
+3. Before starting any service, we need to check whether emulator is running or not:
+   
+   curl http://localhost:8085
+
+4. Then we need to create topics, some of them are below so run these curl command and same for rest topics as well which are other services:
+   
+   curl -X PUT \
+  "http://localhost:8086/v1/projects/my-project-chat-ai-487408/topics/email-verification-events"
+{
+  "name": "projects/my-project-chat-ai-487408/topics/email-verification-events"
+}
+
+curl -X PUT \
+  "http://localhost:8086/v1/projects/my-project-chat-ai-487408/subscriptions/email-verification-events-sub" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "topic": "projects/my-project-chat-ai-487408/topics/email-verification-events"
+  }'
+
+curl -X PUT \
+  "http://localhost:8086/v1/projects/my-project-chat-ai-487408/topics/user-signup-events"
+{
+  "name": "projects/my-project-chat-ai-487408/topics/user-signup-events"
+}
+
+curl -X PUT \
+  "http://localhost:8086/v1/projects/my-project-chat-ai-487408/subscriptions/user-signup-events-sub" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "topic": "projects/my-project-chat-ai-487408/topics/user-signup-events"
+  }'
+
+5. Once topics created, Now start auth service--->user-service----->email-service.
+
+6. For email smtp setup, you need add like local yaml file:
+   
+  mail:
+    host: smtp.gmail.com
+    port: ${SPRING_MAIL_PORT:587}
+    username: "<your email id>"
+    password: "your APP Password not Gmail password."
+    properties:
+      mail:
+        smtp:
+          auth: true
+          startttls:
+            enable: true
+ 
