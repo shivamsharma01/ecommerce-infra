@@ -260,4 +260,17 @@ curl -X PUT \
           auth: true
           startttls:
             enable: true
+
+--------------for product service -------
+1.Run below command :
+docker run -d \
+  --name firestore-emulator \
+  -p 8090:8080 \
+  -p 4000:4000 \
+  andreysenov/firebase-tools:latest \
+  firebase emulators:start --only firestore --project demo-project
+
+
+2. Add   
+
  
