@@ -261,6 +261,8 @@ curl -X PUT \
           startttls:
             enable: true
 
+7. Then run the start service script to up all microservices from where all the repos clone exists see "start_services.sh" and to stop use "stop_services.sh".
+
 --------------for product service -------
 1.Run below command :
 docker run -d \
