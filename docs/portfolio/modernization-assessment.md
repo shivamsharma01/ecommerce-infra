@@ -567,7 +567,10 @@ Either can **clobber checkout deductions**. This is a real engineering problem s
 - Honesty matrix and gap analysis
 - Diagram errata
 - Secret hygiene documentation
-- No application code changes
+- PART 12 current-architecture content package (CTO writeups, demos, diagrams, case-study framing)
+- As-built diagrams 1–14 ([as-built-diagrams.md](as-built-diagrams.md)) — **Done**
+- Next doc step: Case Study 1 client draft
+- No application code changes until Phase 1 approved
 
 **Phase 1 — Payment mock state machine + idempotent charge** (**Proposed modernization**)
 
@@ -677,6 +680,162 @@ Present as **one platform, five engineering problems**:
 
 ---
 
+## PART 12 — Current Architecture Content Package (CTO-Facing)
+
+**Audience:** prospective clients / CTOs. Treat the **current architecture as the product**. Modernization case studies are engineering problems *extracted from that product*, not a technology shopping list.
+
+**Rule:** Keep future work in appendices or sections labeled **Proposed**. The CTO first sees what exists and which problems it honestly has.
+
+### 12.1 What to write (As-Built Architecture Guide)
+
+| Section | Content | Status |
+|---------|---------|--------|
+| **A. One-page executive brief** | What MCART is; domains covered; hybrid style in one sentence; honesty line (mock payment, not monolith, not Kafka); why it matters to a client | Covered in PART 1 |
+| **B. System context** | External actors (browser, SMTP, GCP); edge (Envoy, TLS, JWT); domains Identity / Catalog & Search / Commerce / Platform; payment + email cluster-internal | [as-built-diagrams.md](as-built-diagrams.md) Diagram 1 |
+| **C. Service catalog** | Purpose, API surface, datastore, sync vs async, deployability | PART 2 service inventory |
+| **D. Communication & consistency** | Intentional sync vs async; consistency table | PART 2 + Appendix B |
+| **E. Data ownership** | Who owns which store; Auth vs User; Product vs Inventory vs Search; Order vs Payment two IDs | PART 4–5 + Diagram 8 |
+| **F. Checkout as-built** | Sequence, `@Transactional` scope, compensation, failure windows, mock disclaimer | PART 5 |
+| **G. Auth & edge security** | OIDC, JWKS, edge JWT, scopes, token passthrough limitation | PART 2 auth; Diagram 9 |
+| **H. Catalog / search as-built** | Outbox → Pub/Sub → indexer; version skip; reindex; inventory consuming product events + stock overwrite risk | PART 3–6 + Diagrams 7, 12 |
+| **I. Platform / ops** | Terraform, Helm, GKE, Cloud Build, probes; ~₹2k/day; local = manual Docker + GCP | PART 10 + Diagram 10 |
+| **J. Explicit “not in code” errata** | Razorpay, HPA, DLQ, Redis search cache, shipment/fraud | [diagram-errata.md](diagram-errata.md) |
+
+### 12.2 Diagrams to draw (as-built only)
+
+Draw diagrams that match code. Keep aspirational draw.io files but mark them **Target / Design Intent**.
+
+#### Must-have (CTO deck)
+
+| # | Diagram | Shows | Case study / use |
+|---|---------|-------|------------------|
+| 1 | System context | Browser, Gateway, domains, GCP | Opening slide |
+| 2 | Container / service map | Microservices + datastores | Core architecture |
+| 3 | Sync vs async overlay | Solid = REST, dashed = Pub/Sub | Hybrid story |
+| 4 | Checkout sequence (as-built) | Order → User/Cart/Product/Inv/Pay → DB → Pub/Sub | Case Study 1 |
+| 5 | Checkout failure windows | Failure marks on swimlanes | Case Study 1 demo |
+| 6 | Signup / outbox sequence | Auth DB + outbox → Pub/Sub → user + email | Outbox credibility |
+| 7 | Product → index sequence | Firestore outbox → Pub/Sub → indexer → OpenSearch | Case Study 3 |
+| 8 | Data ownership map | Boxes per store, write arrows | Case Study 2 |
+| 9 | Edge security | TLS → Envoy JWT → service JWT / scopes | Platform chapter |
+| 10 | Deployment as-built | Namespaces `mcart` / `mcart-gateway`, Helm data | Case Study 5 |
+
+#### Nice-to-have
+
+| # | Diagram | Why |
+|---|---------|-----|
+| 11 | Transaction boundary | Local TX ≠ distributed TX for CTOs |
+| 12 | Inventory stock writers | Catalog event + admin sync vs checkout decrement |
+| 13 | Pub/Sub topology | Topics / subscriptions |
+| 14 | CI/CD as-built | GitHub → Cloud Build → Artifact Registry → GKE |
+
+**Do not draw as “current”** unless labeled otherwise: Razorpay/webhook checkout, Kafka bus, HPA everywhere / multi-region, Redis in front of search, separate shipment/fraud/admin microservices.
+
+**If time is limited, draw these three first:** (1) service map + datastores, (2) checkout sequence as-built, (3) product outbox → search. Then Demo A + Demo B.
+
+Canonical mermaid sources: [as-built-diagrams.md](as-built-diagrams.md).
+
+### 12.3 Demos from current behavior
+
+Prioritize demos that need **almost no new code**. Label mock payment: *Payment provider simulated for demonstration purposes.*
+
+| Demo | Name | Length | Proves | Format |
+|------|------|--------|--------|--------|
+| **A** | Platform proof — customer journey | 2–3 min | Real system, not slides | Live or recorded (always first for CTOs) |
+| **B** | Distributed checkout reality | 4–5 min | Failure understanding + compensation that works today | **Live** flagship; also record |
+| **C** | Eventual consistency of search | 3 min | Outbox + Pub/Sub + OpenSearch | Live or recorded |
+| **D** | Identity reliability (outbox) | ~2 min | Transactional outbox **Implemented** | Optional live |
+| **E** | Edge security | ~1 min | Gateway + OIDC | Optional live |
+| **F** | Cost / ops start-stop | ~2 min | Operator mindset; no 24/7 cluster needed | Recorded |
+
+**Demo B script (current behavior only):**
+
+```text
+00:00  Happy path — payment.mock.mode=success
+00:30  mode=fail — show inventory restored (compensation that works)
+01:00  Double-click / retry — explain double-charge risk (no idempotency)
+01:30  Whiteboard — payment OK then order/cart failure window
+02:00  Close — this is the baseline Case Study 1 modernizes
+```
+
+**Recording strategy:** A + B + C on the website; live B for sales calls. Website must not require always-on cluster.
+
+### 12.4 How to describe case studies from current architecture
+
+```text
+As-built baseline (evidence)
+        →
+Real engineering problem visible in that baseline
+        →
+Options considered
+        →
+Decision / proposed target (clearly labeled Proposed)
+        →
+What we will implement / already implemented
+        →
+How we demo it
+```
+
+Never start with “We will introduce Kafka/Saga/OpenTelemetry.” Start with the **problem the current system exhibits**.
+
+#### Case study framing template
+
+1. **Title** — business outcome, not tech  
+2. **Context** — “In our MCART reference platform…”  
+3. **As-built** — 5–8 lines + one current diagram  
+4. **Problem** — failure mode or coupling with evidence  
+5. **Impact** — reliability / consistency / operability / cost (no fake numbers)  
+6. **Options** — 2–3 alternatives  
+7. **Decision** — what and why  
+8. **Target architecture** — labeled **Proposed**  
+9. **Demo** — what the viewer sees today vs after change  
+
+#### Map current architecture → case studies
+
+| Case study | Pull from current architecture | Opening sentence for CTO |
+|------------|--------------------------------|---------------------------|
+| **1. Resilient checkout** | `OrderService.checkout`, sync RestClient chain, weak compensation, two order IDs, no idempotency | “Checkout already spans five services and three databases; today only one failure path is compensated.” |
+| **2. Catalog / inventory / search consistency** | Product outbox, inventory `init` on UPDATE, OpenSearch indexer | “Catalog, stock, and search are correctly separated stores — but catalog events can overwrite live stock.” |
+| **3. Search pipeline reliability** | Outbox + Pub/Sub + version skip + reindex; missing DLQ/`eventId` | “We already run an event-driven indexing pipeline; the case study is hardening delivery semantics, not inventing search.” |
+| **4. Observability / resilience visibility** | Logs + probes only; mock payment delay/fail already exist | “Failures are real; visibility is not. We make the same architecture debuggable and demoable.” |
+| **5. Cost-conscious cloud delivery** | Real GKE/Terraform/Gateway + ₹2k/day + no compose | “The platform is cloud-native and expensive if left on; the case study is delivery strategy, not ‘using Kubernetes.’” |
+
+**Security:** do **not** make a standalone “JWT case study.” Fold into Platform / Case Study 5 as a **capability chapter** (edge JWT, OIDC, scopes — **Implemented**), then optional S2S deepening as **Proposed**.
+
+#### Language that works for CTOs
+
+**Good:**
+
+> “The platform is a hybrid microservice architecture. Checkout is intentionally synchronous for customer response latency, but that creates temporal and availability coupling across inventory and payment. We document the failure windows and a proposed orchestration saga.”
+
+**Bad:**
+
+> “Legacy monolith migrated to Kafka saga microservices.”
+
+### 12.5 Recommended content package and immediate next steps
+
+| Artifact | Format | Priority | Status |
+|----------|--------|----------|--------|
+| As-Built Architecture Guide (sections A–J) | This assessment + diagrams | **P0** | In progress |
+| Diagrams 1–10 (must-have) | Mermaid in [as-built-diagrams.md](as-built-diagrams.md) | **P0** | **Done** (plus nice-to-have 11–14) |
+| Diagram errata | [diagram-errata.md](diagram-errata.md) | **P0** | Done |
+| Secret hygiene | [secret-hygiene.md](secret-hygiene.md) | **P0** | Done |
+| Demo scripts A–C (recorded later) | Runbooks in PART 8 / §12.3 | **P0** | Scripts exist; recording TBD |
+| Case Study 1 writeup (checkout) | 2–3 page client draft | **P0** | Outline in PART 7; full draft next after diagrams |
+| Case Study 2 or 3 writeup | 2 pages | **P1** | Outline only |
+| Case Study 5 (cost/platform) | 1–2 pages | **P1** | Outline only |
+| Case Study 4 | After minimal tracing | **P2** | Outline only |
+
+#### Ordered immediate steps (documentation-only until Phase 1 approved)
+
+1. ~~**Publish as-built diagrams 1–10**~~ → [as-built-diagrams.md](as-built-diagrams.md) **Done**
+2. **Write Case Study 1 client draft** from checkout as-built + failure windows ← **next**
+3. **Expand Demo A/B into operator runbooks** (commands, env vars, what to show on screen)
+4. **Record Demo A + B + C** for the static portfolio site
+5. Only then start **Phase 1** application changes (payment state machine) if approved
+
+---
+
 ## Appendix A — Event catalog (**Implemented**)
 
 | Topic | eventType | Producer | Consumer |
@@ -704,10 +863,11 @@ Present as **one platform, five engineering problems**:
 
 ## Appendix C — Related documents
 
+- [As-built diagrams](as-built-diagrams.md) — CTO must-have diagrams 1–14 (mermaid, code-accurate)
 - [Diagram errata](diagram-errata.md) — artifact-by-artifact honesty guide
 - [Secret hygiene](secret-hygiene.md) — credential handling for local setup
-- [System overview](../../ecommerce-infra/docs/00-system-overview.md) — operational service docs
-- [Interview prep](../../ecommerce-infra/docs/interview-prep-and-demo.md) — existing diagram vs code analysis
+- [System overview](../00-system-overview.md) — operational service docs
+- [Interview prep](../interview-prep-and-demo.md) — existing diagram vs code analysis
 
 ---
 

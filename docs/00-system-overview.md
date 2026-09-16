@@ -61,32 +61,4 @@ Services still enforce their own JWT rules (scopes, `emailVerified`, admin scope
 
 See [Edge gateway, TLS, JWT, Helm sequence diagrams](./sequence-diagrams/edge-gateway-tls-jwt-helm.md) for step-by-step flows.
 
-## Repository map
 
-| Repo | Role |
-|------|------|
-| `ecomm-infra` | Deploy everything (Terraform + Helm + K8s + gateway) |
-| `mcart-ui` | Angular storefront |
-| `auth`, `user`, `email` | Identity, profile, notifications |
-| `product`, `product-indexer`, `search` | Catalog and search |
-| `cart`, `inventory`, `payment`, `order` | Commerce transaction path |
-| `ecommerce` | Draw.io / sequence diagrams only (no application code) |
-
-## Default HTTP ports (local / `SERVER_PORT`)
-
-| Service | Port |
-|---------|------|
-| auth | 8081 |
-| user | 8082 |
-| search | 8083 |
-| product | 8084 |
-| product-indexer | 8085 |
-| inventory | 8086 |
-| cart | 8087 |
-| payment | 8088 |
-| order | 8089 |
-| email | 8090 |
-
-In GKE, Services often map **80 → container port** via manifests in `ecomm-infra/deploy`.
-
-See per-service docs under [`services/`](./services/) for APIs, validation, failure behavior, and Redis details.

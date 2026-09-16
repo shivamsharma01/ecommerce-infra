@@ -1,32 +1,61 @@
-1. run postgresql container and redis container
-	docker run -d \
-	  --name postgres-db \
-	  -p 5433:5432 \
-	  -e POSTGRES_USER=postgres \
-	  -e POSTGRES_PASSWORD=postgres \
-	  postgres:16
-	  
-	docker run -d \
-	  --name auth-redis \
-	  -p 6379:6379 \
-	  -v redis-data:/data \
-	  redis:7 \
-	  redis-server --appendonly yes --requirepass myStrongRedisPassword
-  
-  
-2. create the necessary users and databases
+MCART E-Commerce — Complete Local Setup Guide
+1. Prerequisites
+
+Make sure the following are available on the Linux machine:
+
+Docker
+PostgreSQL container
+Redis container
+Google Cloud CLI (gcloud)
+Gradle / project Gradle wrapper
+Access to the MCART repositories
+GCP project and service-account credentials where required
+
+Project/deployment directory used by the setup:
+
+cd /home/shivam-sharma/project/mcart/ecomm-infra/deploy
+2. Start PostgreSQL and Redis
+
+Start the PostgreSQL container:
+
+docker run -d \
+  --name postgres-db \
+  -p 5433:5432 \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=postgres \
+  postgres:16
+
+Start Redis:
+
+docker run -d \
+  --name auth-redis \
+  -p 6379:6379 \
+  -v redis-data:/data \
+  redis:7 \
+  redis-server --appendonly yes --requirepass myStrongRedisPassword
+
+The PostgreSQL instance is exposed on:
+
+localhost:5433
+
+Redis is exposed on:
+
+localhost:6379
+3. Create PostgreSQL Users and Databases
+
+The ecommerce setup contains separate databases/users for each PostgreSQL-backed service.
+
+Run:
+
 docker exec -i postgres-db psql -U postgres <<'SQL'
 CREATE USER auth_user WITH PASSWORD 'auth_password';
 CREATE DATABASE auth OWNER auth_user;
 GRANT ALL PRIVILEGES ON DATABASE auth TO auth_user;
 SQL
-
 docker exec -i postgres-db psql -U postgres <<'SQL'
 CREATE USER user_user WITH PASSWORD 'user_password';
 CREATE DATABASE "user" OWNER user_user;
-GRANT ALL PRIVILEGES ON DATABASE "user" TO user_user;
 SQL
-
 docker exec -i postgres-db psql -U postgres <<'SQL'
 CREATE USER inventory_user WITH PASSWORD 'inventory_password';
 CREATE DATABASE inventory OWNER inventory_user;
@@ -44,158 +73,449 @@ CREATE USER order_user WITH PASSWORD 'order_password';
 CREATE DATABASE "order" OWNER order_user;
 GRANT ALL PRIVILEGES ON DATABASE "order" TO order_user;
 SQL
+Databases created
+Service	Database	User
+Auth	auth	auth_user
+User	user	user_user
+Inventory	inventory	inventory_user
+Cart	cart	cart_user
+Payment	payment	payment_user
+Order	order	order_user
 
-3. run the flyway scripts
-	export FLYWAY_URL='jdbc:postgresql://host.docker.internal:5433/auth'
-	export FLYWAY_USER='auth_user'
-	export FLYWAY_PASSWORD='auth_password'
+Note: The first document says Cart uses Firestore rather than PostgreSQL/Flyway, while the ecommerce document explicitly creates a Cart PostgreSQL database and runs its Flyway migration. The merged setup follows the ecommerce document, where Cart has its own PostgreSQL database.
 
-	cd /home/shivam-sharma/project/mcart/ecomm-infra/deploy
-	./scripts/run-flyway-local.sh auth
+4. Run Flyway Migrations
 
+Go to the deployment directory:
 
+cd /home/shivam-sharma/project/mcart/ecomm-infra/deploy
+4.1 Auth
+export FLYWAY_URL='jdbc:postgresql://host.docker.internal:5433/auth'
+export FLYWAY_USER='auth_user'
+export FLYWAY_PASSWORD='auth_password'
 
-	export FLYWAY_URL='jdbc:postgresql://host.docker.internal:5433/user'
-	export FLYWAY_USER='user_user'
-	export FLYWAY_PASSWORD='user_password'
-	./scripts/run-flyway-local.sh user
-	
-	
-	export FLYWAY_URL='jdbc:postgresql://host.docker.internal:5433/inventory'
-	export FLYWAY_USER='inventory_user'
-	export FLYWAY_PASSWORD='inventory_password'
-	./scripts/run-flyway-local.sh inventory
-	
-	
-	export FLYWAY_URL='jdbc:postgresql://host.docker.internal:5433/cart'
-	export FLYWAY_USER='cart_user'
-	export FLYWAY_PASSWORD='cart_password'
-	./scripts/run-flyway-local.sh cart
-	
-	
-	export FLYWAY_URL='jdbc:postgresql://host.docker.internal:5433/payment'
-	export FLYWAY_USER='payment_user'
-	export FLYWAY_PASSWORD='payment_password'
-	./scripts/run-flyway-local.sh payment
-	
-	
-	export FLYWAY_URL='jdbc:postgresql://host.docker.internal:5433/order'
-	export FLYWAY_USER='order_user'
-	export FLYWAY_PASSWORD='order_password'
-	./scripts/run-flyway-local.sh order
+./scripts/run-flyway-local.sh auth
+4.2 User
+export FLYWAY_URL='jdbc:postgresql://host.docker.internal:5433/user'
+export FLYWAY_USER='user_user'
+export FLYWAY_PASSWORD='user_password'
 
-# Set your GCP project and credentials path (never commit the JSON key file)
+./scripts/run-flyway-local.sh user
+4.3 Inventory
+export FLYWAY_URL='jdbc:postgresql://host.docker.internal:5433/inventory'
+export FLYWAY_USER='inventory_user'
+export FLYWAY_PASSWORD='inventory_password'
+
+./scripts/run-flyway-local.sh inventory
+4.4 Cart
+export FLYWAY_URL='jdbc:postgresql://host.docker.internal:5433/cart'
+export FLYWAY_USER='cart_user'
+export FLYWAY_PASSWORD='cart_password'
+
+./scripts/run-flyway-local.sh cart
+4.5 Payment
+export FLYWAY_URL='jdbc:postgresql://host.docker.internal:5433/payment'
+export FLYWAY_USER='payment_user'
+export FLYWAY_PASSWORD='payment_password'
+
+./scripts/run-flyway-local.sh payment
+4.6 Order
+export FLYWAY_URL='jdbc:postgresql://host.docker.internal:5433/order'
+export FLYWAY_USER='order_user'
+export FLYWAY_PASSWORD='order_password'
+
+./scripts/run-flyway-local.sh order
+5. Configure GCP Credentials
+
+Set the GCP project:
+
 gcloud config set project "${GCP_PROJECT_ID:?Set GCP_PROJECT_ID}"
+
+Set the service-account credentials path:
+
 export GOOGLE_APPLICATION_CREDENTIALS="${GOOGLE_APPLICATION_CREDENTIALS:?Set path to your GCP service account key JSON}"
 
-4. run auth service
-	./gradlew bootRun --args='--spring.profiles.active=local' 
+The credentials JSON should not be committed to source control.
 
-{
-    "identifier": "bootstrap.admin@mcart.internal",
-    "password": "ChangeMeAfterFirstDeploy!"
-}
+6. Configure GCP Services and Pub/Sub
 
-5. run user service
-	./gradlew bootRun --args='--spring.profiles.active=local' 
-
-
-6. run product service
-	./gradlew bootRun --args='--spring.profiles.active=local' 
-	
-
-
-7. run product-indexer service
-	./gradlew bootRun --args='--spring.profiles.active=local' 
-
-
-8. run search service
-	./gradlew bootRun
-
-
-9. run email service
-	# See ecommerce-docs/portfolio/secret-hygiene.md — use env vars; never commit SMTP passwords
-	export SPRING_MAIL_USERNAME="${SPRING_MAIL_USERNAME:?Set SMTP username}"
-	export SPRING_MAIL_PASSWORD="${SPRING_MAIL_PASSWORD:?Set SMTP app password}"
-	./gradlew bootRun --args='--spring.profiles.active=local'
-
-
-10. inventory
-	./gradlew bootRun --args='--spring.profiles.active=local' 
-	
-
-11. cart
-	./gradlew bootRun --args='--spring.profiles.active=local' 
-	
-
-12. Order
-	./gradlew bootRun --args='--spring.profiles.active=local' 
-
-
-13. Payment
-	./gradlew bootRun --args='--spring.profiles.active=local' 
-
-==========================
-
-lsof -i :8081
-
-# Stop it (replace PID with the actual process ID)
-kill <PID>
-======================
-
-
-```
-
----
-
-## 2. Connect to PostgreSQL
-
-docker exec -it postgres-db psql -U postgres
-
-\c auth
-select * from auth_user;
-select * from auth_identity;
-
-delete from auth_identity where upper(email) like 'YOUR_EMAIL@EXAMPLE.COM';
-
-\c user
-select * from user_profile;
-
-delete from user_profile where upper(email) like 'YOUR_EMAIL@EXAMPLE.COM';
+Enable the required services:
 
 gcloud services enable \
   firestore.googleapis.com \
   pubsub.googleapis.com
 
+Set the project:
+
 gcloud config set project "${GCP_PROJECT_ID:?Set GCP_PROJECT_ID}"
+7. Create Pub/Sub Topics and Subscriptions
+Product events
 gcloud pubsub topics create product-events
-gcloud pubsub subscriptions create product-events-sub --topic=product-events --ack-deadline=60
 
-
+gcloud pubsub subscriptions create product-events-sub \
+  --topic=product-events \
+  --ack-deadline=60
+User signup events
 gcloud pubsub topics create user-signup-events
-gcloud pubsub subscriptions create user-signup-events-sub --topic=user-signup-events --ack-deadline=60
 
+gcloud pubsub subscriptions create user-signup-events-sub \
+  --topic=user-signup-events \
+  --ack-deadline=60
+Email verification events
 gcloud pubsub topics create email-verification-events
-gcloud pubsub subscriptions create email-verification-events-sub --topic=email-verification-events --ack-deadline=60
 
+gcloud pubsub subscriptions create email-verification-events-sub \
+  --topic=email-verification-events \
+  --ack-deadline=60
+Order paid events
 gcloud pubsub topics create order-paid-events
-gcloud pubsub subscriptions create order-paid-email-sub --topic=order-paid-events --ack-deadline=60
 
+gcloud pubsub subscriptions create order-paid-email-sub \
+  --topic=order-paid-events \
+  --ack-deadline=60
+Inventory product events
 gcloud pubsub topics create inventory-product-events
-gcloud pubsub subscriptions create inventory-product-events-sub --topic=inventory-product-events --ack-deadline=60
 
+gcloud pubsub subscriptions create inventory-product-events-sub \
+  --topic=inventory-product-events \
+  --ack-deadline=60
 
-# Replace YOUR_GCP_PROJECT and YOUR_FIRESTORE_SA with your project values
+These topics/subscriptions are the ones specified in the original setup.
+
+8. Configure GCP IAM Permissions
+
+Replace:
+
+YOUR_GCP_PROJECT
+YOUR_FIRESTORE_SA
+
+with the actual values.
+
+Pub/Sub publisher
 gcloud projects add-iam-policy-binding YOUR_GCP_PROJECT \
   --member="serviceAccount:YOUR_FIRESTORE_SA@YOUR_GCP_PROJECT.iam.gserviceaccount.com" \
   --role="roles/pubsub.publisher"
-
+Pub/Sub subscriber
 gcloud projects add-iam-policy-binding YOUR_GCP_PROJECT \
   --member="serviceAccount:YOUR_FIRESTORE_SA@YOUR_GCP_PROJECT.iam.gserviceaccount.com" \
   --role="roles/pubsub.subscriber"
-
+Cloud Storage object creator
 gcloud projects add-iam-policy-binding YOUR_GCP_PROJECT \
   --member="serviceAccount:YOUR_FIRESTORE_SA@YOUR_GCP_PROJECT.iam.gserviceaccount.com" \
   --role="roles/storage.objectCreator"
+9. Local Pub/Sub Emulator — Linux Setup
 
+If you want to run Pub/Sub locally without using the actual GCP Pub/Sub service, use the Pub/Sub emulator.
 
+Start the emulator:
+
+docker run -d \
+  --name pubsub-emulator \
+  -p 8086:8085 \
+  google/cloud-sdk:latest \
+  gcloud beta emulators pubsub start \
+  --host-port=0.0.0.0:8085
+
+The original document has a small port inconsistency: the Docker container maps 8086:8085, so the host endpoint is localhost:8086. However, the subsequent application configuration and curl health check in the document use both 8085 and 8086. The commands below preserve the intended mapping and make the host port explicit.
+
+Check the emulator:
+
+curl http://localhost:8086
+10. Configure Services to Use the Pub/Sub Emulator
+
+In each service's application-local.yaml, locate the GCP configuration.
+
+The original configuration contains:
+
+cloud:
+  gcp:
+    project-id: "${MCART_GCP_PROJECT_ID:${SPRING_CLOUD_GCP_PROJECT_ID:my-project-chat-ai-487408}}"
+    credentials:
+      location: ${GCP_CREDENTIALS_PATH:}
+    pubsub:
+      enabled: ${SPRING_CLOUD_GCP_PUBSUB_ENABLED:true}
+
+For local emulator usage, remove the credentials configuration and add the emulator host:
+
+cloud:
+  gcp:
+    project-id: "${MCART_GCP_PROJECT_ID:${SPRING_CLOUD_GCP_PROJECT_ID:my-project-chat-ai-487408}}"
+    pubsub:
+      enabled: ${SPRING_CLOUD_GCP_PUBSUB_ENABLED:true}
+      emulator-host: "localhost:8086"
+
+The source document shows localhost:8085 in one version of the YAML despite the Docker mapping using host port 8086; this should be kept consistent with whichever host port you actually expose.
+
+11. Create Pub/Sub Topics Locally
+
+With the emulator running, create the topics and subscriptions.
+
+Email verification
+curl -X PUT \
+  "http://localhost:8086/v1/projects/my-project-chat-ai-487408/topics/email-verification-events"
+
+Create the subscription:
+
+curl -X PUT \
+  "http://localhost:8086/v1/projects/my-project-chat-ai-487408/subscriptions/email-verification-events-sub" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "topic": "projects/my-project-chat-ai-487408/topics/email-verification-events"
+  }'
+User signup
+curl -X PUT \
+  "http://localhost:8086/v1/projects/my-project-chat-ai-487408/topics/user-signup-events"
+
+Create the subscription:
+
+curl -X PUT \
+  "http://localhost:8086/v1/projects/my-project-chat-ai-487408/subscriptions/user-signup-events-sub" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "topic": "projects/my-project-chat-ai-487408/topics/user-signup-events"
+  }'
+
+Create the remaining topics/subscriptions in the same way for the other services that require them.
+
+12. Firestore Emulator — Product Service
+
+The product service also requires a Firestore emulator for local setup.
+
+Run:
+
+docker run -d \
+  --name firestore-emulator \
+  -p 8090:8080 \
+  -p 4000:4000 \
+  andreysenov/firebase-tools:latest \
+  firebase emulators:start \
+  --only firestore \
+  --project demo-project
+
+This exposes:
+
+Firestore emulator: localhost:8090
+Firestore UI:       localhost:4000
+
+The original document specifies this as a separate requirement for the product service.
+
+13. Email SMTP Configuration
+
+For local email testing, configure Gmail SMTP in the appropriate application-local.yaml.
+
+mail:
+  host: smtp.gmail.com
+  port: ${SPRING_MAIL_PORT:587}
+  username: "<your email id>"
+  password: "your APP Password not Gmail password."
+  properties:
+    mail:
+      smtp:
+        auth: true
+        startttls:
+          enable: true
+
+Use a Gmail App Password, not the normal Gmail account password.
+
+Alternatively, the service can use environment variables:
+
+export SPRING_MAIL_USERNAME="${SPRING_MAIL_USERNAME:?Set SMTP username}"
+export SPRING_MAIL_PASSWORD="${SPRING_MAIL_PASSWORD:?Set SMTP app password}"
+
+Do not commit SMTP passwords to source control.
+
+14. Start the Microservices
+
+Once PostgreSQL, Redis, Pub/Sub/Firestore emulators where required, Flyway migrations, and configuration are ready, start the services.
+
+The original setup lists the services in this order.
+
+14.1 Auth Service
+./gradlew bootRun --args='--spring.profiles.active=local'
+
+Bootstrap credentials:
+
+{
+  "identifier": "bootstrap.admin@mcart.internal",
+  "password": "ChangeMeAfterFirstDeploy!"
+}
+
+Change the bootstrap password after the first deployment/use.
+
+14.2 User Service
+./gradlew bootRun --args='--spring.profiles.active=local'
+14.3 Product Service
+./gradlew bootRun --args='--spring.profiles.active=local'
+14.4 Product Indexer Service
+./gradlew bootRun --args='--spring.profiles.active=local'
+14.5 Search Service
+./gradlew bootRun
+14.6 Email Service
+
+Set SMTP credentials:
+
+export SPRING_MAIL_USERNAME="${SPRING_MAIL_USERNAME:?Set SMTP username}"
+export SPRING_MAIL_PASSWORD="${SPRING_MAIL_PASSWORD:?Set SMTP app password}"
+
+Then:
+
+./gradlew bootRun --args='--spring.profiles.active=local'
+14.7 Inventory Service
+./gradlew bootRun --args='--spring.profiles.active=local'
+14.8 Cart Service
+./gradlew bootRun --args='--spring.profiles.active=local'
+14.9 Order Service
+./gradlew bootRun --args='--spring.profiles.active=local'
+14.10 Payment Service
+./gradlew bootRun --args='--spring.profiles.active=local'
+15. Recommended Startup Order
+
+For the local environment, the logical startup sequence is:
+
+1. PostgreSQL
+2. Redis
+3. Pub/Sub emulator
+4. Firestore emulator
+5. Flyway migrations
+6. Auth Service
+7. User Service
+8. Product Service
+9. Product Indexer
+10. Search Service
+11. Email Service
+12. Inventory Service
+13. Cart Service
+14. Order Service
+15. Payment Service
+
+The source specifically calls out starting:
+
+auth-service → user-service → email-service
+
+after the Pub/Sub topics have been created.
+
+16. Start All Services Using Script
+
+If all repositories have been cloned under the same location and the project contains the scripts mentioned in the document, use:
+
+./start_services.sh
+
+To stop all services:
+
+./stop_services.sh
+
+The source document specifically references these scripts for starting/stopping all microservices.
+
+17. Check for Port Conflicts
+
+To check whether port 8081 is already being used:
+
+lsof -i :8081
+
+Stop the process using the returned PID:
+
+kill <PID>
+
+The original setup uses this specifically for resolving a service/port conflict.
+
+18. Connect to PostgreSQL
+
+Connect to PostgreSQL:
+
+docker exec -it postgres-db psql -U postgres
+Check Auth Database
+\c auth
+
+select * from auth_user;
+select * from auth_identity;
+
+Delete a test identity:
+
+delete from auth_identity
+where upper(email) like 'YOUR_EMAIL@EXAMPLE.COM';
+Check User Database
+\c user
+
+select * from user_profile;
+
+Delete a test user:
+
+delete from user_profile
+where upper(email) like 'YOUR_EMAIL@EXAMPLE.COM';
+
+These database inspection and cleanup commands are included in the original setup.
+
+19. Local Infrastructure Summary
+
+After completing the setup, the local environment consists of:
+
+Component	Local Endpoint / Port	Purpose
+PostgreSQL	localhost:5433	Auth, User, Inventory, Cart, Payment, Order
+Redis	localhost:6379	Redis-backed functionality
+Pub/Sub Emulator	localhost:8086	Local event messaging
+Firestore Emulator	localhost:8090	Firestore local development
+Firestore Emulator UI	localhost:4000	Firestore emulator interface
+Auth Service	Project-defined	Authentication
+User Service	Project-defined	User management
+Product Service	Project-defined	Products
+Product Indexer	Project-defined	Product indexing
+Search Service	Project-defined	Search
+Email Service	Project-defined	Email
+Inventory Service	Project-defined	Inventory
+Cart Service	Project-defined	Cart
+Order Service	Project-defined	Orders
+Payment Service	Project-defined	Payments
+20. Quick Start — Complete Sequence
+
+For someone setting up the project from scratch, the overall flow is:
+
+START
+  │
+  ├── Start PostgreSQL
+  │
+  ├── Start Redis
+  │
+  ├── Start Pub/Sub emulator
+  │
+  ├── Start Firestore emulator
+  │
+  ├── Create PostgreSQL databases/users
+  │
+  ├── Run Flyway migrations
+  │
+  ├── Configure application-local.yaml
+  │
+  ├── Configure SMTP
+  │
+  ├── Create Pub/Sub topics/subscriptions
+  │
+  ├── Start Auth Service
+  │
+  ├── Start User Service
+  │
+  ├── Start Product Service
+  │
+  ├── Start Product Indexer
+  │
+  ├── Start Search Service
+  │
+  ├── Start Email Service
+  │
+  ├── Start Inventory Service
+  │
+  ├── Start Cart Service
+  │
+  ├── Start Order Service
+  │
+  └── Start Payment Service
+  │
+  ▼
+LOCAL MCART ENVIRONMENT READY
+Important reconciliation from the two source documents
+
+The only significant conflict I found is Cart:
+
+local setup.txt says: “Cart service uses Firestore (not PostgreSQL / Flyway).”
+local setup ecommerce.txt creates cart_user/cart and explicitly runs the Cart Flyway migration.
+
+So the merged document above follows the ecommerce document's newer/more complete Cart setup, while retaining the Firestore emulator because the source also explicitly identifies it as required for the product service.
